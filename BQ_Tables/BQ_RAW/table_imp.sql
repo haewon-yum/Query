@@ -7,6 +7,31 @@
 
 Ref
 - ML validation i2i
+
+SCHEMA
+- _uid_
+- timestamp
+- platform_id
+- advertiser_id
+- req
+- bid
+- api
+    - platform
+        -...
+    - advertiser
+        - ...
+    - product
+        - ...
+    - campaign
+        - id
+        - title
+        - skadn_id
+        - skadn_tr_suffix
+    - trgroup
+    - ...
+- imp
+- compliance
+
 */
 
 

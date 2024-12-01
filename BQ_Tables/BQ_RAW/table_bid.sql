@@ -56,6 +56,15 @@
         - pricing_name
         - core
 - api
+    - platform
+    - advertiser
+    - product
+    - campaign
+    - trgroup
+    - adgroup
+    - crgroup
+    - creative
+    - tracking_links
 - compliance
 
 */
@@ -64,3 +73,6 @@
 SELECT
 FROM `focal-elf-631.prod_stream_view.bid`
 WHERE 
+
+
+-- Win rate calcuation

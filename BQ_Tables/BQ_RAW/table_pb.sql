@@ -31,7 +31,7 @@ SCHEMA
     - ...
 - app
     - name
-    - bundle
+    - bundle = MMP Bundle
     - store
     - version
     - sdk_version
@@ -65,3 +65,45 @@ SELECT *
 FROM `focal-elf-631.prod_stream_view.pb`
 WHERE date(timestamp) = current_date()
 LIMIT 10
+
+
+-- https://colab.research.google.com/drive/1sHhhAcMcDbJt0N3eX_f7UE6Kn0lHrmA6#scrollTo=F1GI23VmvH0u
+-- Revenue by Market
+CREATE OR REPLACE TABLE {table_market_moloco_v3} AS
+WITH apps AS (
+    SELECT
+        advertiser.mmp_bundle_id,
+        product.genre,
+        product.sub_genre
+    FROM `moloco-ae-view.athena.fact_dsp_core`
+    WHERE date_utc BETWEEN '2024-09-01' AND '2024-09-30'
+    AND product.is_gaming IS TRUE
+    GROUP BY ALL
+    HAVING SUM(gross_spend_usd) > 0
+)
+
+SELECT
+    device.country,
+    CASE WHEN device.country IN ('KOR') THEN 'KOR'
+        WHEN device.country IN ('USA', 'CAN') THEN 'NA'
+        WHEN device.country IN ('GBR', 'FRA', 'DEU') THEN 'EU'
+        WHEN device.country IN ('TWN', 'JPN', 'HKG') THEN 'NEA'
+    END AS market,
+    device.os,
+    apps.genre,
+    apps.sub_genre,
+    COUNT(DISTINCT `moloco-ml.lat_utils.is_userid_truly_available`(device.ifa)) AS cnt_device,
+    SUM(event.revenue_usd.amount) AS revenue,
+    SUM(
+    CASE WHEN event.revenue_usd.amount > 200 THEN 200
+            ELSE event.revenue_usd.amount END
+    ) AS capped_revenue
+FROM `focal-elf-631.prod_stream_view.pb` pb
+    JOIN apps ON pb.app.bundle = apps.mmp_bundle_id
+WHERE date(timestamp) BETWEEN '2024-09-01' AND '2024-09-30'
+    AND (LOWER(event.name) like '%revenue%'
+    OR LOWER(event.name) like '%purchase%'
+    OR LOWER(event.name) like '%iap%'
+    OR LOWER(event.name) like '%iaa%')
+    AND event.revenue_usd.amount < 10000
+GROUP BY ALL

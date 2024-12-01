@@ -41,6 +41,13 @@ SCHEMA
         - iptype
         - geo
             - utcoffset
+            - region
+            - country
+            - city
+            - zip
+            - metro
+            - lat
+            - lon
             
         - lmt
         - atts
@@ -121,6 +128,10 @@ SCHEMA
     - advertiser
     - product
     - campaign
+        - id
+        - title
+        - skadn_id
+        - skadn_tr_suffix
     - trgroup
     - adgroup
     - crgroup
@@ -136,7 +147,7 @@ SCHEMA
     - handled_at
     - happend_at
     - client_ip
-    - event: This field represents the type of event that occured. For example, it could be an event like 'INSTALL' or 'CUSTOM_KPI_AUCTION'. it is used to identify the nature of the event in the conversion data. 
+    - event: This field represents the type of event that occured. For example, it could be an event like 'INSTALL' or 'CUSTOM_KPI_ACTION'. it is used to identify the nature of the event in the conversion data. 
     - event_pb: This field represents the postback event name. It is used to match the event with the specific postback data. For instance, in the context of ROAS (Return on Ad Spend) campaigns, cv.event_pb is used to aggregate daily KPI event counts and the sum of revenue from postbacks.
 - compliance
 

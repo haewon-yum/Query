@@ -15,8 +15,6 @@ platform_id ARRAY<STRING> DEFAULT [
     'FUSEBOX',
     'RANXUN'
 ];
--- DECLARE
--- advertiser_id STRING DEFAULT 't52aeGmi7ov3wppl';
 DECLARE
 app_bundle ARRAY<STRING> DEFAULT [
     'com.fuseboxgames.loveisland2.gp',
@@ -365,53 +363,6 @@ imp_usa_t AS (
             NET.IPV4_TO_INT64(NET.SAFE_IP_FROM_STRING(I.ip)) BETWEEN IP.ipv4num_start AND IP.ipv4num_end
     GROUP BY ALL
 ),
--- cv_raw_t AS (
---     SELECT
---         platform_id,
---         advertiser_id,
---         C.api.campaign.id AS campaign_id,
---         C.api.campaign.title AS campaign_title,
---         C.req.device.os,
---         C.cv.event,
---         C.cv.event_pb,
---         C.click.happened_at AS click_happened_at,
---         api.creative.cr_format AS cr_format,
---         DATE(C.timestamp) AS date_utc,
---         DATE(C.timestamp, A.advertiser_timezone) AS local_date,
---         CASE WHEN C.req.device.geo.lon BETWEEN -180 AND 180 AND C.req.device.geo.lat BETWEEN -90 AND 90 THEN C.req.device.geo.lat ELSE NULL END AS lat,
---         CASE WHEN C.req.device.geo.lon BETWEEN -180 AND 180 AND C.req.device.geo.lat BETWEEN -90 AND 90 THEN C.req.device.geo.lon
---         ELSE NULL END AS lon,
---         `moloco-ods.general_utils.normalize_ip`(req.device.ip) AS ip,
---         bid.mtid,
---         C.cv.revenue_usd.amount AS revenue_usd
---     FROM `focal-elf-631.prod_stream_view.cv` AS C
---         INNER JOIN advertiser_timezone AS A USING (platform_id, advertiser_id)
---     WHERE DATE(C.timestamp) BETWEEN run_from_date AND run_to_date
---         AND api.product.app.store_id = app_bundle 
---         -- AND C.api.campaign.id IN UNNEST(campaign_id)
--- ),
--- cv_usa_t AS (
---     SELECT
---         C.platform_id,
---         C.advertiser_id,
---         C.campaign_id,
---         C.campaign_title,
---         C.os,
---         C.date_utc,
---         C.local_date,
---         COALESCE(O.osm_city, IF(C.lon IS NULL OR C.lon = 0, IP.osm_city, 'n/a'), 'other') AS city,
---         -- cr_format,
---         SUM(IF(C.event = 'INSTALL' AND C.click_happened_at IS NOT NULL, 1, 0)) AS ct_install,
---         SUM(IF(C.event = 'INSTALL', 1, 0)) AS install,
---         SUM(IF(C.event = 'CUSTOM_KPI_ACTION', 1, 0)) AS action,
---         SUM(IF(C.event_pb = 'inApp_revenue', 1, 0)) AS event_pb_action
---     FROM cv_raw_t AS C
---         LEFT JOIN osm_t AS O ON ST_CONTAINS(O.geometry, ST_GEOGPOINT(C.lon, C.lat)) AND C.lon != 0
---         LEFT JOIN ip_t IP ON
---             NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(C.ip), 16) = NET.IP_TRUNC(NET.SAFE_IP_FROM_STRING(IP.ip_start), 16) AND
---             NET.IPV4_TO_INT64(NET.SAFE_IP_FROM_STRING(C.ip)) BETWEEN IP.ipv4num_start AND IP.ipv4num_end
---     GROUP BY ALL
--- ),
 cv_raw_t AS (
     SELECT
         *,

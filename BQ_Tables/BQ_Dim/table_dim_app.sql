@@ -7,5 +7,9 @@ SCHEMA
 - v2
 - dataai
   - app_name
+  - is_gaming
+  - genre
+  - sub_genre,
+  ...
     
 */
