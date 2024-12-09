@@ -107,3 +107,70 @@ WHERE date(timestamp) BETWEEN '2024-09-01' AND '2024-09-30'
     OR LOWER(event.name) like '%iaa%')
     AND event.revenue_usd.amount < 10000
 GROUP BY ALL
+
+
+/* 
+    ARPPU for attributed + unattributed 
+    Use case; geo expansion. new country proposal
+*/
+
+DECLARE start_date DATE DEFAULT '2024-11-27';
+DECLARE end_date DATE DEFAULT '2024-12-08';
+
+WITH
+    t_rev AS (
+    SELECT
+        device.ifa AS idfa, 
+        device.country,
+        TIMESTAMP_DIFF(event.event_at, event.install_at, DAY) AS diff, 
+        event.revenue_usd.amount AS revenue
+    FROM
+      `focal-elf-631.prod_stream_view.pb`
+    WHERE
+      DATE(timestamp) BETWEEN start_date AND end_date
+      AND DATE(event.install_at) BETWEEN start_date AND end_date
+      AND app.bundle = 'com.kabam.knights.legends'
+    --   AND TIMESTAMP_DIFF(timestamp, cv.install_at_pb, DAY) < 7
+      AND event.revenue_usd.amount > 0
+      AND event.revenue_usd.amount < 10000
+    ),
+    t_rev_sum AS (
+        SELECT
+        idfa,
+        country,
+        diff,
+        COUNT(1) AS purchase,
+        SUM(revenue) AS revenue
+        FROM
+        t_rev
+        GROUP BY
+        ALL
+        )
+SELECT
+    country,
+    diff,
+    COUNT(DISTINCT idfa) AS num_payer,
+    SUM(purchase) AS num_purchsae,
+    SUM(revenue) AS revenue
+FROM t_rev_sum
+GROUP BY ALL
+
+
+/* 
+    I2A
+*/
+
+DECLARE start_date DATE DEFAULT '2024-11-27';
+DECLARE end_date DATE DEFAULT '2024-12-08';
+
+SELECT
+    device.country,
+    COUNT (DISTINCT CASE WHEN lower(event.name) IN ('install', 'installs') THEN device.ifa ELSE NULL END) AS num_install_user,
+    COUNT (DISTINCT CASE WHEN event.revenue_usd.amount > 0 THEN device.ifa ELSE NULL END) AS num_payer
+FROM
+      `focal-elf-631.prod_stream_view.pb`
+WHERE
+    DATE(timestamp) BETWEEN start_date AND end_date
+    AND DATE(event.install_at) BETWEEN start_date AND end_date
+    AND app.bundle = 'com.kabam.knights.legends' 
+GROUP BY ALL
