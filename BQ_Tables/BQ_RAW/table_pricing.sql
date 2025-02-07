@@ -39,3 +39,14 @@ FROM `focal-elf-631.prod_stream_view.pricing` ,
   UNNEST(pricing.candidates) AS candidates
 WHERE date(timestamp) = '2024-10-10'
 GROUP BY ALL
+
+
+--- 각 캠페인 앱별 pricing에 고려된 (Internal acution에 참여한) bid request 수
+SELECT
+  req.app.bundle AS publisher_bundle, 
+  count(1) AS pricing_cnt,
+  
+FROM `focal-elf-631.prod_stream_view.pricing` ,
+  UNNEST(pricing.candidates) AS candidates
+WHERE 
+  pricing.candidates.product_id IN ('q23yekzCBcvizM3g')
