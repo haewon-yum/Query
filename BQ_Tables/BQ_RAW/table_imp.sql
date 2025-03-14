@@ -14,6 +14,13 @@ SCHEMA
 - platform_id
 - advertiser_id
 - req
+  - app
+  - site
+  - device
+    - ifa
+    - os
+    - osv 
+    ...
 - bid
 - api
     - platform
@@ -193,3 +200,21 @@ SELECT
 FROM
   imp_t AS I
 GROUP BY ALL
+
+
+/* which model is applied in my campaign? */
+select
+  bid.model.pricing_function AS pricing_function,
+  bid.model.prediction_logs[SAFE_OFFSET(1)].type AS model_type,
+  bid.model.prediction_logs[SAFE_OFFSET(1)].tf_model_name AS model_name,
+from `focal-elf-631.prod_stream_sampled.imp_1to1000`
+where date(timestamp) = CURRENT_DATE()
+and api.campaign.id IN  ('otvftPJXj0TTRykz')
+group by 1 ,2,3
+order by 1 ,2,3
+
+
+/* 
+  Impression per user (maid)
+*/
+

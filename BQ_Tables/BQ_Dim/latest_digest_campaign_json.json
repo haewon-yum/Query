@@ -1,0 +1,153 @@
+{
+    "ad_tracking_allowance": "DO_NOT_CARE",
+    "ad_units": [],
+    "advertiser": "fvCawV3ktgbdLjcI",
+    "advertiser_bidding": null,
+    "all_regions": false,
+    "apt_throttle_tags": [],
+    "attr_window": null,
+    "audience_extension": null,
+    "audience_tags": {},
+    "capper": {
+        "budget": {
+            "daily_spending": 0,
+            "hourly_spending": 20
+        },
+        "imp_daily": "0",
+        "imp_format_interval": {},
+        "imp_hourly": "0",
+        "imp_interval": "",
+        "imp_lifetime": "100000",
+        "imp_monthly": "0",
+        "imp_weekly": "0",
+        "user_event_count": {},
+        "user_event_interval": {}
+    },
+    "country": "JPN",
+    "country_settings": {
+        "JPN": {
+            "disabled": false,
+            "representative": true,
+            "summary": null
+        }
+    },
+    "created_timestamp_nano": "1687852751987090000",
+    "creative_group_names": [],
+    "creative_pick": null,
+    "cuid": 0,
+    "currency": "JPY",
+    "custom_key_values": {},
+    "deal_settings": null,
+    "description": "",
+    "disable_product_level_user_targets": false,
+    "disabled": true,
+    "disabled_timestamp_nano": "1689674789751114000",
+    "display_name": "Secret_iOS",
+    "experimental_properties": {
+        "allow_reference_common_filters": false,
+        "bid_flow_policy": null,
+        "daily_budget_windows_tmp": [],
+        "dreamgames_support": null,
+        "exclusive_deal_ids": [],
+        "extra_app_bundles_for_ctv": [],
+        "hotstar_support": null,
+        "jio_support": null,
+        "restrict_category": [],
+        "value_based_bidding": null
+    },
+    "feature_whitelist": {
+        "allow_ctv_tr_links": false,
+        "country_settings": {},
+        "pc_migrated": false
+    },
+    "final_landing_url": "",
+    "first_activated_timestamp_nano": "1688379966329066000",
+    "fraud_properties": null,
+    "goal": {
+        "kpi_actions": [],
+        "main_target_kpi_history": null,
+        "optimize_app_installs": {
+            "actions": [],
+            "budget_centric": {
+                "rate": 1
+            },
+            "target_cpa": null,
+            "target_cpi": {
+                "amount": 1,
+                "currency": "USD"
+            }
+        },
+        "sub_target_kpi_histories": [],
+        "target_kpi_histories": [],
+        "type": "OPTIMIZE_CPI_FOR_APP_UA"
+    },
+    "inactive_since": "2023-07-18T10:06:29Z",
+    "inventory_feature": null,
+    "name": "GS0848CYmXhC7i88",
+    "os": "IOS",
+    "pas_tenant_target": null,
+    "product_name": "pPqQnjSRk1ouIHrf",
+    "publisher_properties": null,
+    "schedule": {
+        "end": "",
+        "start": "2023-06-26T15:00:00Z"
+    },
+    "skadn_input": {
+        "ad_group_ids": {},
+        "attribution_method": "ATTRIBUTION_MMP",
+        "campaign_id": 0,
+        "campaign_id_aux": 0,
+        "cr_group_ids": {},
+        "device_targeting_state": "DEVICE_TARGET_MMP_ATTRIBUTABLE",
+        "disable": false,
+        "targeting_state": "TARGET_ALL"
+    },
+    "state": "ARCHIVED",
+    "system_targets": [
+        "audience_new_user",
+        "media_app"
+    ],
+    "target_ad_platforms": [],
+    "terminated_timestamp_nano": "0",
+    "timeline": {
+        "liveness_changed_since_ns": "1689674789751114902"
+    },
+    "tracking_company": "ADJUST",
+    "tracking_link_name": "wyQuTWCztWmTURad",
+    "traffic_groups": [
+        {
+            "ad_groups_with_rank": {
+                "QxAQyi8mIN00r961": 35
+            },
+            "capper": null,
+            "enable": true,
+            "name": "ALL",
+            "user_buckets": [
+                {
+                    "end": 100,
+                    "start": 0
+                }
+            ]
+        }
+    ],
+    "type": "APP_USER_ACQUISITION",
+    "updated_timestamp_nano": "1721045426078358000",
+    "user_capper": {
+        "budget": {
+            "currency": "UNKNOWN_CURRENCY",
+            "daily_budget": 30000,
+            "daily_budget_relaxing_ratio": 0,
+            "enable_flexible_budget_spending": true,
+            "hourly_budget_pace": {},
+            "total_budget": 0,
+            "total_budget_started_at": "",
+            "weekday_budget": null,
+            "weekly_flexible_budget": 210000
+        },
+        "budget_timeline": {
+            "max_most_recent_daily_budget": 30000,
+            "most_recent_daily_budget_updated_nano": "1688379822547809000"
+        }
+    },
+    "user_targets": []
+}

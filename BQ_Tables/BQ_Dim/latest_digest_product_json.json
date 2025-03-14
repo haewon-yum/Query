@@ -1,0 +1,82 @@
+{
+    "advertiser_name": "a2qQn4CqdcPzU4cH",
+    "allow_empty_domain": false,
+    "app_properties": {
+        "app_event_types": {
+            "af_ad_view": "IN_APP_ADVERTISING",
+            "af_purchase": "IN_APP_PURCHASE"
+        },
+        "app_store_url": "https://play.google.com/store/apps/details?id=com.king.farmheroessaga",
+        "bundle": "com.king.farmheroessaga",
+        "categories": [
+            "IAB9-30",
+            "IAB9",
+            "IAB9-8"
+        ],
+        "categories_modified": false,
+        "content_rating": "Everyone",
+        "ios_primary_attribution": "UNKNOWN_IOS_PRIMARY_ATTRIBUTION",
+        "localized_app_icon_url": {
+            "en": "https://play-lh.googleusercontent.com/JJ5zXv997qZ0UNzq5TcetDU1cWRxmCisFIeYNlEpyBE2X9TQzVGRTDhqym-YhaGVL9bl=s180"
+        },
+        "localized_app_name": {
+            "en": "Farm Heroes Saga"
+        },
+        "mmp_integration_reference_name": "uqyzb9V4e98djyls",
+        "postback_integration": {
+            "mmp": "APPSFLYER",
+            "tracking_bundle": "com.king.farmheroessaga"
+        },
+        "rating": 4.6,
+        "rtb_bundles": []
+    },
+    "archived_timestamp_nano": "0",
+    "category": "IAB9-30",
+    "created_timestamp_nano": "1617334687750694000",
+    "dedicated_campaign_goal_map": {},
+    "description": "This campaign is using com.king.farmheroessaga as store app bundle, so please use test tracking links for each cr group.",
+    "developer_name": "sponsor",
+    "display_name": "Creative Test App Android",
+    "domain": "farmheroessaga.com",
+    "dynamic_creative_property": {
+        "permission": true
+    },
+    "enable_adult_content_timestamp_nano": "0",
+    "experimental_properties": null,
+    "feature_allowlist": null,
+    "hidden_timestamp_nano": "0",
+    "inventory_feature": {
+        "enable_autostore": false,
+        "enable_autostore_click": false,
+        "enable_engaged_view_click": true,
+        "enable_playable_engagement_click": true,
+        "enable_skoverlay": false,
+        "enable_skoverlay_click": false,
+        "engaged_click_rate_for_skoverlay": 0,
+        "storekit_click_enabled_timestamp_nano": "0",
+        "target_storekit_click_rate": 0
+    },
+    "landing_url": "",
+    "name": "hHyEkIOxi0Dnw2tt", 
+    "os": "ANDROID",
+    "overridden_internal_creative_review_status": "CREATIVE_REVIEW_STATUS_UNSPECIFIED",
+    "pas_tenant_target": null,
+    "publisher_properties": null,
+    "risky_app_status": "UNKNOWN_RISKY_APP_STATUS",
+    "risky_app_timestamp_nano": "0",
+    "suspension_history": [
+        {
+            "created_at": "2023-06-05T07:29:50.020836851Z",
+            "effective_from": "2023-06-05T15:00:00Z",
+            "effective_until": "2023-06-06T14:59:59Z",
+            "kind": "CREATE",
+            "reason": "custom suspension test 6/6~6/6",
+            "type": "SUSPEND_UNTIL",
+            "user_email": "juhyeong.kim+commitee@moloco.com",
+            "user_name": "juhyeong"
+        }
+    ],
+    "type": "APP",
+    "updated_timestamp_nano": "1733257190494372000",
+    "user_targets": []
+}

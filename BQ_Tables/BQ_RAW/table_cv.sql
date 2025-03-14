@@ -138,6 +138,7 @@ SCHEMA
     - creative
     - tracking_links
 - imp
+    
 - imp_extra
 - ev
 - click
@@ -164,3 +165,5 @@ WHERE
     WHERE DATE(C.timestamp) BETWEEN run_from_date AND run_to_date
     AND api.product.app.store_id IN UNNEST(app_bundle)
 GROUP BY ALL
+
+

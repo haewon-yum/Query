@@ -36,3 +36,27 @@ FROM `focal-elf-631.prod.bidrequest2024*`
 WHERE _TABLE_SUFFIX >= '0901'
 LIMIT 100
 
+
+/* Xiaomi device in IND */
+
+SELECT
+    CASE WHEN 
+    timestamp,
+    bid_id,
+    bidfloor, 
+    idfa,
+    exchange,
+    os, 
+    country, 
+    region, 
+    city, 
+    app_bundle, 
+    user_gender, 
+    geo_lat,
+    geo_lon,
+    user_bucket,
+    bid_region,
+
+FROM `focal-elf-631.prod.bidrequest2024*`
+WHERE _TABLE_SUFFIX >= '0901'
+LIMIT 100

@@ -1,0 +1,42 @@
+{
+    "advertiser_name": "zrwr3jGVgo9LDGrz",
+    "archived_timestamp_nano": "0",
+    "audience_extension": null,
+    "audience_tags": {},
+    "campaign_name": "fjJ86LgcUmyscOpL",
+    "capper": {
+        "budget": null,
+        "imp_daily": "0",
+        "imp_format_interval": {},
+        "imp_hourly": "0",
+        "imp_interval": "1m",
+        "imp_lifetime": "0",
+        "imp_monthly": "0",
+        "imp_weekly": "0",
+        "user_event_count": {},
+        "user_event_interval": {}
+    },
+    "created_timestamp_nano": "1728896048550802000",
+    "creative_groups": [],
+    "creative_pick": null,
+    "disable_campaign_level_user_targets": false,
+    "disabled": false,
+    "display_name": "OMS_ADG_163_36_31",
+    "estimated_audience_size": null,
+    "experiment_id": "",
+    "experimental_properties": null,
+    "name": "vn2cWeGP7CgViW6z",
+    "pricing_order": {
+        "max_cpm": 70,
+        "override_tune_params": null,
+        "pricing_model_name": "cloud_v1"
+    },
+    "product_name": "yEIDzUpb7eyagN8m",
+    "report_tag": "",
+    "skan_input": null,
+    "system_targets": [],
+    "target_ad_platforms": [],
+    "updated_timestamp_nano": "1730160681382777000",
+    "user_buckets": [],
+    "user_targets": []
+}
