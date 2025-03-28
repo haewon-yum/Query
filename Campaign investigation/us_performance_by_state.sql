@@ -367,7 +367,8 @@ cv_raw_t AS (
     SELECT
         *,
         MAX(install_utc) OVER (PARTITION BY platform_id, advertiser_id, store_id, campaign_id, os, mtid) AS install_at,
-        IF(LOWER(event) NOT LIKE '%install%', TIMESTAMP_DIFF(timestamp, MAX(install_utc) OVER (PARTITION BY platform_id, advertiser_id, store_id, campaign_id, os, mtid), day), NULL) AS i_to_e_day_diff
+        IF(LOWER(event) NOT LIKE '%install%', TIMESTAMP_DIFF(timestamp, MAX(install_utc) OVER 
+            (PARTITION BY platform_id, advertiser_id, store_id, campaign_id, os, mtid), day), NULL) AS i_to_e_day_diff
     FROM(
         SELECT
             C.timestamp,
