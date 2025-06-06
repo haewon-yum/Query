@@ -18,12 +18,12 @@ SCHEMA
 - attribution
     - method
     - raw_method
-    - viewthrough
+    - viewthrough (BOOLEAN)
     - reengagement
     - organic
     - reject_reason
 - moloco
-    - attributed
+    - attributed (BOOLEAN)
     - mtid
     - is_test
     - compaign_id
@@ -174,3 +174,70 @@ WHERE
     AND DATE(event.install_at) BETWEEN start_date AND end_date
     AND app.bundle = 'com.kabam.knights.legends' 
 GROUP BY ALL
+
+
+/* 
+    I2A - Modified
+*/
+
+DECLARE start_date DATE DEFAULT '2025-02-01';
+DECLARE end_date DATE DEFAULT '2025-02-28';
+
+WITH raw AS (
+
+    SELECT
+        CASE
+            WHEN `moloco-ods.general_utils.is_idfa_truly_available`(device.ifv) THEN "ifv:" || device.ifv
+            WHEN `moloco-ods.general_utils.is_idfa_truly_available`(device.ifa) THEN "ifa:" || device.ifa
+            WHEN `moloco-ml.lat_utils.is_userid_truly_available` (mmp.device_id) THEN 'device:' || mmp.device_id
+            ELSE NULL END AS user_id,
+        device.os,
+        CASE
+            WHEN device.country = 'KOR' THEN 'KR'
+            WHEN device.country IN ('USA','CAN') THEN 'NA'
+            WHEN device.country IN ('GBR', 'FRA', 'DEU') THEN 'EU'
+            WHEN device.country IN ('JPN','HKG','TWN') THEN 'NEA'
+            ELSE 'ETC' END AS region,
+        app.bundle,
+        event.name AS event_name,
+        DATE_DIFF(timestamp, event.install_at, DAY) AS date_diff
+
+    FROM
+        `focal-elf-631.prod_stream_view.pb`
+    WHERE
+        DATE(timestamp) BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 7 DAY)
+        AND DATE(event.install_at) BETWEEN start_date AND end_date
+        AND device.country IN ('KOR', 'USA','CAN', 'GBR', 'FRA', 'DEU', 'JPN','HKG','TWN')
+        AND event.revenue_usd.amount > 0
+        AND event.revenue_usd.amount < 10000
+        AND (LOWER(event.name) IN ('install', 'installs') OR (LOWER(event.name) LIKE '%purchase%'
+          OR LOWER(event.name) LIKE '%iap'
+          OR LOWER(event.name) LIKE '%revenue%'
+          OR LOWER(event.name) LIKE '%_ad_%'
+          OR LOWER(event.name) IN ('af_top_up', 'pay', '0ofw9', 'h9bsc')
+          OR LOWER(event.name) LIKE '%deposit%'))
+        AND LOWER(event.name) NOT LIKE '%ltv%'
+        AND event.name NOT IN ('Purcahse=3', 'BOARD_3')
+        -- AND app.bundle = 'com.kabam.knights.legends' 
+
+),
+
+agg AS (
+
+    SELECT 
+        os,
+        region,
+        COUNT(DISTINCT CASE WHEN LOWER(event_name) IN ('install', 'installs') THEN user_id ELSE NULL END) AS install_user, 
+        COUNT(DISTINCT CASE WHEN LOWER(event_name) NOT IN ('install', 'installs') AND date_diff < 7 THEN user_id ELSE NULL END) AS purchase_user,
+    FROM raw
+    GROUP BY 1,2
+)
+
+SELECT 
+    os,
+    region,
+    install_user,
+    purchase_user,
+    ROUND(SAFE_DIVIDE(purchase_user, install_user), 4) AS purchase_conversion_rate
+FROM agg
+

@@ -162,7 +162,7 @@ SELECT
     count(1) as count
 FROM focal-elf-631.prod_stream_view.cv
 WHERE 
-    WHERE DATE(C.timestamp) BETWEEN run_from_date AND run_to_date
+    DATE(C.timestamp) BETWEEN run_from_date AND run_to_date
     AND api.product.app.store_id IN UNNEST(app_bundle)
 GROUP BY ALL
 

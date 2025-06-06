@@ -1,6 +1,33 @@
 /*
 - focal-elf-631.prod_stream_view.clicks
 - Clicks from a Moloco campaign
+
+SCHEMA
+- timestamp
+- platform_id
+- advertiser_id
+- req
+- bid
+- api
+  - platform
+  - advertiser
+  - product
+  - campaign
+    - id
+    - title
+    - skan_id
+    - skan_tr_suffix
+  - trgroup
+  - adgroup
+  - crgroup
+  - creative
+  - tracking_links
+- imp
+- imp_extra
+- ev
+- ec
+- click
+- compliance
 */
 
 

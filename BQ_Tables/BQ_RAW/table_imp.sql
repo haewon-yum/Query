@@ -20,11 +20,29 @@ SCHEMA
     - ifa
     - os
     - osv 
-    ...
+    - model
+    - model_norm
+    - ip
+    - iptype
+    - country
+    - session_count
+    - ua
+    - ifv
+    - anonymized_ifv
+    - lauguage
+    - name
+    - name
+    - appsetid
+  - publisher
+    - ...
+  - ..
 - bid
+  - mtid
+  - maid
+  - ...
 - api
     - platform
-        -...
+        -...d
     - advertiser
         - ...
     - product
@@ -218,3 +236,92 @@ order by 1 ,2,3
   Impression per user (maid)
 */
 
+DECLARE run_from_date DATE DEFAULT "2025-02-01";
+DECLARE run_to_date DATE DEFAULT "2025-02-28";
+ 
+
+SELECT
+  api.product.app.store_id as app_market_bundle,
+  COUNT(DISTINCT bid.maid) AS imp_user
+FROM `focal-elf-631.prod_stream_view.imp` AS I
+WHERE DATE(I.timestamp) BETWEEN run_from_date AND run_to_date
+  AND api.product.app.store_id = 'closet.match.pair.matching.games'
+GROUP BY 1
+
+
+/* Impression to Install (at user level) */ 
+
+WITH imp AS (
+
+  SELECT
+    api.product.app.store_id as app_market_bundle,
+    COUNT(DISTINCT bid.maid) AS imp_user
+  FROM `focal-elf-631.prod_stream_view.imp` AS I
+  WHERE DATE(I.timestamp) BETWEEN run_from_date AND run_to_date
+    AND api.product.app.store_id = 'closet.match.pair.matching.games'
+  GROUP BY 1
+
+), 
+
+install AS (
+  SELECT
+    api.product.app.store_id as app_market_bundle,
+    COUNT(DISTINCT bid.maid) AS install_user
+  FROM `focal-elf-631.prod_stream_view.cv` AS C 
+  WHERE DATE(timestamp) BETWEEN run_from_date AND run_to_date
+    AND api.product.app.store_id = 'closet.match.pair.matching.games'
+    AND LOWER(cv.event) = 'install'
+  GROUP BY 1
+)
+
+SELECT
+  imp.app_market_bundle,
+  imp_user,
+  install_user,
+  ROUND(SAFE_DIVIDE(install_user, imp_user), 4) AS install_conversion
+FROM imp LEFT JOIN install using(app_market_bundle)
+
+
+/* compare user reach between two campaigns 
+  Nol / Tving Case : https://colab.research.google.com/drive/1VB8Yfr_SNfnu6TUcG2l5dMTY15RLW6jT#scrollTo=xOLldxOyzOFK
+
+*/
+
+  DECLARE start_date DATE DEFAULT '{start_date}';
+  DECLARE end_date DATE DEFAULT '{end_date}';
+
+  WITH imp_bau AS (
+    SELECT
+      bid.maid, 
+      COUNT(1) AS cnt_imp_user
+    FROM 
+      `focal-elf-631.prod_stream_view.imp` AS I
+    WHERE DATE(I.timestamp, 'Asia/Seoul') BETWEEN start_date AND end_date
+      AND I.api.campaign.id = '{campaign_bau}'
+    GROUP BY 1
+  ), 
+
+  imp_tving AS (
+    SELECT
+      bid.maid, 
+      COUNT(1) AS cnt_imp_user
+    FROM
+      `focal-elf-631.prod_stream_view.imp` AS I
+    WHERE DATE(I.timestamp, 'Asia/Seoul') BETWEEN start_date AND end_date
+      AND I.api.campaign.id = '{campaign_tving}'
+    GROUP BY 1
+  ),
+
+  joined AS (
+    SELECT
+      imp_bau.maid AS maid_bau,
+      imp_tving.maid AS maid_tving
+    FROM imp_bau 
+    FULL OUTER JOIN imp_tving USING(maid)
+  )
+
+  SELECT
+    COUNTIF(maid_bau IS NOT NULL AND maid_tving IS NOT NULL) AS cnt_imp_user_both,
+    COUNTIF(maid_bau IS NOT NULL AND maid_tving IS NULL) AS cnt_imp_user_bau_only,
+    COUNTIF(maid_bau IS NULL AND maid_tving IS NOT NULL) AS cnt_imp_user_tving_only
+  FROM joined;

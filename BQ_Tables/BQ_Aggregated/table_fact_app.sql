@@ -24,3 +24,15 @@
   WHERE fact_app.date_utc BETWEEN '{start_date_release}' AND '{end_date_analysis}'
       AND fact_app.app_market_bundle IN ({tgt_bundles_str})
   GROUP BY ALL
+
+
+  ## daily download trend ## 
+
+  SELECT
+    fact_app.date_utc,
+    COALESCE(SUM(fact_app.daily.downloads ), 0) AS daily_downloads
+  FROM `moloco-ae-view.athena.fact_app` fact_app
+  WHERE fact_app.app_market_bundle = '1662742277'
+    AND fact_app.date_utc BETWEEN '2025-03-01' AND '2025-04-20'
+    AND fact_app.country  = 'USA'
+  GROUP BY 1

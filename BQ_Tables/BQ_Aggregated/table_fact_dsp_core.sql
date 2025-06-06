@@ -3,6 +3,7 @@
 
  SCHEMA
  - advertiser
+    - mmp_bundle_id
  - advertiser_id
  - ad_group
  - campaign
@@ -14,7 +15,8 @@
  - moloco_product
  - platform
  - platform_id
- - ... 
+ - product
+    - app_market_bundle
  
 */
 

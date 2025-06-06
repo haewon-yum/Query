@@ -6,7 +6,14 @@
 - Note 
     + Odd naming schema where IDs are called “name”, e.g. “campaign_name” is the campaign_id, and names are called “display_name”
 
-
-
+- campaign_name
+- os
+- country
+- enabled
+- type
+- product_category
+- store_bundle
+- campaign_goals
+- 
 
 */

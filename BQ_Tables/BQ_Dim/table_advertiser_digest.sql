@@ -6,5 +6,7 @@
 - Notes:
     + advertiser_id might be duplicated. When joining to other tables, use platform_id as well
 
-
+- advertiser_id
+- advertiser_title
+- 
 */
