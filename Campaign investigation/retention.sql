@@ -249,3 +249,93 @@ GROUP BY
   1,2,3,4,5
 ORDER BY
   1,2,3,4,5
+
+
+
+### NOL RE Campaign After TVing ###
+https://colab.research.google.com/drive/1VB8Yfr_SNfnu6TUcG2l5dMTY15RLW6jT#scrollTo=_EjyhgH_2AVn
+
+
+  #@title build query with re-engagement event
+  start_date = '2025-05-08'
+  end_date = '2025-05-28'
+
+
+  def build_query():
+
+    condition = "AND cv.pb.event.name NOT IN  ('install', 'reengagement', 'reattribution')"
+
+    query_retention = f"""
+
+      DECLARE start_date DATE DEFAULT '{start_date}';
+      DECLARE end_date DATE DEFAULT '{end_date}';
+
+
+      WITH reengagement AS (
+
+        SELECT
+          bid.maid,
+          api.campaign.id AS campaign_id,
+          MIN(timestamp) AS first_reengagement_at
+        FROM `focal-elf-631.prod_stream_view.cv`
+        WHERE
+          LOWER(cv.pb.event.name) = 'reengagement'
+          AND DATE(timestamp, 'Asia/Seoul') BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 1 DAY)
+          AND cv.pb.app.bundle = 'com.cultsotry.yanolja.nativeapp'
+          AND req.device.geo.country = 'KOR'
+          AND api.campaign.id IN ('{campaign_bau}', '{campaign_tving}')
+        GROUP BY 1,2
+
+      ),
+
+      actions AS (
+        SELECT
+          bid.maid,
+          api.campaign.id AS campaign_id,
+          timestamp AS action_at
+
+        FROM
+          `focal-elf-631.prod_stream_view.cv`
+
+        WHERE 1=1
+          AND DATE(timestamp) >= start_date AND DATE(timestamp) <= DATE_ADD(end_date, INTERVAL 14 DAY)
+          {condition}
+          AND cv.pb.app.bundle = 'com.cultsotry.yanolja.nativeapp'
+          AND req.device.geo.country = 'KOR'
+          AND api.campaign.id IN ('{campaign_bau}', '{campaign_tving}')
+        ),
+
+      joined AS (
+
+        SELECT
+            reengagement.campaign_id,
+            reengagement.maid as reengagement_maid,
+            actions.maid as action_maid,
+            TIMESTAMP_DIFF(action_at, first_reengagement_at, DAY) as day_diff,
+            COUNT(DISTINCT reengagement.maid) OVER
+              (PARTITION BY reengagement.campaign_id) AS reengagement_for_group,
+          FROM
+            reengagement
+          LEFT JOIN
+            actions
+          ON
+            reengagement.maid = actions.maid
+            AND reengagement.campaign_id = actions.campaign_id
+            AND action_at > first_reengagement_at
+
+      )
+
+      SELECT
+        day_diff,
+        campaign_id,
+        ANY_VALUE(reengagement_for_group) AS reengagement_cnt,
+        COUNT(DISTINCT action_maid) AS retention_for_day
+      FROM joined
+      WHERE day_diff < 14
+      GROUP BY
+        1,2
+      ORDER BY
+        1,2
+
+    """
+    return query_retention

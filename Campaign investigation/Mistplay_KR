@@ -1,0 +1,87 @@
+## DATA PULL
+
+DECLARE start_date DATE DEFAULT '2025-04-01';
+DECLARE end_date DATE DEFAULT '2025-08-19';
+
+WITH raw AS (
+    SELECT
+        device.country,
+        CASE
+            WHEN `moloco-ods.general_utils.is_idfa_truly_available`(device.ifv) THEN "ifv:" || device.ifv
+            WHEN `moloco-ods.general_utils.is_idfa_truly_available`(device.ifa) THEN "ifa:" || device.ifa
+            WHEN `moloco-ml.lat_utils.is_userid_truly_available` (mmp.device_id) THEN 'device:' || mmp.device_id
+            ELSE NULL END AS user_id,
+        moloco.attributed,
+        DATE(timestamp) AS dt,
+        event.install_at, 
+        event.event_at, 
+        event.name AS event_name,
+        TIMESTAMP_DIFF(event.event_at, event.install_at, DAY) AS diff,
+        event.revenue_usd.amount AS revenue
+    FROM `focal-elf-631.prod_stream_view.pb`
+    WHERE DATE(timestamp) BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 7 DAY)
+    AND DATE(event.install_at) BETWEEN start_date AND end_date
+    AND device.country IN ('KOR', 'JPN')
+    AND app.bundle = 'com.mistplay.mistplay'
+), 
+
+agg AS (
+    SELECT
+        country,
+        DATE(install_at) AS install_dt,
+        attributed,
+        COUNT(DISTINCT IF(LOWER(event_name)='install', user_id, NULL)) AS install_user, 
+        COUNT(DISTINCT IF((LOWER(event_name)='iap_spend_all_v2') AND diff < 7, user_id, NULL)) AS kpi_user_d7,
+        SUM(IF((LOWER(event_name)='iap_spend_all_v2') AND diff < 7, revenue, NULL)) AS kpi_revenue_d7
+    FROM raw
+    GROUP BY 1,2,3
+
+), 
+
+agg_user AS (
+    SELECT  
+        country,
+        DATE(install_at) AS install_dt,
+        attributed,
+        user_id, 
+        COUNT(IF((LOWER(event_name)='iap_spend_all_v2') AND diff < 7, 1, 0)) AS count_kpi_d7,
+        SUM(  IF((LOWER(event_name)='iap_spend_all_v2') AND diff < 7, revenue, 0)) AS kpi_revenue_d7       
+    FROM raw
+    GROUP BY 1,2,3,4 
+)
+
+spend AS (
+
+    SELECT
+        date_utc,
+        campaign.country,
+        campaign_id, 
+        campaign.title, 
+        campaign.goal,
+        SUM(gross_spend_usd) AS spend
+    FROM `moloco-ae-view.athena.fact_dsp_core`
+    WHERE date_utc BETWEEN start_date AND end_date
+        AND advertiser_id = 'WM5Eu5mu1GcVKxBI'
+        AND campaign.country IN ('KOR', 'JPN')
+    GROUP BY ALL
+)
+
+
+
+#### FROM CV ####
+
+SELECT 
+    DATE(install_time_bucket) AS date_utc,
+    country, 
+    exchange,
+    COUNT(DISTINCT if(on_day < 7, mtid, NULL)) AS event_user_d7,
+    SUM(if(on_day < 7, total_revenue, NULL)) AS event_revenue_d7,
+FROM `moloco-dsp-data-view.standard_cs_v5.i2a_rolling`
+WHERE 1=1
+    AND advertiser_id = 'WM5Eu5mu1GcVKxBI'
+    -- AND app_bundle = 'com.mistplay.mistplay'
+    AND country IN ('JPN', 'KOR')
+    AND pb_event = 'iap_spend_all_v2'
+    AND DATE(install_time_bucket) BETWEEN '2025-04-01' AND '2025-08-20'
+GROUP BY ALL
+ORDER BY date_utc DESC
