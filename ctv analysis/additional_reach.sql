@@ -106,6 +106,8 @@ SET full_table_name_mobile = FORMAT(
 SELECT full_table_name_mobile;
 
 EXECUTE IMMEDIATE FORMAT("""
+  CREATE OR REPLACE TABLE %s AS
+
     WITH 
     t_advertiser AS (
         SELECT
