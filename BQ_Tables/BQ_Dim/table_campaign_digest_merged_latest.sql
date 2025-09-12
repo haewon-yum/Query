@@ -14,6 +14,6 @@
 - product_category
 - store_bundle
 - campaign_goals
-- 
+- tracking_bundle
 
 */

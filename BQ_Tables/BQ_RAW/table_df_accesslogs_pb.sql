@@ -1,5 +1,5 @@
 /* 
-- focal-elf-631.df_accesslogs.pb
+- focal-elf-631.df_accesslog.pb
 - This table contains all available postbacks and is fully unsampled but may not have all the columns available in prod_stream_view.pb
 
 SCHEMA
@@ -16,9 +16,44 @@ SCHEMA
     - creative_id
     - cohort_id
 - app
+    - bundle
+    - name
+    - store
+    - version
+    - sdk_version
 - pub
+    - app_bundle
 - device
+    - ip
+    - ua
+    - os
+    - osv
+    - idfa
+    - idfv
+    - country
+    - session_count
+    - user_bucket
+    - language_est
+    - name
+    - model_est
+    - appsetid
 - event
+    - name
+    - imp_at
+    - click_at
+    - download_at
+    - install_at
+    - event_at
+    - revenue_raw
+        - currency
+        - amount
+    - revenue_usd
+        - currency
+        - amount
+    - page_uri
+    - custom_info
+        - key
+        - value
 - request
 
 */
