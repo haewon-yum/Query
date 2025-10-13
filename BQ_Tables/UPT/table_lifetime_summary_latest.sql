@@ -1,6 +1,9 @@
 /* 
 
 focal-elf-631.user_data_v2_avro.lifetime_summary_latest
+This table contains data of IDFA users that we have bidded on in a lifetime 
+Note: Useful to check bid against audience, such as in Reengagement / RTG.
+
 
 SCHEMA: 
 column_name	data_type	is_nullable
