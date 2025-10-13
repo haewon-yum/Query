@@ -1,8 +1,9 @@
 -- 2025-02-06 20:00 - 23:30 UTC. 
+-- DECLARE run_from_date DATE DEFAULT "2025-02-06";
 
-DECLARE run_from_date DATE DEFAULT "2025-02-06";
-DECLARE run_to_date DATE DEFAULT "2025-02-06";
-DECLARE advertisers ARRAY<STRING> DEFAULT ['CLPQ2epYqtnnNprD',
+DECLARE run_to_date DATE DEFAULT "2025-02-07";
+DECLARE advertisers ARRAY<STRING> DEFAULT [
+  'CLPQ2epYqtnnNprD',
           'T7eVdFNdQmaj6bxV',        
           'Voql38wJkmDNzXbW',
           'HKRCcBXgyO9rR9Pb',
