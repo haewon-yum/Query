@@ -1,0 +1,204 @@
+{
+    "id": "67e3437d89e969d121babcd7",
+    "imp": [
+        {
+            "id": "1",
+            "banner": {
+                "format": [
+                    {
+                        "w": 320,
+                        "h": 50
+                    },
+                    {
+                        "w": 320,
+                        "h": 50
+                    },
+                    {
+                        "w": 320,
+                        "h": 50
+                    }
+                ],
+                "w": 320,
+                "h": 50,
+                "mimes": [
+                    "image/jpg",
+                    "image/gif",
+                    "text/html"
+                ],
+                "api": [
+                    5,
+                    7
+                ],
+                "id": "1"
+            },
+            "displaymanager": "Vungle",
+            "displaymanagerver": "7.4.0",
+            "tagid": "BANNER_IOS-4049696",
+            "bidfloor": 0.05,
+            "bidfloorcur": "USD",
+            "secure": 1,
+            "exp": 21600,
+            "ext": {
+                "skadn": {
+                    "version": "4.0",
+                    "versions": [
+                        "2.0",
+                        "2.2",
+                        "3.0",
+                        "4.0"
+                    ],
+                    "sourceapp": "1022650847",
+                    "skadnetids": [],
+                    "ext": {
+                        "sko": 0
+                    }
+                },
+                "deeplink": 1,
+                "skpv": 0,
+                "pcta": 0
+            }
+        }
+    ],
+    "app": {
+        "id": "67bda2bcfb32c9bf51cef0df",
+        "name": "Yalla Shoot - IOS",
+        "bundle": "1022650847",
+        "storeurl": "https://apps.apple.com/us/app/yalla-shoot-live-scores/id1022650847?uo=4",
+        "cat": [
+            "IAB1",
+            "IAB9"
+        ],
+        "ver": "4.8.8",
+        "privacypolicy": 1,
+        "publisher": {
+            "id": "67bda2410543d20011d5130f",
+            "cat": [
+                "IAB1",
+                "IAB9"
+            ]
+        },
+        "keywords": "4+",
+        "ext": {}
+    },
+    "device": {
+        "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        "geo": {
+            "type": 2,
+            "ipservice": 3,
+            "country": "IRQ",
+            "region": "DI",
+            "city": "Baqubah"
+        },
+        "dnt": 1,
+        "lmt": 1,
+        "ip": "37.77.55.36",
+        "devicetype": 4,
+        "make": "Apple",
+        "model": "iPhone12,1",
+        "os": "iOS",
+        "osv": "18.1.1",
+        "hwv": "11",
+        "h": 896,
+        "w": 414,
+        "language": "ar",
+        "carrier": "--",
+        "connectiontype": 6,
+        "ext": {
+            "idfv": "DC3C5C71-3A2C-4BF3-BFC2-44747A27154B",
+            "ifv": "DC3C5C71-3A2C-4BF3-BFC2-44747A27154B",
+            "atts": 2
+        }
+    },
+    "user": {},
+    "at": 1,
+    "tmax": 880,
+    "cur": [
+        "USD"
+    ],
+    "bcat": [
+        "IAB25",
+        "IAB14-1",
+        "IAB14-6",
+        "IAB14-2",
+        "IAB14-3",
+        "IAB14-4",
+        "IAB14-8",
+        "IAB7-29",
+        "IAB7-24",
+        "IAB7-19",
+        "IAB7-22",
+        "IAB7-33",
+        "IAB7-3",
+        "IAB7-16",
+        "IAB7-2",
+        "IAB7-28",
+        "IAB7-30",
+        "IAB7-7",
+        "IAB7-9",
+        "IAB7-12",
+        "IAB7-18",
+        "IAB7-43",
+        "IAB7-5",
+        "IAB7-41",
+        "IAB7-15",
+        "IAB7-20",
+        "IAB7-23",
+        "IAB7-27",
+        "IAB7-8",
+        "IAB7-13",
+        "IAB7-35",
+        "IAB7-21",
+        "IAB7-34",
+        "IAB7-10",
+        "IAB7-42",
+        "IAB7-6",
+        "IAB7-14",
+        "IAB7-39",
+        "IAB7-11",
+        "IAB11",
+        "IAB13-2",
+        "IAB17-18",
+        "IAB8-5",
+        "IAB8-18",
+        "IAB9-9",
+        "IAB9-7",
+        "IAB23",
+        "IAB26",
+        "IAB20-24",
+        "IAB18-2"
+    ],
+    "badv": [
+        "newpub.co"
+    ],
+    "bapp": [
+        "1545607822",
+        "1574436604"
+    ],
+    "source": {
+        "ext": {
+            "schain": {
+                "complete": 1,
+                "nodes": [
+                    {
+                        "asi": "vungle.com",
+                        "sid": "67bda2410543d20011d5130f",
+                        "rid": "67e3437d89e969d121babcd7",
+                        "name": "Yalla Group",
+                        "hp": 1
+                    }
+                ],
+                "ver": "1.0"
+            },
+            "omidpn": "vungle",
+            "omidpv": "7.4.0",
+            "header_bidding": 1
+        }
+    },
+    "regs": {
+        "ext": {
+            "gdpr": 0,
+            "us_privacy": "1-N-"
+        }
+    },
+    "ext": {}
+}

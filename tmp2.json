@@ -1,0 +1,2606 @@
+{
+    "bid_context_log": {
+        "MinImpIntervalMin": {
+            "enable": true,
+            "value": "60"
+        },
+        "auction_type": "FIRST_PRICE",
+        "campaign_app_category": "IAB13",
+        "campaign_goal_model": {
+            "optimize_cpa_for_app_ua": {
+                "action": "firstrecharge",
+                "budget_centric": {
+                    "rate": 1
+                }
+            },
+            "type": "OPTIMIZE_CPA_FOR_APP_UA"
+        },
+        "creative": {
+            "native": {
+                "cta_text": "Download Now",
+                "icon_image": {
+                    "height": 512,
+                    "image_url": "https://cdn-f.adsmoloco.com/w9bkpEAtWrjRsWHT/creative/m2ybgyso_kokl7nq_kfpsrtsyy8pzcn6u.png",
+                    "size_in_bytes": 601309,
+                    "width": 512
+                },
+                "main_image": {
+                    "height": 628,
+                    "image_url": "https://cdn-f.adsmoloco.com/w9bkpEAtWrjRsWHT/creative/m2ybi7d5_t3zj6p8_gycmd8scdbx1zih3.png",
+                    "size_in_bytes": 152628,
+                    "width": 1200
+                },
+                "shrunk_main_image": {
+                    "height": 418,
+                    "image_url": "https://cdn-f.adsmoloco.com/w9bkpEAtWrjRsWHT/creative/shrunk_m2ybi7d5_t3zj6p8_gycmd8scdbx1zih3.png",
+                    "size_in_bytes": 49324,
+                    "width": 800
+                },
+                "sponsor_text": "finapp app house",
+                "star_rating": 4.5,
+                "text": "Receber seu grande prêmio hoje\n",
+                "title": "Emi Calculator"
+            },
+            "type": "NATIVE"
+        },
+        "device_model_standardizer_version": "2024-12-09",
+        "finalized_tf_model_names": {
+            "2": {
+                "model_names": [
+                    "install_v28_idfa_1_tpu_c311"
+                ]
+            }
+        },
+        "inventory_feature": {
+            "enable_engaged_view_click": true,
+            "enable_playable_engagement_click": true
+        },
+        "mediator_id_from_apt": "UNKNOWN_MEDIATOR",
+        "user_summary": {
+            "CampaignMap": {
+                "Cktqduy5ND0ww0Nx": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730917698552000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730917698552000000",
+                                    "value": "37"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730917698552000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "ETMjM30Bw1L5Iqom": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733058611669000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733058611669000000",
+                                    "value": "1946"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1733058611669000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "FIbWASMnopuYyYBK": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726835056151000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726835056151000000",
+                                    "value": "108"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1726835056151000000",
+                            "value": "3"
+                        }
+                    }
+                },
+                "GWxaQXxpSs2IC2Aj": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1729867978646000000",
+                                    "value": "7"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1729867978646000000",
+                                    "value": "5568"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "B": {
+                            "timestamp_ns": "1728578685865000000",
+                            "value": "4"
+                        },
+                        "I": {
+                            "timestamp_ns": "1729867978646000000",
+                            "value": "3"
+                        }
+                    }
+                },
+                "H9P3hJmO6uv3Ryy4": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1732314528716000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1732314528716000000",
+                                    "value": "2819"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1732314528716000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "JWGNt3z4d2il4upB": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731182042325000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731182042325000000",
+                                    "value": "3045"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1731182042325000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "KA9y3awHIOnrVaYP": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726684295124000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726684295124000000",
+                                    "value": "50"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1726684295124000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "KIucdLnzLSC7QWCA": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1727797889832000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1727797889832000000",
+                                    "value": "982"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1727797889832000000",
+                            "value": "3"
+                        }
+                    }
+                },
+                "KuL3m3mrNOvQ6qcP": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "320x50": {
+                                    "timestamp_ns": "1732830072833000000",
+                                    "value": "1"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1730653699277000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "320x50": {
+                                    "timestamp_ns": "1732830072833000000",
+                                    "value": "22"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1730653699277000000",
+                                    "value": "31"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "B": {
+                            "timestamp_ns": "1732830072833000000",
+                            "value": "1"
+                        },
+                        "N": {
+                            "timestamp_ns": "1730653699277000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "MDl7DdtHN8dctnyu": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728931228313000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728931228313000000",
+                                    "value": "59"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1728931228313000000",
+                            "value": "3"
+                        }
+                    }
+                },
+                "MTw5XJJEYZdEG5az": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "300x250": {
+                                    "timestamp_ns": "1733527502603000000",
+                                    "value": "1"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1733506146741000000",
+                                    "value": "1"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1733609441184000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "3": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733609453687000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "300x250": {
+                                    "timestamp_ns": "1733527502603000000",
+                                    "value": "33"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1733506146741000000",
+                                    "value": "65"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1733609441184000000",
+                                    "value": "2179"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "B": {
+                            "timestamp_ns": "1733527502603000000",
+                            "value": "1"
+                        },
+                        "I": {
+                            "timestamp_ns": "1733609441184000000",
+                            "value": "3"
+                        },
+                        "N": {
+                            "timestamp_ns": "1733506146741000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "NNlQUiLyrNSw29zV": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733320583212000000",
+                                    "value": "2"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1728590703257000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "3": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1728041558335000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733320583212000000",
+                                    "value": "209"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1728590703257000000",
+                                    "value": "4218"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1728590703257000000",
+                            "value": "3"
+                        },
+                        "N": {
+                            "timestamp_ns": "1733320583212000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "PM4f3wfe25mz7BM5": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733356968264000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733356968264000000",
+                                    "value": "27"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1733356968264000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "PU3N5mmwfkRpzeU2": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733506132435000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733506132435000000",
+                                    "value": "2092"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1733506132435000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "RSBASanKxjBOqfzr": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730817399236000000",
+                                    "value": "5"
+                                }
+                            }
+                        },
+                        "24": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730819166733000000",
+                                    "value": "8"
+                                }
+                            }
+                        },
+                        "3": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730817403038000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "4": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730817963598000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730817399236000000",
+                                    "value": "158"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730817399236000000",
+                            "value": "5"
+                        }
+                    }
+                },
+                "V04FxHASJf9rq6Ia": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732272213723000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732272213723000000",
+                                    "value": "11"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1732272213723000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "WDPHi94xZ69Lwqbh": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726827219220000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726827219220000000",
+                                    "value": "35"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1726827219220000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "a83LPExY6PlONaj4": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731517334419000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731517334419000000",
+                                    "value": "1055"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1731517334419000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "aXHbf4OTuNobcjie": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733343102062000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733343102062000000",
+                                    "value": "14"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "B": {
+                            "timestamp_ns": "1733343102062000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "bwBX7x0WP2K6kzYI": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731970132008000000",
+                                    "value": "4"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731970132008000000",
+                                    "value": "132"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1731970132008000000",
+                            "value": "4"
+                        }
+                    }
+                },
+                "c0yozQMMggq2VF3A": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730068186143000000",
+                                    "value": "5"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730068186143000000",
+                                    "value": "3697"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730068186143000000",
+                            "value": "5"
+                        }
+                    }
+                },
+                "drQMwuJdq6p2MypB": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733685057523000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733685057523000000",
+                                    "value": "19"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1733685057523000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "j9ewYZehpcocyxcO": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732550891990000000",
+                                    "value": "7"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732550891990000000",
+                                    "value": "116"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1732550891990000000",
+                            "value": "7"
+                        }
+                    }
+                },
+                "jSl7jRE4gCHI0eBW": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728146157684000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728146157684000000",
+                                    "value": "171"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1728146157684000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "jVohzuyYq1EyEI9y": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731515271759000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731515271759000000",
+                                    "value": "1266"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1731515271759000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "lXpm5oNyEbDFI6gy": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726849648476000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726849648476000000",
+                                    "value": "43"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1726849648476000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "loXyky0eRjBli0jj": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1729902576153000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1729902576153000000",
+                                    "value": "11"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1729902576153000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "npV8yvUvMqutPYsI": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730936974300000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730936974300000000",
+                                    "value": "41"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730936974300000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "oX6ibJlHDCwyyxSy": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "300x250": {
+                                    "timestamp_ns": "1733527501040000000",
+                                    "value": "5"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1733874952731000000",
+                                    "value": "143"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1729725541399000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "300x250": {
+                                    "timestamp_ns": "1733527501040000000",
+                                    "value": "164"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1733874952731000000",
+                                    "value": "10772"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1729725541399000000",
+                                    "value": "953"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "B": {
+                            "timestamp_ns": "1733527501040000000",
+                            "value": "5"
+                        },
+                        "I": {
+                            "timestamp_ns": "1729725541399000000",
+                            "value": "1"
+                        },
+                        "N": {
+                            "timestamp_ns": "1733874952731000000",
+                            "value": "143"
+                        }
+                    }
+                },
+                "pPI96DaTdhl9PyM0": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733917807421000000",
+                                    "value": "116"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733917807421000000",
+                                    "value": "18646"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1733917807421000000",
+                            "value": "116"
+                        }
+                    }
+                },
+                "ptCKmYHQjNGgViTu": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731519285631000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1731519285631000000",
+                                    "value": "2978"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1731519285631000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "py7tFoxVHmnPQyHu": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730851242469000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730851242469000000",
+                                    "value": "75"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730851242469000000",
+                            "value": "3"
+                        }
+                    }
+                },
+                "riRN7s1yVCikaAQx": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733103136752000000",
+                                    "value": "4"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1733103136752000000",
+                                    "value": "58"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1733103136752000000",
+                            "value": "4"
+                        }
+                    }
+                },
+                "sE7s7x5skhvAVmba": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733507514272000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733507514272000000",
+                                    "value": "1698"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1733507514272000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "sFvpfoc3alOUp3SD": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732653968424000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732653968424000000",
+                                    "value": "14"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1732653968424000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "svOTcmu4Jw1SqhFz": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731256481741000000",
+                                    "value": "12"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1730217307656000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731256481741000000",
+                                    "value": "3737"
+                                },
+                                "video": {
+                                    "timestamp_ns": "1730217307656000000",
+                                    "value": "600"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1730217307656000000",
+                            "value": "1"
+                        },
+                        "N": {
+                            "timestamp_ns": "1731256481741000000",
+                            "value": "12"
+                        }
+                    }
+                },
+                "vcnOFDc0OdkoDsF0": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730315092490000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730315092490000000",
+                                    "value": "60"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730315092490000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "vqsB6IDfXOobF0uz": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731361124096000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731361124096000000",
+                                    "value": "29"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1731361124096000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "xJzbObvyZdJbkjez": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733698849636000000",
+                                    "value": "6"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733698849636000000",
+                                    "value": "12024"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1733698849636000000",
+                            "value": "6"
+                        }
+                    }
+                },
+                "xWWL35D3dFr2QTlm": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733608137898000000",
+                                    "value": "5"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1733608137898000000",
+                                    "value": "16209"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1733608137898000000",
+                            "value": "5"
+                        }
+                    }
+                },
+                "xqcYbP62E00ekAPn": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726961822165000000",
+                                    "value": "4"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1726961822165000000",
+                                    "value": "134"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1726961822165000000",
+                            "value": "4"
+                        }
+                    }
+                },
+                "y0IRUwizKclYWpjz": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730591085131000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1730591085131000000",
+                                    "value": "29"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1730591085131000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "y3xUuuFZXxAOkFXO": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731071962551000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731071962551000000",
+                                    "value": "12"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1731071962551000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "yaeJ8vz4yJfnTQaK": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728952871410000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728952871410000000",
+                                    "value": "12"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1728952871410000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "ynngjJqKEzKqctn9": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728154500083000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1728154500083000000",
+                                    "value": "3588"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1728154500083000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "yzbMRlTawx0OK74s": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1729633218575000000",
+                                    "value": "2"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1729633218575000000",
+                                    "value": "36"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1729633218575000000",
+                            "value": "2"
+                        }
+                    }
+                },
+                "z17xV5o8pNbzhSlo": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732831467109000000",
+                                    "value": "18"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1732831467109000000",
+                                    "value": "689"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1732831467109000000",
+                            "value": "18"
+                        }
+                    }
+                },
+                "zAUlKSipBhnv03WH": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1730323401689000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "3": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1730323404848000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "video": {
+                                    "timestamp_ns": "1730323401689000000",
+                                    "value": "534"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "I": {
+                            "timestamp_ns": "1730323401689000000",
+                            "value": "1"
+                        }
+                    }
+                },
+                "zR5hlHzvoWv5MePI": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "300x250": {
+                                    "timestamp_ns": "1733744821773000000",
+                                    "value": "20"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1733685071658000000",
+                                    "value": "21"
+                                }
+                            }
+                        },
+                        "3": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1729865818773000000",
+                                    "value": "1"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "300x250": {
+                                    "timestamp_ns": "1733744821773000000",
+                                    "value": "1437"
+                                },
+                                "native": {
+                                    "timestamp_ns": "1733685071658000000",
+                                    "value": "1985"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "B": {
+                            "timestamp_ns": "1733744821773000000",
+                            "value": "20"
+                        },
+                        "N": {
+                            "timestamp_ns": "1733685071658000000",
+                            "value": "21"
+                        }
+                    }
+                },
+                "zssBJyinmS6cgGpv": {
+                    "event_map": {
+                        "2": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731968063659000000",
+                                    "value": "3"
+                                }
+                            }
+                        },
+                        "8": {
+                            "format_map": {
+                                "native": {
+                                    "timestamp_ns": "1731968063659000000",
+                                    "value": "61"
+                                }
+                            }
+                        }
+                    },
+                    "imp_inv_format_map": {
+                        "N": {
+                            "timestamp_ns": "1731968063659000000",
+                            "value": "3"
+                        }
+                    }
+                }
+            },
+            "market_price_history": {
+                "1": {
+                    "data": [
+                        {
+                            "count": "1",
+                            "exchange": "ADX",
+                            "inv_format": "INVENTORY_FORMAT_BANNER",
+                            "sum": 150,
+                            "sum_square": 22500
+                        },
+                        {
+                            "count": "3",
+                            "exchange": "ADX",
+                            "inv_format": "INVENTORY_FORMAT_INTERSTITIAL",
+                            "sum": 11970,
+                            "sum_square": 48565700
+                        },
+                        {
+                            "count": "42",
+                            "exchange": "XIAOMI",
+                            "inv_format": "INVENTORY_FORMAT_NATIVE",
+                            "sum": 827,
+                            "sum_square": 54393
+                        }
+                    ]
+                },
+                "30": {
+                    "data": [
+                        {
+                            "count": "167",
+                            "exchange": "ADX",
+                            "inv_format": "INVENTORY_FORMAT_BANNER",
+                            "sum": 46980,
+                            "sum_square": 32076400
+                        },
+                        {
+                            "count": "1",
+                            "exchange": "MOLOCO_SDK_MAX",
+                            "inv_format": "INVENTORY_FORMAT_BANNER"
+                        },
+                        {
+                            "count": "307",
+                            "exchange": "ADX",
+                            "inv_format": "INVENTORY_FORMAT_INTERSTITIAL",
+                            "sum": 908880,
+                            "sum_square": 5253825400
+                        },
+                        {
+                            "count": "36",
+                            "exchange": "VUNGLE",
+                            "inv_format": "INVENTORY_FORMAT_INTERSTITIAL",
+                            "sum": 585801,
+                            "sum_square": 24845481187
+                        },
+                        {
+                            "count": "1169",
+                            "exchange": "XIAOMI",
+                            "inv_format": "INVENTORY_FORMAT_NATIVE",
+                            "sum": 29270,
+                            "sum_square": 3022824
+                        },
+                        {
+                            "count": "34",
+                            "exchange": "ADX",
+                            "inv_format": "INVENTORY_FORMAT_NATIVE",
+                            "sum": 105450,
+                            "sum_square": 2253542700
+                        },
+                        {
+                            "count": "2",
+                            "exchange": "VUNGLE",
+                            "inv_format": "INVENTORY_FORMAT_NATIVE",
+                            "sum": 631,
+                            "sum_square": 203221
+                        },
+                        {
+                            "count": "12",
+                            "exchange": "APPLOVIN",
+                            "inv_format": "INVENTORY_FORMAT_BANNER",
+                            "sum": 496,
+                            "sum_square": 25638
+                        },
+                        {
+                            "count": "6",
+                            "exchange": "APPLOVIN",
+                            "inv_format": "INVENTORY_FORMAT_INTERSTITIAL",
+                            "sum": 1635,
+                            "sum_square": 1336725
+                        },
+                        {
+                            "count": "47",
+                            "exchange": "APPLOVIN",
+                            "inv_format": "INVENTORY_FORMAT_NATIVE",
+                            "sum": 1030,
+                            "sum_square": 53944
+                        }
+                    ]
+                }
+            },
+            "postback": {
+                "com.goldlion.and.fh": {
+                    "event": {
+                        "Day2Active": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1731235161205",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1731235161205"
+                        },
+                        "Online": {
+                            "count": "13",
+                            "daily_activity_bits_1": "7",
+                            "first_millis": "1731184000755",
+                            "latest_daily_activity_bits_1": "7",
+                            "latest_millis": "1731430349998"
+                        },
+                        "Register": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1731183996524",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1731183996524"
+                        },
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1731183984493",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1731183984493"
+                        },
+                        "session": {
+                            "count": "6",
+                            "daily_activity_bits_1": "7",
+                            "first_millis": "1731194689520",
+                            "latest_daily_activity_bits_1": "7",
+                            "latest_millis": "1731427162094"
+                        }
+                    }
+                },
+                "com.ikeyboard.theme.neon.love": {
+                    "event": {
+                        "__ADMON_USER_LEVEL_REVENUE__": {
+                            "count": "8",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1730819163754",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1730819166652",
+                            "moloco_attr_count": "8",
+                            "revenue_bucketized": [
+                                0
+                            ]
+                        },
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1730817963535",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1730817963535",
+                            "moloco_attr_count": "1"
+                        }
+                    }
+                },
+                "com.life360.android.safetymapd": {
+                    "event": {
+                        "af_complete_registration": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1731952046389",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1731952046389"
+                        },
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1731951996632",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1731951996632"
+                        }
+                    }
+                },
+                "com.linkedin.android": {
+                    "event": {
+                        "__SESSION__": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1727209025873",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1727209025873"
+                        },
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1727209023152",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1727209023152"
+                        }
+                    }
+                },
+                "com.reefgames.fabletown": {
+                    "event": {
+                        "af_app_opened": {
+                            "count": "3",
+                            "daily_activity_bits_1": "7",
+                            "first_millis": "1733176366182",
+                            "latest_daily_activity_bits_1": "7",
+                            "latest_millis": "1733395536933"
+                        },
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1733176362499",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1733176362499"
+                        }
+                    }
+                },
+                "com.shopee.br": {
+                    "event": {
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1732833112357",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1732833112357"
+                        }
+                    }
+                },
+                "com.zhiliaoapp.musically": {
+                    "event": {
+                        "2d_rr_user": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1726598186342",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1726598186342"
+                        },
+                        "af_app_opened": {
+                            "count": "96",
+                            "daily_activity_bits_1": "1134555262374117087",
+                            "daily_activity_bits_2": "67108735",
+                            "first_millis": "1726400669537",
+                            "latest_daily_activity_bits_1": "1152920815264333823",
+                            "latest_millis": "1733765412230"
+                        },
+                        "af_pltv_lt7_ug_v2_deeplt": {
+                            "count": "7",
+                            "daily_activity_bits_1": "91",
+                            "first_millis": "1726490799319",
+                            "latest_daily_activity_bits_1": "109",
+                            "latest_millis": "1727010614648"
+                        },
+                        "install": {
+                            "count": "1",
+                            "daily_activity_bits_1": "1",
+                            "first_millis": "1726400665128",
+                            "latest_daily_activity_bits_1": "1",
+                            "latest_millis": "1726400665128"
+                        }
+                    }
+                }
+            },
+            "user_data": {
+                "audience": [
+                    {
+                        "first_millis": "1726680896147",
+                        "latest_millis": "1730419379088",
+                        "name": "com.appmusicdownload.musicdownloadervani2app",
+                        "stat": {
+                            "bid_cnt": 8.780629,
+                            "req_cnt": 14.442029,
+                            "video_cnt": 12.293062
+                        }
+                    },
+                    {
+                        "first_millis": "1727914817230",
+                        "latest_millis": "1727914901930",
+                        "name": "app.archivo.conquienchateamipareja",
+                        "stat": {
+                            "bid_cnt": 0.747073,
+                            "req_cnt": 0.8537976,
+                            "video_cnt": 0.8537976
+                        }
+                    },
+                    {
+                        "first_millis": "1727992767406",
+                        "latest_millis": "1727995488236",
+                        "name": "com.vipusa.rastrearcelularguide",
+                        "stat": {
+                            "bid_cnt": 0.4268988,
+                            "req_cnt": 0.5336237,
+                            "video_cnt": 0.4268988
+                        }
+                    },
+                    {
+                        "first_millis": "1729009274190",
+                        "latest_millis": "1733673848738",
+                        "name": "me.jagar.xscamera2",
+                        "stat": {
+                            "bid_cnt": 0.16030388,
+                            "req_cnt": 2.4809117,
+                            "video_cnt": 2.4809117
+                        }
+                    },
+                    {
+                        "first_millis": "1731665832238",
+                        "latest_millis": "1731666007221",
+                        "name": "com.thmobile.transparentwallpaper",
+                        "stat": {
+                            "bid_cnt": 2.292636,
+                            "req_cnt": 6.877908,
+                            "video_cnt": 5.5023265
+                        }
+                    },
+                    {
+                        "first_millis": "1728170799328",
+                        "latest_millis": "1728170890624",
+                        "name": "trackmyphone.findmyphone.phonetracker.findlostphone",
+                        "stat": {
+                            "bid_cnt": 0.6852718,
+                            "req_cnt": 4.682692,
+                            "video_cnt": 1.7131791
+                        }
+                    },
+                    {
+                        "first_millis": "1728147374446",
+                        "latest_millis": "1728151654300",
+                        "name": "com.naxclow.v720",
+                        "stat": {
+                            "bid_cnt": 0.5710598,
+                            "req_cnt": 0.7994836,
+                            "video_cnt": 0.22842385
+                        }
+                    },
+                    {
+                        "first_millis": "1728086986459",
+                        "latest_millis": "1728485817916",
+                        "name": "com.picpay",
+                        "stat": {
+                            "bid_cnt": 0.5876468,
+                            "req_cnt": 0.5876468,
+                            "video_cnt": 0.3426359
+                        }
+                    },
+                    {
+                        "first_millis": "1730817274085",
+                        "latest_millis": "1730817397289",
+                        "name": "com.xgame.raftdefense3d",
+                        "stat": {
+                            "bid_cnt": 0.32668748,
+                            "req_cnt": 36.589005,
+                            "reward_cnt": 1.3067499,
+                            "video_cnt": 30.05524
+                        }
+                    },
+                    {
+                        "first_millis": "1728145733678",
+                        "latest_millis": "1728154624149",
+                        "name": "com.fty.cam",
+                        "stat": {
+                            "bid_cnt": 4.1116295,
+                            "req_cnt": 6.738506,
+                            "video_cnt": 0.6852718
+                        }
+                    },
+                    {
+                        "first_millis": "1728035955498",
+                        "latest_millis": "1728035999925",
+                        "name": "phonetracker.locationtracker.gpstracker.familylocator",
+                        "stat": {
+                            "bid_cnt": 0.3312147,
+                            "req_cnt": 0.44161946,
+                            "video_cnt": 0.22080973
+                        }
+                    },
+                    {
+                        "first_millis": "1727619391310",
+                        "latest_millis": "1733312474879",
+                        "name": "com.miui.global.packageinstaller",
+                        "stat": {
+                            "bid_cnt": 5.5569143,
+                            "req_cnt": 5.9185753
+                        }
+                    },
+                    {
+                        "first_millis": "1732824837917",
+                        "latest_millis": "1732960021479",
+                        "name": "com.officedocument.word.docx.document.viewer",
+                        "stat": {
+                            "bid_cnt": 31.498692,
+                            "req_cnt": 207.39104,
+                            "reward_cnt": 4.324812,
+                            "video_cnt": 79.071625
+                        }
+                    },
+                    {
+                        "first_millis": "1733312571147",
+                        "latest_millis": "1733570372225",
+                        "name": "periodtracker.pregnancy.ovulationtracker",
+                        "stat": {
+                            "bid_cnt": 2.6195595,
+                            "req_cnt": 5.426079,
+                            "video_cnt": 2.7130394
+                        }
+                    },
+                    {
+                        "first_millis": "1726420573377",
+                        "latest_millis": "1733513930727",
+                        "name": "com.xiaomi.mipicks",
+                        "stat": {
+                            "bid_cnt": 41.034225,
+                            "req_cnt": 42.256546
+                        }
+                    },
+                    {
+                        "first_millis": "1728173174769",
+                        "latest_millis": "1728173174769",
+                        "name": "com.gpstracker.numberlocator.phone.locationtracker",
+                        "stat": {
+                            "req_cnt": 0.118150264
+                        }
+                    },
+                    {
+                        "first_millis": "1732753694930",
+                        "latest_millis": "1732824658665",
+                        "name": "all.documentreader.filereader.office.viewer",
+                        "stat": {
+                            "bid_cnt": 2.8498857,
+                            "req_cnt": 7.8371854,
+                            "video_cnt": 4.2748284
+                        }
+                    },
+                    {
+                        "first_millis": "1733583050084",
+                        "latest_millis": "1733603572960",
+                        "name": "com.cat.cattery.browser.catterybrowser",
+                        "stat": {
+                            "bid_cnt": 20.3,
+                            "req_cnt": 21.266666,
+                            "reward_cnt": 6.766667,
+                            "video_cnt": 19.333334
+                        }
+                    },
+                    {
+                        "first_millis": "1733678635744",
+                        "latest_millis": "1733678635848",
+                        "name": "com.easybrain.jigsaw.puzzles",
+                        "stat": {
+                            "req_cnt": 2
+                        }
+                    },
+                    {
+                        "first_millis": "1727709495302",
+                        "latest_millis": "1733701607296",
+                        "name": "com.skipads.oitube.official",
+                        "stat": {
+                            "bid_cnt": 561.4627,
+                            "req_cnt": 720.73553,
+                            "video_cnt": 585.93933
+                        }
+                    },
+                    {
+                        "first_millis": "1727999310793",
+                        "latest_millis": "1727999498903",
+                        "name": "whatsapp.web.whatscan.whatsweb.qrscan",
+                        "stat": {
+                            "req_cnt": 1.6008706,
+                            "reward_cnt": 0.1067247,
+                            "video_cnt": 1.2806969
+                        }
+                    },
+                    {
+                        "first_millis": "1726689296978",
+                        "latest_millis": "1733660366714",
+                        "name": "com.miui.android.fashiongallery",
+                        "stat": {
+                            "bid_cnt": 29.321802,
+                            "req_cnt": 31.49466
+                        }
+                    },
+                    {
+                        "first_millis": "1726598479342",
+                        "latest_millis": "1733692047710",
+                        "name": "com.gogo.launcher",
+                        "stat": {
+                            "bid_cnt": 3987.1409,
+                            "req_cnt": 4827.679
+                        }
+                    },
+                    {
+                        "first_millis": "1732825314537",
+                        "latest_millis": "1732828544347",
+                        "name": "icv.resume.curriculumvitae",
+                        "stat": {
+                            "bid_cnt": 3.5623572,
+                            "req_cnt": 4.9873004,
+                            "video_cnt": 2.8498857
+                        }
+                    },
+                    {
+                        "first_millis": "1728941870955",
+                        "latest_millis": "1729685385401",
+                        "name": "com.kwai.video",
+                        "stat": {
+                            "bid_cnt": 0.18358494,
+                            "req_cnt": 7.4732556,
+                            "video_cnt": 7.4732556
+                        }
+                    },
+                    {
+                        "first_millis": "1730454951886",
+                        "latest_millis": "1733497041181",
+                        "name": "com.appmusicdownloader.fdownloadmusicfree2",
+                        "stat": {
+                            "bid_cnt": 6.215965,
+                            "req_cnt": 14.819914,
+                            "video_cnt": 7.703537
+                        }
+                    },
+                    {
+                        "first_millis": "1728643077642",
+                        "latest_millis": "1728643281134",
+                        "name": "com.healthapplines.healthsense.bloodsugarhub",
+                        "stat": {
+                            "bid_cnt": 0.41992566,
+                            "req_cnt": 2.2396026,
+                            "video_cnt": 1.1198013
+                        }
+                    },
+                    {
+                        "first_millis": "1730817704945",
+                        "latest_millis": "1730817832070",
+                        "name": "com.ikeyboard.theme.neon.love",
+                        "stat": {
+                            "bid_cnt": 7.840501,
+                            "req_cnt": 22.214748,
+                            "reward_cnt": 1.6334376,
+                            "video_cnt": 11.107374
+                        }
+                    },
+                    {
+                        "first_millis": "1728173024065",
+                        "latest_millis": "1728173775201",
+                        "name": "com.phone.locator.gps.phonetracker.gpstracker",
+                        "stat": {
+                            "bid_cnt": 1.654104,
+                            "req_cnt": 3.6626596,
+                            "video_cnt": 2.2448552
+                        }
+                    },
+                    {
+                        "first_millis": "1731667684986",
+                        "latest_millis": "1731667902580",
+                        "name": "com.tools.flash.ledlight.app",
+                        "stat": {
+                            "bid_cnt": 9.170544,
+                            "req_cnt": 13.297289,
+                            "video_cnt": 6.877908
+                        }
+                    },
+                    {
+                        "first_millis": "1729342264085",
+                        "latest_millis": "1729342341122",
+                        "name": "com.normally.office.trans",
+                        "stat": {
+                            "bid_cnt": 1.4686795,
+                            "req_cnt": 1.6522647,
+                            "video_cnt": 0.91792494
+                        }
+                    },
+                    {
+                        "first_millis": "1732830212128",
+                        "latest_millis": "1733172064384",
+                        "name": "com.disney.frozensaga_goo",
+                        "stat": {
+                            "bid_cnt": 5.236368,
+                            "req_cnt": 142.64035,
+                            "reward_cnt": 106.76203,
+                            "video_cnt": 142.64035
+                        }
+                    },
+                    {
+                        "first_millis": "1727950613327",
+                        "latest_millis": "1727950828739",
+                        "name": "com.whatsdelete.Unseen.NoLastSeen",
+                        "stat": {
+                            "bid_cnt": 0.64034843,
+                            "req_cnt": 1.2806969,
+                            "video_cnt": 0.747073
+                        }
+                    },
+                    {
+                        "first_millis": "1733176319674",
+                        "latest_millis": "1733395531346",
+                        "name": "com.reefgames.fabletown",
+                        "stat": {
+                            "bid_cnt": 2.5050747,
+                            "req_cnt": 114.879745,
+                            "reward_cnt": 114.879745,
+                            "video_cnt": 114.879745
+                        }
+                    },
+                    {
+                        "first_millis": "1732895250357",
+                        "latest_millis": "1732901273341",
+                        "name": "com.fpl.car.race",
+                        "stat": {
+                            "req_cnt": 17.688946,
+                            "reward_cnt": 3.685197,
+                            "video_cnt": 8.107433
+                        }
+                    },
+                    {
+                        "first_millis": "1726745321099",
+                        "latest_millis": "1733664292892",
+                        "name": "com.media.music.mp3.musicplayer",
+                        "stat": {
+                            "bid_cnt": 3.6259038,
+                            "req_cnt": 30.818922
+                        }
+                    }
+                ],
+                "device": {
+                    "carrier": "70962",
+                    "language": "es",
+                    "make": "Android",
+                    "model": "24044RN32L",
+                    "os": "android",
+                    "osv": "14.0.0",
+                    "type": "HIGHEND_PHONE"
+                },
+                "first_rtb_millis": "1726420573377",
+                "gender": {
+                    "last_computed_at": "1733701607296",
+                    "score": 0.4426644776766703,
+                    "source": "GLB_ANDROID"
+                },
+                "key_idfa": "2ea330d8-28be-49a8-9041-67150c072765",
+                "keyword_list": {},
+                "stat": {
+                    "bid_cnt": 4745.357,
+                    "req_cnt": 6328.97,
+                    "reward_cnt": 239.46536,
+                    "video_cnt": 1056.3257
+                },
+                "top_frequent_countries": [
+                    {
+                        "country": "BRA",
+                        "measure": {
+                            "latest_millis": "1733701607296",
+                            "request_count": 18574
+                        }
+                    }
+                ],
+                "top_frequent_geo": [
+                    {
+                        "geo": {
+                            "country": "BRA",
+                            "region": "br"
+                        },
+                        "measure": {
+                            "latest_millis": "1733692047710",
+                            "request_count": 15379
+                        }
+                    },
+                    {
+                        "geo": {
+                            "city": "londrina",
+                            "country": "BRA",
+                            "region": "stateofparana"
+                        },
+                        "measure": {
+                            "latest_millis": "1733681142555",
+                            "request_count": 1447
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "external_imp_trackers": [
+        "https://view.adjust.com/impression/1hl4tbzz?adgroup=com.gogo.launcher&campaign=Emi-BRA-AND-firstrecharge-1101&creative=w9bkpEAtWrjRsWHT%3Aa%3Ak2Fqr9eyeyMwXFah&device_model=24044RN32L&device_type=phone&gps_adid=2ea330d8-28be-49a8-9041-67150c072765&idfa=&impression_id=1911dc08-3141-457d-8c76-c31a9b558349&molo_click_id=ChAFDKlzPN5ASZA2wsiS9PUvEOmQ5roGGhQIARoQLqMw2Ci-SaiQQWcVDAcnZSABKgAyAhgB&os_name=ANDROID&os_version=14.0.0&tracker_limit=250000"
+    ],
+    "imp_id": "0",
+    "mt_log": {
+        "bid_snapshot": {
+            "bid_bnd_log": {
+                "bidfnt_in": "2024-12-11T12:41:13.881494007Z",
+                "bidfnt_out": "2024-12-11T12:41:13.947752190Z",
+                "request": {
+                    "bid_region": "US",
+                    "bid_request": {
+                        "app": {
+                            "id": "507",
+                            "name": "MiuiApp",
+                            "publisher": {
+                                "id": "300",
+                                "name": "xiaomi_global"
+                            },
+                            "ver": "30230000"
+                        },
+                        "at": "FIRST_PRICE",
+                        "device": {
+                            "carrier": "72404",
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "h": 0,
+                            "hwv": "",
+                            "ifa": "2ea330d8-28be-49a8-9041-67150c072765",
+                            "ip": "177.51.125.242",
+                            "language": "es",
+                            "lmt": false,
+                            "make": "xiaomi",
+                            "model": "24044RN32L",
+                            "osv": "14.0.0",
+                            "w": 0
+                        },
+                        "id": "1911dc08-3141-457d-8c76-c31a9b558349",
+                        "imp": [
+                            {
+                                "displaymanager": "Xiaomi Columbus",
+                                "displaymanagerver": "3.3.7.2",
+                                "exp": 0,
+                                "id": "0",
+                                "instl": false,
+                                "native": {}
+                            },
+                            {
+                                "displaymanager": "Xiaomi Columbus",
+                                "displaymanagerver": "3.3.7.2",
+                                "exp": 0,
+                                "id": "1",
+                                "instl": false,
+                                "native": {}
+                            }
+                        ],
+                        "tmax": 500
+                    },
+                    "bid_request_excerpt": {
+                        "bid_id": "1911dc08-3141-457d-8c76-c31a9b558349",
+                        "connection_type": 6,
+                        "country": "BRA",
+                        "device_type": 1,
+                        "device_ua": "Mozilla/5.0 (Linux; Android 14; 24044RN32L Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.6778.39 Mobile Safari/537.36",
+                        "display_manager": "Xiaomi Columbus",
+                        "display_manager_ver": "3.3.7.2",
+                        "ip_data": {
+                            "ip2asn": {
+                                "ip_range_end": "177.51.127.255",
+                                "ip_range_start": "177.51.64.0",
+                                "usage": "CELLULAR",
+                                "version": "2024-12-10"
+                            },
+                            "ip_lookup_key": "177.51.125.242"
+                        },
+                        "os": "ANDROID",
+                        "placement_index": 1,
+                        "region": "br",
+                        "session_depth": -1,
+                        "tag_id": "1.507.4.4",
+                        "utc_offset_mins": -300
+                    },
+                    "bid_request_ext_excerpt": {
+                        "misc_json": "{\"fd\":false,\"schain_complete\":1,\"schain_len\":1,\"sdk_bpb\":\"1.0000\",\"upt_cache_hit\":true}"
+                    },
+                    "exchange": "XIAOMI"
+                },
+                "response": {
+                    "aux": {},
+                    "bid_floor": 10,
+                    "bid_price": 17,
+                    "cr_pick_log": {
+                        "num_candidates": 4,
+                        "picker": "PICK_BY_PERFORMANCE",
+                        "reason": "useVideoExperiment:false, params:&{randomRate:0.1 minPerfThreshold:0.97 useThompson:false enableThompson:true useIpm:true crFormatMinImp:map[] recencyWindow:5 maxNewCreativeLength:4 expCptRowID:}",
+                        "score": 0.44
+                    },
+                    "experiment_ids": [
+                        299,
+                        3002,
+                        20199,
+                        1009,
+                        3000,
+                        323,
+                        599,
+                        1102,
+                        15410,
+                        499,
+                        1013,
+                        15409,
+                        4751,
+                        12002,
+                        13001,
+                        11910,
+                        1500,
+                        20400
+                    ],
+                    "experiment_info": {
+                        "bin_number": 73,
+                        "experiment_ids_v2": [
+                            1445,
+                            1808,
+                            2491,
+                            3267,
+                            3617,
+                            5127,
+                            5728,
+                            6096,
+                            6709,
+                            6735,
+                            6805,
+                            7015,
+                            7208,
+                            7303,
+                            7544,
+                            7655,
+                            7808,
+                            8000
+                        ],
+                        "experiment_ids_v2_assigned": [
+                            2491,
+                            8038,
+                            7898,
+                            7936,
+                            3357,
+                            8035,
+                            8000,
+                            7208,
+                            7789,
+                            6837,
+                            7981,
+                            7535,
+                            6096,
+                            6712,
+                            7658,
+                            5127,
+                            7015,
+                            6545,
+                            7679,
+                            7699,
+                            3617,
+                            5728,
+                            7480,
+                            8185,
+                            8010,
+                            7770,
+                            7808,
+                            7948,
+                            8008,
+                            3267,
+                            7467,
+                            8033,
+                            7825,
+                            7980,
+                            7047,
+                            8015,
+                            7777,
+                            7422,
+                            7678,
+                            1808,
+                            8019,
+                            7532,
+                            6735,
+                            6709,
+                            7655,
+                            7794,
+                            7139,
+                            7697,
+                            7816,
+                            8206,
+                            8006,
+                            7765,
+                            7932,
+                            1445,
+                            7413,
+                            6828,
+                            7527,
+                            7820,
+                            3143,
+                            7767,
+                            7899,
+                            8017,
+                            6805,
+                            7180,
+                            7545,
+                            7544,
+                            7303,
+                            3702727413,
+                            2244593359,
+                            2973346011,
+                            2519304537,
+                            3551577703,
+                            3557259062,
+                            4160830542,
+                            2221651218,
+                            4039697274,
+                            2397861394,
+                            3808862305,
+                            2484072125,
+                            3146353401,
+                            4232508560,
+                            3131350519,
+                            3980195227,
+                            3901191260,
+                            4129223933,
+                            2780423328,
+                            3977666277,
+                            2695985878,
+                            3791901029
+                        ]
+                    },
+                    "gender": "U",
+                    "inventory_feature": {},
+                    "is_s2s_click": true,
+                    "pricing_log": {
+                        "autopilot_log": {
+                            "combined_target_cost": 1.4841347817732709,
+                            "exp_multiplier": 0.9650110466927574,
+                            "proto_target_cost": 1,
+                            "target_cost_multiplier": 1.4841347817732709
+                        },
+                        "bid_former_logs": {
+                            "log_layer_1": {
+                                "bidformed_value_price": 0.016385398078431625,
+                                "formula": "03a",
+                                "input_value_price": 0.09471328369035621,
+                                "params": {
+                                    "clear_rate": 0.11242623627185822,
+                                    "formula03adj": 1,
+                                    "mu": -4.685857772827148,
+                                    "sigma": 3.322385311126709,
+                                    "status:ok": 1,
+                                    "tau": 0,
+                                    "value_cpm_prev": 0.09471328369035621,
+                                    "win_pred": 0.5686412125110893
+                                },
+                                "random_variables": {
+                                    "randResp": 0
+                                },
+                                "reason": "winprice_v11_low_mbtw_pen_cont:1733909261"
+                            }
+                        },
+                        "prediction_logs": [
+                            {
+                                "context_revision": "1733915786",
+                                "latency_ns": "21426798",
+                                "pred": 0.00005570067878579721,
+                                "tf_model_names": "install_v28_idfa_1_tpu_c311",
+                                "type": "I2I_TF_JOINT",
+                                "wrapper": {
+                                    "vt_ratio": 0.11551068723201752
+                                }
+                            },
+                            {
+                                "context_name": "com.finapp.emicalculator.tools:firstrecharge",
+                                "context_revision": "1733872056",
+                                "latency_ns": "21119663",
+                                "pred": 0.29240837693214417,
+                                "prediction_type": "UNIFIED_D7",
+                                "tf_model_names": "action_tpu_v8_multi_cursor_cont",
+                                "type": "ACTION",
+                                "wrapper": {
+                                    "mixture_ratio": 1,
+                                    "normalizer": 0.38421085476875305,
+                                    "normalizer_from_tfserving": true
+                                }
+                            }
+                        ],
+                        "pricing_function_name": "ua_install_with_action:UA_INSTALL_AND_ACTION",
+                        "pricing_log_shared": {
+                            "market_model_name": "winprice_v11_low_mbtw_pen_cont:1733909261",
+                            "market_model_params": {
+                                "clear_rate": 0.11242623627185822,
+                                "mu": -4.685857772827148,
+                                "sigma": 3.322385311126709
+                            }
+                        }
+                    },
+                    "total_imp_count": 1,
+                    "value_price": 17
+                }
+            },
+            "event_config_log": {
+                "click_redirection": {
+                    "final_landing_url": "market://details?id=com.finapp.emicalculator.tools&referrer=adjust_external_click_id%3Dmoloco_050ca973-3cde-4049-9036-c2c892f4f52f",
+                    "landing_page_url": "https://app.adjust.com/1hl4tbzz?adgroup={{publisher.bundle}}&campaign={{campaign.title}}&creative={{creative.cr_id}}&device_model={{device.model}}&device_type={{device.type}}&gps_adid={{device.gaid}}&idfa={{device.idfa}}&impression_id={{request.id}}&molo_click_id={{mtid}}&os_name={{device.os}}&os_version={{device.osv}}&tracker_limit=250000",
+                    "tracking_company": "ADJUST"
+                }
+            },
+            "ml_context_log": {},
+            "report_log": {
+                "ad_group": {
+                    "id": "UxzeHKiM3p2esHBe",
+                    "target_cost": 1.4841347817732709,
+                    "title": "adgroup_default_android"
+                },
+                "advertiser": {
+                    "currency": "USD",
+                    "id": "w9bkpEAtWrjRsWHT",
+                    "title": "Emi calculator_MADHOUSE_1030_01"
+                },
+                "campaign": {
+                    "id": "AXkg3ZkFavxDQmTk",
+                    "payout": {
+                        "currency": "USD",
+                        "event": "IMP",
+                        "serving_cost_rate_percent": 42.6,
+                        "tier": "PLATINUM",
+                        "unit_of_budget": "PAYOUT_MONEY"
+                    },
+                    "title": "Emi-BRA-AND-firstrecharge-1101",
+                    "type": "APP_USER_ACQUISITION",
+                    "version": "1733875937"
+                },
+                "creative": {
+                    "cr_format": "nl",
+                    "cr_size": "1200x628",
+                    "crid": "w9bkpEAtWrjRsWHT:a:k2Fqr9eyeyMwXFah",
+                    "file_name": "Image_1200x628_3.png",
+                    "format": "native",
+                    "height": 628,
+                    "id": "k2Fqr9eyeyMwXFah",
+                    "size_in_bytes": 601309,
+                    "title": "Image_1200x628_3.png",
+                    "width": 1200
+                },
+                "creative_group": {
+                    "id": "Oj4HThvwnTlMTVTH",
+                    "title": "Creative"
+                },
+                "exchange": "XIAOMI",
+                "platform": {
+                    "id": "MADHOUSE",
+                    "title": "MADHOUSE"
+                },
+                "product": {
+                    "app": {
+                        "store_id": "com.finapp.emicalculator.tools"
+                    },
+                    "id": "MmkYIyX7Dbev9aye",
+                    "postback_integration": {
+                        "mmp": "ADJUST",
+                        "tracking_bundle": "com.finapp.emicalculator.tools"
+                    }
+                },
+                "sub_publisher": {
+                    "id": "300",
+                    "title": "xiaomi_global"
+                },
+                "sub_publisher_channel": {
+                    "id": "com.gogo.launcher",
+                    "title": "MiuiApp",
+                    "type": "APP"
+                },
+                "sub_publisher_inventory": {
+                    "format": "INVENTORY_FORMAT_NATIVE",
+                    "playable_type": "NON_PLAYABLE",
+                    "video_type": "NON_VIDEO"
+                },
+                "tr_group": {
+                    "id": "ALL",
+                    "user_bucket": 79
+                },
+                "tracking_links": [
+                    {
+                        "id": "Nkz1dPCGXJzhlRYo",
+                        "tracker": "ADJUST",
+                        "updated_at": "2024-11-01T05:44:08.669895Z",
+                        "vt_link_resolved": "https://view.adjust.com/impression/1hl4tbzz?adgroup=com.gogo.launcher&campaign=Emi-BRA-AND-firstrecharge-1101&creative=w9bkpEAtWrjRsWHT%3Aa%3Ak2Fqr9eyeyMwXFah&device_model=24044RN32L&device_type=phone&gps_adid=2ea330d8-28be-49a8-9041-67150c072765&idfa=&impression_id=1911dc08-3141-457d-8c76-c31a9b558349&molo_click_id=ChAFDKlzPN5ASZA2wsiS9PUvEOmQ5roGGhQIARoQLqMw2Ci-SaiQQWcVDAcnZSABKgAyAhgB&os_name=ANDROID&os_version=14.0.0&tracker_limit=250000"
+                    }
+                ]
+            }
+        },
+        "key": {
+            "auxiliary": {},
+            "bid_region": "US",
+            "bt_log_col": {
+                "placement_index": 1
+            },
+            "internal_bid_id": "BQypczzeQEmQNsLIkvT1Lw==",
+            "maid": {
+                "id_type": "ANDROID_IDFA",
+                "uuid": "LqMw2Ci+SaiQQWcVDAcnZQ=="
+            },
+            "timestamp_sec": "1733920873"
+        }
+    }
+}

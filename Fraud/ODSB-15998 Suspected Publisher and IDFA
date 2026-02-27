@@ -1,0 +1,249 @@
+
+/* 
+    - Identify IDFA with MTID generating XX+ clicks
+*/ 
+# THIS_QUERY_WILL_LEAD_MOLOCO_TO_UNICORN_DO_NOT_KILL
+
+WITH event AS (
+    SELECT
+        req.device.ifa,
+        req.exchange,
+        req.app.bundle,
+        req.app.publisher.id AS publisher_id,
+        req.app.publisher.name AS publisher_name,
+        req.imp.tagid,
+        cv.pb.event.name as event_name,
+        cv.received_at as event_timestamp,
+        bid.timestamp as bid_timestamp,
+        imp.received_at as imp_timestamp,
+        click.received_at as click_timestamp,
+        install.received_at as install_timestamp,
+        REGEXP_EXTRACT(cv.pb.payload.raw, r'&moloco_mtid=([^&]*)') AS mtid_value,
+    FROM
+    `focal-elf-631.prod_stream_view.cv`
+    WHERE
+    api.advertiser.id = 'h4khOQuVmBR7OV2S'
+    AND timestamp BETWEEN '2026-01-01' AND '2026-01-20'
+),
+
+suspected_mtid AS (
+    SELECT
+        ifa,
+        exchange,
+        bundle,
+        -- publisher_id,
+        -- publisher_name,
+        tagid,
+        mtid_value,
+        event_name,
+        COUNT(DISTINCT click_timestamp) AS click_cnt,
+        COUNT(DISTINCT event_timestamp) AS event_cnt
+    FROM event
+    WHERE event_name = 'deeplink'
+    GROUP BY ALL
+    HAVING event_cnt > 10
+)
+
+/* 
+
+    How are thor user behaviors across other app bundles? 
+    : data pull app bundle, action, event_timestamp
+
+*/
+
+SELECT 
+    app.bundle,
+    app.name,
+    event.name,
+    COUNT(1) AS cnt
+FROM `focal-elf-631.df_accesslog.pb`
+WHERE 
+    DATE(timestamp) BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) AND CURRENT_DATE()
+    AND device.idfa IN (
+        SELECT DISTINCT ifa
+        FROM suspected_mtid
+    )
+GROUP BY ALL
+
+
+/* suspected publishers' app bundle CTR */
+WITH filtered_events AS (
+  SELECT
+    req.app.bundle AS publisher_app_bundle,
+    req.imp.tagid,
+    bid.mtid,
+    imp.happened_at AS imp_ts,
+    click.happened_at AS click_ts,
+    timestamp
+  FROM
+    `focal-elf-631.prod_stream_view.cv`
+  WHERE
+    DATE(timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND CURRENT_DATE() - 1
+    AND req.app.bundle IN (
+      'com.ltlk',
+        'com.ilevit.alwayz.android',
+        'com.cashwalk.cashwalk',
+        'com.bridgeworks.cashmore'  ,      
+        'co.luckies.app'
+        
+    )
+)
+
+SELECT
+  publisher_app_bundle,
+  tagid,
+  COUNT(DISTINCT imp_ts) AS impressions,
+  COUNT(DISTINCT click_ts) AS clicks,
+  SAFE_DIVIDE(COUNT(DISTINCT click_ts), COUNT(DISTINCT imp_ts)) AS ctr
+FROM
+  filtered_events
+WHERE
+  imp_ts IS NOT NULL
+GROUP BY ALL
+ORDER BY publisher_app_bundle, tagid
+
+
+-- Execution with MTID -- 
+SELECT
+  publisher_app_bundle,
+  tagid,
+  COUNT(DISTINCT mtid) AS impressions,
+  COUNT(DISTINCT IF(click_ts IS NOT NULL, mtid, NULL)) AS clicks,
+  SAFE_DIVIDE(COUNT(DISTINCT click_ts), COUNT(DISTINCT IF(click_ts IS NOT NULL, mtid, NULL))) AS ctr
+FROM
+  filtered_events
+WHERE
+  imp_ts IS NOT NULL
+GROUP BY ALL
+ORDER BY publisher_app_bundle, tagid
+
+/* 
+
+    - click surplus
+    - Suspected MTID have more click surplus, probably matching deeplink event counts?
+
+*/
+
+
+WITH event AS (
+    SELECT
+        req.device.ifa,
+        req.exchange,
+        req.app.bundle,
+        req.app.publisher.id AS publisher_id,
+        req.app.publisher.name AS publisher_name,
+        req.imp.tagid,
+        cv.pb.event.name as event_name,
+        cv.received_at as event_timestamp,
+        bid.timestamp as bid_timestamp,
+        imp.received_at as imp_timestamp,
+        click.received_at as click_timestamp,
+        install.received_at as install_timestamp,
+        REGEXP_EXTRACT(cv.pb.payload.raw, r'&moloco_mtid=([^&]*)') AS mtid_value,
+    FROM
+    `focal-elf-631.prod_stream_view.cv`
+    WHERE
+    api.advertiser.id = 'h4khOQuVmBR7OV2S'
+    AND timestamp BETWEEN '2026-01-01' AND '2026-01-20'
+),
+
+suspected_mtid AS (
+    SELECT
+        ifa,
+        exchange,
+        bundle,
+        -- publisher_id,
+        -- publisher_name,
+        tagid,
+        mtid_value,
+        event_name,
+        COUNT(DISTINCT click_timestamp) AS click_cnt,
+        COUNT(DISTINCT event_timestamp) AS event_cnt
+    FROM event
+    WHERE event_name = 'deeplink'
+    GROUP BY ALL
+    HAVING event_cnt > 30
+)
+
+SELECT
+  req.device.ifa,
+  bid.mtid,
+  req.exchange,
+  req.app.bundle,
+  req.app.publisher.id AS publisher_id,
+  req.app.publisher.name AS publisher_name,
+  req.imp.tagid,  
+  bid.timestamp as bid_timestamp,
+  imp.received_at as imp_timestamp,
+  click.received_at as click_timestamp,
+  click_surplus.reason AS click_surplus
+FROM `focal-elf-631.prod_stream_view.click_surplus`
+WHERE api.advertiser.id = 'h4khOQuVmBR7OV2S'
+    AND timestamp BETWEEN '2026-01-01' AND '2026-01-20'
+    AND req.device.ifa IN (
+        SELECT DISTINCT ifa
+        FROM suspected_mtid
+    )
+
+
+
+/* 
+
+    click surplus comprasion bewteen reward vs. non-reward publishers
+
+*/    
+
+
+WITH per_app AS (
+  SELECT
+    publisher.app_market_bundle AS publisher_app_bundle,
+    SUM(impressions) AS imp,
+    SUM(CASE WHEN creative.is_rewarded THEN impressions ELSE 0 END) AS reward_imp
+  FROM `moloco-ae-view.athena.fact_dsp_all`
+  WHERE DATE(timestamp_utc) BETWEEN '2026-01-20' AND '2026-01-27'
+    AND campaign.country = 'KOR'
+  GROUP BY 1
+  HAVING SUM(impressions) > 1000
+),
+
+reward AS (
+
+    SELECT
+    publisher_app_bundle,
+    SAFE_DIVIDE(reward_imp, imp) AS reward_ratio,
+    SAFE_DIVIDE(reward_imp, imp) >= 0.7 AS is_reward_app
+    FROM per_app
+)
+,
+
+raw AS (
+    SELECT
+      req.device.ifa,
+      bid.mtid,
+      req.exchange,
+      req.app.bundle,
+      req.app.publisher.name AS publisher_name,
+      reward.is_reward_app,
+    COUNT(click.received_at) as click_count,
+    FROM `focal-elf-631.prod_stream_view.click_surplus`
+        LEFT JOIN reward
+        ON req.app.bundle = reward.publisher_app_bundle
+    WHERE req.device.geo.country = 'KOR'
+        AND DATE(timestamp) BETWEEN '2026-01-20' AND '2026-01-27'
+    GROUP BY ALL
+)
+
+SELECT
+    bundle,
+    publisher_name,
+    is_reward_app,
+    AVG(click_count)
+FROM raw
+GROUP BY bundle, publisher_name, is_reward_app
+
+-- WHERE api.advertiser.id = 'h4khOQuVmBR7OV2S'
+--     AND timestamp BETWEEN '2026-01-01' AND '2026-01-20'
+--     AND req.device.ifa IN (
+--         SELECT DISTINCT ifa
+--         FROM suspected_mtid
+--     )

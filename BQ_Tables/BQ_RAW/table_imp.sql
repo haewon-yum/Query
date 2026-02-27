@@ -335,3 +335,112 @@ FROM imp LEFT JOIN install using(app_market_bundle)
     COUNTIF(maid_bau IS NOT NULL AND maid_tving IS NULL) AS cnt_imp_user_bau_only,
     COUNTIF(maid_bau IS NULL AND maid_tving IS NOT NULL) AS cnt_imp_user_tving_only
   FROM joined;
+
+
+
+  /* model prediction values for imp users */
+
+  SELECT
+    DATE_TRUNC(timestamp, DAY) AS date,
+    bid.model.pricing_function as pricing_name,
+    bid.model.prediction_logs[safe_offset(1)].tf_model_name as action_model_name,
+    PERCENTILE_CONT(bid.model.prediction_logs[SAFE_OFFSET(0)].pred, 0.5) OVER (PARTITION BY AS DATE_TRUNC(timestamp, DAY), bid.model.pricing_function,bid.model.prediction_logs[safe_offset(1)].tf_model_name) AS  median_i2i,
+    PERCENTILE_CONT(bid.model.prediction_logs[SAFE_OFFSET(1)].pred, 0.5) OVER (PARTITION BY AS DATE_TRUNC(timestamp, DAY), bid.model.pricing_function,bid.model.prediction_logs[safe_offset(1)].tf_model_name) AS i2a,
+    -- PERCENTILE_CONT(bid.model.prediction_logs[SAFE_OFFSET(1)].wrapper.normalizer, 0.5) AS normalizer,
+    -- PERCENTILE_CONT(safe_divide(bid.model.prediction_logs[SAFE_OFFSET(1)].pred, bid.model.prediction_logs[SAFE_OFFSET(1)].wrapper.normalizer), 0.5) OVER (PARTITION BY AS DATE_TRUNC(timestamp, DAY), bid.model.pricing_function,bid.model.prediction_logs[safe_offset(1)].tf_model_name) AS i2a_norm,
+    -- bid.model.prediction_logs[SAFE_OFFSET(1)].wrapper.multiplier AS revenue_multiplier,
+    -- bid.model.multipliers.budget AS budget_tcm
+  FROM
+    `focal-elf-631.prod_stream_view.imp`
+  where DATE(timestamp) BETWEEN '2025-09-04' AND '2025-09-07'
+  AND
+    api.campaign.id = 'byJy685EjCDQ8Mri'
+  -- limit 100
+
+
+/* spend monitoring by 30 min interval */
+  SELECT
+    DATETIME_TRUNC(DATETIME(TIMESTAMP_ADD(timestamp, INTERVAL 9 HOUR)), MINUTE) -
+    INTERVAL MOD(EXTRACT(MINUTE FROM TIMESTAMP_ADD(timestamp, INTERVAL 9 HOUR)), 30) MINUTE
+    AS architect_30_min_interval,
+    SUM(SAFE_DIVIDE(imp.cost.analysis.demand_charge_cost.usd.amount_micro, 1e6)) AS spend
+  FROM
+  `focal-elf-631.prod_stream_view.imp`
+  WHERE
+    DATE(timestamp, "Asia/Seoul") >= '2025-10-22'
+    AND api.product.app.store_id IN ('6698862298') -- app_market_bundle
+    GROUP BY architect_30_min_interval
+    ORDER BY architect_30_min_interval
+
+/* spend by campaign type for the given app bundle */  
+WITH campaign_info AS (
+  SELECT campaign_name AS campaign_id, 
+        type
+  FROM `focal-elf-631.prod.campaign_digest_merged_latest`
+  WHERE store_bundle = 'com.cultsotry.yanolja.nativeapp'
+)
+
+
+select
+  DATE(timestamp) AS imp_dt,
+  campaign_info.type,
+  SUM(SAFE_DIVIDE(imp.cost.analysis.demand_charge_cost.usd.amount_micro, 1e6)) AS spend
+from `focal-elf-631.prod_stream_view.imp` I
+  LEFT JOIN campaign_info ON I.api.campaign.id = campaign_info.campaign_id
+where TRUE
+  AND date(timestamp) >= '2025-12-01'
+  and api.product.app.store_id = 'com.cultsotry.yanolja.nativeapp'
+GROUP BY ALL
+
+
+  /* Audience Overlap between two cmapaign based on imp */
+
+WITH re_roas AS (
+	SELECT
+		DISTINCT req.device.ifa
+	FROM `focal-elf-631.prod_stream_view.imp`
+	WHERE
+		DATE(timestamp) >= '2025-11-19'
+		AND api.campaign.id = 'He8n67hBEd1Edequ'
+),
+
+re_open AS (
+	SELECT
+		DISTINCT req.device.ifa
+	FROM `focal-elf-631.prod_stream_view.imp`
+	WHERE
+		DATE(timestamp) >= '2025-11-19'
+		AND api.campaign.id = 'yyKnyz15ooJACn2n'
+), 
+overlap AS (
+	## Overlap ##
+	SELECT
+		re_roas.ifa AS ifa_roas,
+		re_open.ifa AS ifa_open
+	FROM re_roas 
+	LEFT JOIN re_open USING(ifa)
+)
+
+SELECT 
+	COUNT(ifa_roas) AS cnt_ifa_roas,
+	COUNT(ifa_open) AS cnt_ifa_open,
+	SAFE_DIVIDE(COUNT(ifa_open), COUNT(ifa_roas)) AS overlap
+FROM overlap
+
+
+
+/* TCM, prediction values trned */
+
+SELECT
+  DATETIME_TRUNC(DATETIME(TIMESTAMP_ADD(timestamp, INTERVAL 9 HOUR)), MINUTE) -
+    INTERVAL MOD(EXTRACT(MINUTE FROM TIMESTAMP_ADD(timestamp, INTERVAL 9 HOUR)), 30) MINUTE
+    AS architect_30_min_interval,
+  
+  bid.model.multipliers.budget AS tcm,
+  
+FROM
+  `focal-elf-631.prod_stream_view.imp`
+WHERE
+  DATE(timestamp) >= '2025-12-11'
+  AND api.campaign.id = 'cAPqSzMvf9yO0Pb5'
+LIMIT 100;

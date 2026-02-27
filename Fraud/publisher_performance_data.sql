@@ -51,8 +51,8 @@ SELECT
   SUM(IF(TIMESTAMP_DIFF(event_at, install_at, DAY) < 7, postback_revenue, 0)) AS d7_revenue,
   COUNT(DISTINCT CASE WHEN is_purchase AND TIMESTAMP_DIFF(event_at, install_at, DAY) < 7 THEN events.mtid ELSE NULL END) AS unique_payer_d7,
   COUNT(DISTINCT CASE WHEN NOT is_purchase AND TIMESTAMP_DIFF(event_at, install_at, DAY) < 7 THEN events.mtid ELSE NULL END) AS unique_revenue_producer_d7,
-  COUNT(DISTINCT CASE WHEN TIMESTAMP_DIFF(event_at, install_at, DAY) > 3 THEN events.mtid ELSE NULL END) AS d3_retention,
-  COUNT(DISTINCT CASE WHEN TIMESTAMP_DIFF(event_at, install_at, DAY) > 7 THEN events.mtid ELSE NULL END) AS d7_retention
+  COUNT(DISTINCT CASE WHEN TIMESTAMP_DIFF(event_at, install_at, DAY) = 3 THEN events.mtid ELSE NULL END) AS d3_retention,
+  COUNT(DISTINCT CASE WHEN TIMESTAMP_DIFF(event_at, install_at, DAY) = 7 THEN events.mtid ELSE NULL END) AS d7_retention
 FROM installs
 LEFT JOIN events
 ON events.mtid = installs.mtid

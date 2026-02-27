@@ -1,0 +1,70 @@
+-- Declare install period and campaign ID
+DECLARE start_date DATE DEFAULT DATE '2025-09-08';
+DECLARE end_date DATE DEFAULT DATE '2025-09-30';
+DECLARE campaign_id STRING DEFAULT 'SSPTo4M8Mi0Uuwrd';
+
+-- Step 1: Load fraud user list (from IDFA column)
+WITH fraud_users AS (
+  SELECT LOWER(mi_platformadid) AS idfa
+  FROM `moloco-ods.haewon.odsb14358_netmarble_fraud_SSPTo4M8Mi0Uuwrd`
+),
+
+-- Step 2: Extract install users (where event = install)
+installs AS (
+  SELECT
+    LOWER(req.device.ifa) AS idfa,
+    DATE(cv.happened_at) AS install_date
+  FROM `focal-elf-631.prod_stream_view.cv`
+  WHERE 
+    api.campaign.id = campaign_id
+    AND cv.event_pb = 'install'
+    AND `moloco-ods.general_utils.is_idfa_truly_available`(req.device.ifa)
+    AND cv.happened_at IS NOT NULL
+    AND DATE(cv.happened_at) BETWEEN start_date AND end_date
+    AND timestamp BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 7 DAY)
+),
+
+-- Step 3: Extract post-install action events (excluding install)
+actions AS (
+  SELECT
+    LOWER(req.device.ifa) AS idfa,
+    DATE(cv.happened_at) AS event_date
+  FROM `focal-elf-631.prod_stream_view.cv`
+  WHERE 
+    api.campaign.id = campaign_id
+    AND cv.event_pb != 'install'
+    AND `moloco-ods.general_utils.is_idfa_truly_available`(req.device.ifa)
+    AND cv.happened_at IS NOT NULL
+    AND timestamp BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 7 DAY)
+),
+
+-- Step 4: Join installs with actions and label users as fraud or non-fraud
+joined AS (
+  SELECT
+    i.idfa,
+    i.install_date,
+    a.event_date,
+    DATE_DIFF(a.event_date, i.install_date, DAY) AS days_after_install,
+    IF(f.idfa IS NOT NULL, 'fraud', 'non_fraud') AS user_type
+  FROM installs i
+  LEFT JOIN actions a
+    ON i.idfa = a.idfa
+    AND DATE_DIFF(a.event_date, i.install_date, DAY) IN (1, 3, 7)
+  LEFT JOIN fraud_users f
+    ON i.idfa = f.idfa
+),
+
+-- Step 5: Calculate retention rates by user type
+retention_summary AS (
+  SELECT
+    user_type,
+    COUNT(DISTINCT idfa) AS total_users,
+    COUNT(DISTINCT IF(days_after_install = 1, idfa, NULL)) / COUNT(DISTINCT idfa) AS D1_retention,
+    COUNT(DISTINCT IF(days_after_install = 3, idfa, NULL)) / COUNT(DISTINCT idfa) AS D3_retention,
+    COUNT(DISTINCT IF(days_after_install = 7, idfa, NULL)) / COUNT(DISTINCT idfa) AS D7_retention
+  FROM joined
+  GROUP BY user_type
+)
+
+-- Final output
+SELECT * FROM retention_summary;

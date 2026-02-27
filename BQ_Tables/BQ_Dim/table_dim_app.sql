@@ -27,6 +27,11 @@ SELECT
   app_market_bundle,
   os,
   dataai.app_name,
-  dataai.app_release_date_utc,
+  matters42.iab_cat_v1,
+  matters42.iab_cat_v2,
+  matters42.iab_cat_v3
 FROM `moloco-ae-view.athena.dim1_app`
-WHERE DATE(dataai.app_release_date_utc) >= '2024-01-01'
+WHERE matters42.iab_cat_v1 IS NOT NULL
+   OR matters42.iab_cat_v2 IS NOT NULL
+   OR matters42.iab_cat_v3 IS NOT NULL
+LIMIT 10

@@ -1,0 +1,174 @@
+// TODO: Set your OpenAI API key (do not commit secrets)
+const CHAT_GPT_API_KEY = "YOUR_OPENAI_API_KEY_HERE";
+const BASE_URL = "https://api.openai.com/v1/chat/completions";
+const WEB_SEARCH_URL = "https://api.openai.com/v1/responses";
+
+function runGPT(systemContent, userContent) {
+  // console.log(systemContent, userContent)
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${CHAT_GPT_API_KEY}`,
+    };
+
+    const options = {
+      headers,
+      method: "GET",
+      muteHttpExceptions: true,
+      payload: JSON.stringify({
+        model: "gpt-5",
+        messages: [
+          {
+            role: "system",
+            content: systemContent,
+          },
+          {
+            role: "user",
+            content: userContent,
+          },
+        ],
+        max_tokens: 3000,
+        temperature: 0.7,
+      }),
+    };
+
+    const response = JSON.parse(UrlFetchApp.fetch(BASE_URL, options));
+    // console.log(response);
+    console.log(response.choices[0].message.content);
+    return response.choices[0].message.content;
+  } catch (e) {
+    console.log(e);
+    return "Some Error Occured Please check your formula or try again later.";
+  }
+}
+
+function runGPTWithWebSearch(userContent) {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${CHAT_GPT_API_KEY}`,
+    };
+
+    const options = {
+      headers,
+      method: "POST",
+      muteHttpExceptions: true,
+      payload: JSON.stringify({
+        model: "gpt-5",
+        temperature: 0.1,
+        top_p: 0.1,
+        tools: [
+          {
+            type: "web_search_preview",
+            search_context_size: "low",
+          },
+        ],
+        tool_choice: {
+          type: "web_search_preview",
+        },
+        input: [
+          {
+            role: "system",
+            content: `You are an app store information gatherer. You will receive a text including a list of mobile games.
+First, extract the list of games from the text to determine which games to search for. Then for each game in the list:
+1. Search for its official app store listings.
+2. Extract the app name, Android app ID (e.g. com.example.app), and iOS app ID (e.g. 1234567890).
+3. Return the information in the specified JSON format.
+4. If a game has multiple versions or regional variants, include the most relevant one.
+5. If you cannot find information for a game, include it in the response with null values for the app IDs. Do not guess or fabricate any app IDs. Only use IDs that are explicitly found in the web search results or on the official app store pages.
+
+Example output:
+{
+  "success": true,
+  "errorMessage": "",
+  "apps": [
+    {"app_name": "Game A", "android_app_id": "com.example.gamea", "ios_app_id": "1234567890"},
+    {"app_name": "Game B", "android_app_id": null, "ios_app_id": null}
+  ]
+}
+
+If no result is found, return success as false and errorMessage as "No result found".
+If the input does not provide any game names, return success as false and errorMessage as "No game names provided".`,
+          },
+          {
+            role: "user",
+            content: userContent,
+          },
+        ],
+        text: {
+          format: {
+            type: "json_schema",
+            name: "app_store_info",
+            schema: {
+              type: "object",
+              properties: {
+                success: {
+                  type: "boolean",
+                  description: "Indicates if the search and data extraction was successful",
+                },
+                errorMessage: {
+                  type: "string",
+                  description: "Error message if search fails or input is invalid. Empty string if successful.",
+                },
+                apps: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      app_name: { type: "string" },
+                      android_app_id: { type: "string" },
+                      ios_app_id: { type: "number" },
+                    },
+                    required: ["app_name", "android_app_id", "ios_app_id"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: ["success", "errorMessage", "apps"],
+              additionalProperties: false,
+            },
+            strict: true,
+          },
+        },
+      }),
+    };
+
+    const response = JSON.parse(UrlFetchApp.fetch(WEB_SEARCH_URL, options));
+
+    // Find web search call and message from output array
+    const webSearchCall = response.output.find((item) => item.type === "web_search_call");
+    const message = response.output.find((item) => item.type === "message");
+
+    if (webSearchCall) {
+      console.log("Web Search Call ID:", webSearchCall.id);
+    }
+
+    if (message && message.content && message.content[0]) {
+      console.log("Text Result:", message.content[0].text);
+
+      if (message.content[0].annotations) {
+        console.log("URL Annotations:", message.content[0].annotations);
+      }
+    }
+
+    return response;
+  } catch (e) {
+    console.log(e);
+    return {
+      success: false,
+      errorMessage: "API request failed: " + e.toString(),
+      apps: [],
+    };
+  }
+}
+
+function testCandyCrushAppSearch() {
+  const searchQuery = `1순위: League of Legends: Wild Rift / Brawl Stars / Mobile Legends: Bang Bang / Squad Bursters 
+2순위: Hunt Royale / Zooba / Smash Legends / Thetan Arena (Heroes Strike) / T3 Arena 
+3순위: Honor of Kings / Arena of Valor / One Piece Bounty Rush / Pokemon Unite / Vainglory`;
+
+  console.log("Testing web search with query:", searchQuery);
+  const result = runGPTWithWebSearch(searchQuery);
+  console.log("Test Results:", result);
+  return result;
+}

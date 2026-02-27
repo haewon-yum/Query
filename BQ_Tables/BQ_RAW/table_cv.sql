@@ -177,7 +177,7 @@ SELECT
     cv.event,
     cv.event_pb,
     count(1) as count
-FROM focal-elf-631.prod_stream_view.cv
+FROM `focal-elf-631.prod_stream_view.cv`
 WHERE 
     DATE(C.timestamp) BETWEEN run_from_date AND run_to_date
     AND api.product.app.store_id IN UNNEST(app_bundle)

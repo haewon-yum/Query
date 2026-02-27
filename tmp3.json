@@ -1,0 +1,148 @@
+{
+    "ad_tracking_allowance": "DO_NOT_CARE",
+    "ad_units": [],
+    "advertiser": "EipgyNsvbuY0qCIo",
+    "advertiser_bidding": null,
+    "all_regions": false,
+    "apt_throttle_tags": [],
+    "archived_timestamp_nano": "1723259655847608000",
+    "attr_window": null,
+    "audience_extension": null,
+    "audience_tags": {},
+    "capper": {
+        "budget": {
+            "daily_spending": 0,
+            "hourly_spending": 20
+        },
+        "imp_daily": "0",
+        "imp_format_interval": {},
+        "imp_hourly": "0",
+        "imp_interval": "",
+        "imp_lifetime": "100000",
+        "imp_monthly": "0",
+        "imp_weekly": "0",
+        "user_event_count": {},
+        "user_event_interval": {}
+    },
+    "country": "RUS",
+    "country_settings": {
+        "RUS": {
+            "disabled": false,
+            "representative": true,
+            "summary": null
+        }
+    },
+    "created_timestamp_nano": "1707229083853359000",
+    "creative_group_names": [],
+    "creative_pick": null,
+    "cuid": 15425,
+    "currency": "USD",
+    "custom_key_values": {},
+    "deal_settings": null,
+    "description": "次日留存高于20%，3D ROAS>3%",
+    "disable_product_level_user_targets": false,
+    "disabled": true,
+    "disabled_timestamp_nano": "1708416568536375000",
+    "display_name": "lizzy.moco.ios.vr.ru.noninct.rr.20240112",
+    "experimental_properties": {
+        "allow_reference_common_filters": false,
+        "bid_flow_policy": null,
+        "daily_budget_windows_tmp": [],
+        "dreamgames_support": null,
+        "exclusive_deal_ids": [],
+        "extra_app_bundles_for_ctv": [],
+        "hotstar_support": null,
+        "jio_support": null,
+        "restrict_category": [],
+        "value_based_bidding": null
+    },
+    "feature_whitelist": {
+        "allow_ctv_tr_links": false,
+        "country_settings": {},
+        "pc_migrated": false
+    },
+    "final_landing_url": "",
+    "first_activated_timestamp_nano": "1707240247779459000",
+    "fraud_properties": null,
+    "goal": {
+        "kpi_actions": [],
+        "main_target_kpi_history": null,
+        "optimize_app_retention": {
+            "budget_centric": {
+                "rate": 1
+            },
+            "target_cpi": null
+        },
+        "sub_target_kpi_histories": [],
+        "target_kpi_histories": [],
+        "type": "OPTIMIZE_RETENTION_FOR_APP_UA"
+    },
+    "inactive_since": "2024-02-20T08:09:28Z",
+    "inventory_feature": null,
+    "name": "oyceiK6o7vzPahye",
+    "os": "IOS",
+    "pas_tenant_target": null,
+    "product_name": "bSRXRLcJFWW291hz",
+    "publisher_properties": null,
+    "schedule": {
+        "end": "",
+        "start": "2024-02-06T05:00:00Z"
+    },
+    "skadn_input": {
+        "ad_group_ids": {},
+        "attribution_method": "ATTRIBUTION_BOTH",
+        "campaign_id": 0,
+        "campaign_id_aux": 0,
+        "cr_group_ids": {},
+        "device_targeting_state": "DEVICE_TARGET_ATTRIBUTABLE",
+        "disable": false,
+        "targeting_state": "TARGET_ALL"
+    },
+    "state": "ARCHIVED",
+    "system_targets": [
+        "audience_new_user",
+        "media_app"
+    ],
+    "target_ad_platforms": [],
+    "terminated_timestamp_nano": "1720667124131136000",
+    "timeline": {
+        "liveness_changed_since_ns": "1708416568536375449"
+    },
+    "tracking_company": "APPSFLYER",
+    "tracking_link_name": "MWvEYAoIr3qh1jP2",
+    "traffic_groups": [
+        {
+            "ad_groups_with_rank": {
+                "E7H7gSNI8vtrxThA": 35
+            },
+            "capper": null,
+            "enable": true,
+            "name": "ALL",
+            "user_buckets": [
+                {
+                    "end": 100,
+                    "start": 0
+                }
+            ]
+        }
+    ],
+    "type": "APP_USER_ACQUISITION",
+    "updated_timestamp_nano": "1723259655982665000",
+    "user_capper": {
+        "budget": {
+            "currency": "UNKNOWN_CURRENCY",
+            "daily_budget": 500,
+            "daily_budget_relaxing_ratio": 0,
+            "enable_flexible_budget_spending": true,
+            "hourly_budget_pace": {},
+            "total_budget": 0,
+            "total_budget_started_at": "",
+            "weekday_budget": null,
+            "weekly_flexible_budget": 3500
+        },
+        "budget_timeline": null
+    },
+    "user_targets": [
+        "kRFzLfVLCeM3jkJD"
+    ]
+}

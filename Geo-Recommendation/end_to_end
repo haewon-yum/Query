@@ -1,0 +1,1484 @@
+const TargetOutputSheetName = 'target_output'
+const BMOutputSheetName = 'BM_output'
+const FinalRecommendationSheetName = 'Final_Recommendation'
+
+
+function ping() {
+  return { ok: true, when: new Date().toISOString() };   // ✅ Date → ISO string
+}
+
+function authBootstrap() {
+  // 프로젝트 ID는 실제 쿼리를 돌리는 billing 프로젝트
+  BigQuery.Datasets.list('focal-elf-631');   // 아무 리스트 호출로도 승인이 트리거됨
+}
+
+
+// ===== Common utils =====
+function notify_(ss, title, msg) {
+  const sh = ss.getSheetByName('Status') || ss.insertSheet('Status');
+  sh.appendRow([new Date(), title || 'n8n', String(msg)]);
+  SpreadsheetApp.flush();
+}
+
+function ensureSheet(ss, name) {
+  return ss.getSheetByName(name) || ss.insertSheet(name);
+}
+
+// ===== Entry point (Execution API) =====
+function TargetrunPipeline(spreadsheetId, opts) {
+  const startedAt = new Date();
+  const ss = SpreadsheetApp.openById(spreadsheetId);
+  notify_(ss, 'n8n', 'Target Analysis started');
+
+  try {
+    const res1 = targetOneStop(ss);
+
+    notify_(ss, 'n8n', `Done 🎉 (rows: ${res1?.rows ?? 'n/a'})`);
+
+    return {
+      ok: true,
+      processedAt: new Date().toISOString(),              // ✅ Date → ISO string
+      elapsedSec: Math.round((Date.now() - startedAt.getTime()) / 1000),
+      fileId: spreadsheetId,
+      // opts는 직렬화 불가 가능성 -> 생략하거나 필요한 값만 뽑아서 넣기
+      meta: { rows: res1?.rows ?? 0, headerCount: res1?.headers?.length ?? 0 },
+    };
+  } catch (e) {
+    notify_(ss, 'n8n ❌', `Failed: ${e && e.message ? e.message : e}`);
+    return {
+      ok: false,
+      processedAt: new Date().toISOString(),              // ✅
+      errorMessage: String(e && e.message ? e.message : e),
+      stack: String(e && e.stack ? e.stack : '')
+    };
+  }
+}
+
+// ===== Orchestration =====
+function targetOneStop(ss) {
+  notify_(ss, 'Step 1/2', 'Querying BigQuery & writing results…');
+  const qres = generateAndRunCombinedInstallI2PArppuQuery(ss);
+  notify_(ss, 'Step 1/2', `Sheet written: ${qres.headers?.length || 0} cols, ${qres.rows || 0} rows`);
+
+  notify_(ss, 'Step 2/2', 'Building charts and summary…');
+  Utilities.sleep(500); // 커밋 여유
+  generateTopI2PvsARPPUChart(ss);
+  notify_(ss, 'Step 2/2', 'Charts done.');
+
+  return qres; // 최종 집계/행 수 반환
+}
+
+// ===== BigQuery → Sheet =====
+function generateAndRunCombinedInstallI2PArppuQuery(ss) {
+  const sheet = ss.getSheetByName("target_input");
+  if (!sheet) throw new Error("Sheet 'target_input' not found.");
+
+  const startDateRaw       = sheet.getRange("B1").getValue();
+  const endDateRaw         = sheet.getRange("B2").getValue();
+  const bundleInput        = sheet.getRange("B3").getValue();
+  const purchaseEventInput = sheet.getRange("B4").getValue();
+  const outputCellRef      = sheet.getRange("B5").getValue();
+
+  const startDate = Utilities.formatDate(new Date(startDateRaw), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  const endDate   = Utilities.formatDate(new Date(endDateRaw),   Session.getScriptTimeZone(), "yyyy-MM-dd");
+
+  const bundles = String(bundleInput || '')
+    .split(',')
+    .map(b => b.trim())
+    .filter(Boolean)
+    .map(b => `'${b}'`)
+    .join(', ');
+
+  const purchaseEvents = String(purchaseEventInput || '')
+    .split(',')
+    .map(e => e.trim())
+    .filter(Boolean)
+    .map(e => `'${e}'`)
+    .join(', ');
+
+  const query = `
+    DECLARE start_date DATE DEFAULT DATE('${startDate}');
+    DECLARE end_date   DATE DEFAULT DATE('${endDate}');
+    DECLARE bundles         ARRAY<STRING> DEFAULT [${bundles}];
+    DECLARE purchase_events ARRAY<STRING> DEFAULT [${purchaseEvents}];
+
+    WITH tracking_bundle AS (
+      SELECT DISTINCT app_store_bundle, tracking_bundle
+      FROM \`focal-elf-631.standard_digest.product_digest\`
+      WHERE app_store_bundle IN UNNEST(bundles)
+    ),
+    base_events AS (
+      SELECT
+        app.bundle AS bundle,
+        device.country AS country,
+        device.os AS os,
+        LOWER(event.name) AS event_name,
+        event.revenue_usd.amount AS revenue,
+        event.install_at AS install_ts,
+        timestamp,
+        moloco.attributed AS is_attributed,
+        CASE
+          WHEN \`moloco-ods.general_utils.is_idfa_truly_available\`(device.ifv) THEN 'ifv:' || device.ifv
+          WHEN \`moloco-ods.general_utils.is_idfa_truly_available\`(device.ifa) THEN 'ifa:' || device.ifa
+          WHEN \`moloco-ml.lat_utils.is_userid_truly_available\` (mmp.device_id) THEN 'device:' || mmp.device_id
+          ELSE NULL
+        END AS user_id
+      FROM \`focal-elf-631.prod_stream_view.pb\`
+      WHERE DATE(timestamp) BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 7 DAY)
+        AND app.bundle IN UNNEST(bundles)
+    ),
+    installs AS (
+      SELECT DISTINCT bundle, country, user_id, is_attributed
+      FROM base_events
+      WHERE event_name = 'install' AND user_id IS NOT NULL
+        AND DATE(timestamp) BETWEEN start_date AND end_date
+    ),
+    purchases AS (
+      SELECT DISTINCT bundle, country, user_id
+      FROM base_events
+      WHERE event_name IN UNNEST(purchase_events) AND user_id IS NOT NULL
+    ),
+    revenue_events AS (
+      SELECT
+        bundle, country, os, user_id,
+        COUNT(*) AS purchase_count,
+        SUM(revenue) AS total_revenue
+      FROM base_events
+      WHERE user_id IS NOT NULL
+        AND revenue IS NOT NULL AND revenue > 0 AND revenue < 10000
+        AND event_name IN UNNEST(purchase_events)
+        AND install_ts IS NOT NULL
+        AND DATE(install_ts) BETWEEN start_date AND end_date
+        AND TIMESTAMP_DIFF(timestamp, install_ts, DAY) < 7
+      GROUP BY bundle, country, os, user_id
+    ),
+    final AS (
+      SELECT
+        i.bundle, i.country,
+        COUNT(DISTINCT IF(is_attributed = TRUE,  i.user_id, NULL)) AS attributed_installs,
+        COUNT(DISTINCT IF(is_attributed = FALSE, i.user_id, NULL)) AS unattributed_installs,
+        COUNT(DISTINCT i.user_id) AS install_users,
+        COUNT(DISTINCT p.user_id) AS purchase_users,
+        AVG(r.purchase_count) AS avg_purchase,
+        AVG(r.total_revenue)  AS arppu
+      FROM installs i
+      LEFT JOIN purchases p ON i.bundle = p.bundle AND i.country = p.country AND i.user_id = p.user_id
+      LEFT JOIN revenue_events r ON i.bundle = r.bundle AND i.country = r.country AND i.user_id = r.user_id
+      GROUP BY i.bundle, i.country
+    )
+    SELECT
+      bundle, country,
+      attributed_installs, unattributed_installs,
+      ROUND(SAFE_DIVIDE(attributed_installs, attributed_installs + unattributed_installs) * 100, 2) AS moloco_share_of_installs,
+      install_users, purchase_users,
+      ROUND(SAFE_DIVIDE(purchase_users, install_users) * 100, 2) AS i2p_percentage,
+      ROUND(avg_purchase, 2) AS avg_purchase,
+      ROUND(arppu, 2) AS arppu
+    FROM final
+    ORDER BY bundle, unattributed_installs DESC;
+  `;
+
+  // 출력 위치 파싱
+  const [outputSheetName, outputRange] = String(outputCellRef || '').split('!').map(s => s.trim());
+  if (!outputSheetName || !outputRange) {
+    throw new Error(`Invalid output_cell ref: "${outputCellRef}". Expected like "target_output!A1"`);
+  }
+  const outputSheet = ensureSheet(ss, outputSheetName);
+
+  // BigQuery 실행
+  const request  = { query: query, useLegacySql: false };
+  const projectId = 'focal-elf-631';
+
+  notify_(ss, 'BigQuery', 'Job submitting…');
+  let queryResults = BigQuery.Jobs.query(request, projectId);
+  const jobId = queryResults.jobReference.jobId;
+
+  let tick = 0;
+  const startedAt = Date.now();
+  while (!queryResults.jobComplete) {
+    Utilities.sleep(500);
+    if (++tick % 5 === 0) {
+      const sec = Math.round((Date.now() - startedAt) / 1000);
+      notify_(ss, 'BigQuery', `Still running… ${sec}s`);
+    }
+    queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId);
+  }
+
+  const rows   = queryResults.rows || [];
+  const fields = (queryResults.schema && queryResults.schema.fields) || [];
+  const headers = fields.map(f => f.name);
+  const values  = rows.map(r => r.f.map(f => f.v));
+
+  // 시트 쓰기
+  const outputRow = parseInt(outputRange.match(/\d+/)[0], 10);
+  const outputCol = columnLetterToNumber(outputRange.match(/[A-Z]+/i)[0]);
+  notify_(ss, 'BigQuery', `Writing ${values.length} rows to sheet…`);
+
+  outputSheet.getRange(outputRow, outputCol, 1, headers.length).setValues([headers]);
+  if (values.length > 0) {
+    outputSheet.getRange(outputRow + 1, outputCol, values.length, headers.length).setValues(values);
+  }
+  notify_(ss, 'BigQuery', 'Done.');
+
+  return { headers, rows: values.length };
+}
+
+
+// ===== Charts (I2P vs ARPPU) =====
+function generateTopI2PvsARPPUChart(ss) {
+  const src = ss.getSheetByName("target_output");
+  if (!src) { notify_(ss, 'Charts', "Sheet 'target_output' not found; skip charts."); return; }
+
+  const name = "target_visualize";
+  let sh = ss.getSheetByName(name);
+  if (!sh) sh = ss.insertSheet(name); else sh.clear();
+
+  // 0) exclude list
+  const inputSheet = ss.getSheetByName("target_input");
+  const excludeSet = new Set();
+  if (inputSheet) {
+    const inData = inputSheet.getDataRange().getValues();
+    if (inData && inData.length) {
+      const header = inData[0].map(h => String(h).toLowerCase().trim());
+      let exIdx = header.indexOf("exclude_countries");
+      if (exIdx === -1) exIdx = header.indexOf("exclude_countires");
+      if (exIdx !== -1 && inData.length > 1) {
+        for (const row of inData.slice(1)) {
+          const val = row[exIdx];
+          if (val) String(val).split(/[,;\n]/).map(s=>s.trim()).filter(Boolean)
+            .forEach(c => excludeSet.add(c.toUpperCase()));
+        }
+      } else {
+        // key-value 레이아웃
+        for (const row of inData) {
+          const key = String(row[0] ?? "").toLowerCase().trim();
+          if (key === "exclude_countries" || key === "exclude_countires") {
+            const val = row[1];
+            if (val) String(val).split(/[,;\n]/).map(s=>s.trim()).filter(Boolean)
+              .forEach(c => excludeSet.add(c.toUpperCase()));
+          }
+        }
+      }
+    }
+  }
+
+  // 1) Read + normalize
+  const all = src.getDataRange().getValues();
+  if (!all || !all.length) { notify_(ss, 'Charts', "No data in 'target_output'"); return; }
+
+  const headers = all[0].map(h => String(h).toLowerCase().trim());
+  const rows    = all.slice(1);
+  const idx = {}; headers.forEach((h,i)=>idx[h]=i);
+  if (idx["unattributed_installs"] == null) {
+    idx["unattributed_installs"] =
+      idx["unattributed_inst"] ?? idx["unattributed_install"] ?? idx["unattributed_instal"];
+  }
+  const required = ["country","unattributed_installs","i2p_percentage","arppu"];
+  const missing  = required.filter(c => idx[c]==null);
+  if (missing.length) { notify_(ss, 'Charts', "Missing columns: " + missing.join(", ")); return; }
+
+  // 2) Top10 build
+  const top = rows
+    .map(r => ({
+      country: String(r[idx["country"]] ?? "").trim(),
+      i2p: Number(r[idx["i2p_percentage"]]),
+      arppu: Number(r[idx["arppu"]]),
+      unattributed: Number(r[idx["unattributed_installs"]]),
+    }))
+    .filter(o =>
+      ![o.i2p, o.arppu, o.unattributed].some(v => isNaN(v)) &&
+      !excludeSet.has(o.country.toUpperCase())
+    )
+    .sort((a,b)=> b.unattributed - a.unattributed)
+    .slice(0, 10);
+
+  if (!top.length) { notify_(ss, 'Charts', "No data to chart after exclusions."); return; }
+
+  // Top10 국가를 BM_input!B4에 기록
+  const bmSheet = ss.getSheetByName("BM_input");
+  if (bmSheet) {
+    const topCountryCSV = top.map(o => o.country).join(",");
+    bmSheet.getRange("B4").setValue(topCountryCSV);
+  } else {
+    notify_(ss, 'Charts', "Sheet 'BM_input' not found; skip writing Top10 list.");
+  }
+
+  // 3) 테이블 쓰기
+  const mainTable = [["Country","I2P (%)","ARPPU","Series","Size","unattributed_installs"]];
+  top.forEach(o => mainTable.push([o.country, o.i2p, o.arppu, "All", 1, o.unattributed]));
+
+  const barTable  = [["country","unattributed_installs"]];
+  top.forEach(o => barTable.push([o.country, o.unattributed]));
+
+  const needRowsMain = mainTable.length;
+  const needRowsBar  = barTable.length;
+  const needRows = Math.max(needRowsMain, needRowsBar);
+  const needCols = 9; // up to column I
+  if (sh.getMaxRows()    < needRows) sh.insertRowsAfter(sh.getMaxRows(),    needRows - sh.getMaxRows());
+  if (sh.getMaxColumns() < needCols) sh.insertColumnsAfter(sh.getMaxColumns(), needCols - sh.getMaxColumns());
+
+  sh.getRange(1, 1, needRowsMain, mainTable[0].length).setValues(mainTable);
+  sh.getRange(1, 8, needRowsBar,  barTable[0].length).setValues(barTable);
+
+  SpreadsheetApp.flush();
+  Utilities.sleep(150);
+
+  // 4) Charts
+  const barRange = sh.getRange(1, 8, needRowsBar, 2);
+  const barChart = sh.newChart()
+    .setChartType(Charts.ChartType.BAR)
+    .addRange(barRange)
+    .setNumHeaders(1)
+    .setOption("title", "unattributed_installs vs. country")
+    .setOption("legend", { position: "none" })
+    .setOption("hAxis", { title: "unattributed_installs" })
+    .setOption("vAxis", { title: "country" })
+    .setPosition(1, 8, 0, 0)
+    .build();
+  sh.insertChart(barChart);
+
+  const bubbleRange = sh.getRange(1, 1, needRowsMain, 5);
+  const bubbleChart = sh.newChart()
+    .setChartType(Charts.ChartType.BUBBLE)
+    .addRange(bubbleRange)
+    .setNumHeaders(1)
+    .setOption("title", "Top 10 Countries (exclusions applied): I2P (%) vs ARPPU")
+    .setOption("hAxis", { title: "I2P (%)" })
+    .setOption("vAxis", { title: "ARPPU" })
+    .setOption("bubble", { textStyle: { fontSize: 10 } })
+    .setOption("legend", { position: "none" })
+    .setPosition(20, 8, 0, 0)
+    .build();
+  sh.insertChart(bubbleChart);
+}
+
+/* BM Title Analysis */
+
+// ===== Entry point (Execution API) =====
+function BMrunPipeline(spreadsheetId, opts) {
+  const startedAt = new Date();
+  const ss = SpreadsheetApp.openById(spreadsheetId);
+  notify_(ss, 'n8n', 'BM Analysis started');
+
+  try {
+    const res1 = BMOneStop(ss);
+
+    notify_(ss, 'n8n', `BM Analysis Done 🎉 (rows: ${res1?.rows ?? 'n/a'})`);
+
+    return {
+      ok: true,
+      processedAt: new Date().toISOString(),              // ✅ Date → ISO string
+      elapsedSec: Math.round((Date.now() - startedAt.getTime()) / 1000),
+      fileId: spreadsheetId,
+      // opts는 직렬화 불가 가능성 -> 생략하거나 필요한 값만 뽑아서 넣기
+      meta: { rows: res1?.rows ?? 0, headerCount: res1?.headers?.length ?? 0 },
+    };
+  } catch (e) {
+    notify_(ss, 'n8n ❌', `BM Analysis Failed: ${e && e.message ? e.message : e}`);
+    return {
+      ok: false,
+      processedAt: new Date().toISOString(),              // ✅
+      errorMessage: String(e && e.message ? e.message : e),
+      stack: String(e && e.stack ? e.stack : '')
+      };
+    }
+  }
+
+
+
+function BMOneStop(ss){
+  notify_(ss, "BM Data Pulling & Analysis", "Starting…", 3);
+
+  notify_(ss, "Step 1/3", "Querying & aggregating data…", 5);
+  BMgenerateAndRunI2PArppuRoasFromCV(ss);
+
+  notify_(ss, "Step 2/3", "Committing to sheet…", 3);
+  SpreadsheetApp.flush();
+  Utilities.sleep(5000);
+
+  notify_(ss, "Step 3/3", "Building charts & scores…", 5);
+  BMdrawBubbleChartsCombineResults_v2(ss);
+
+  notify_(ss, "Done ✅", "All steps completed.", 5);
+}
+
+function BMgenerateAndRunI2PArppuRoasFromCV(ss) {
+  const sheet = ss.getSheetByName("BM_input");
+
+  const startDateRaw = sheet.getRange("B1").getValue();
+  const endDateRaw = sheet.getRange("B2").getValue();
+  const bundleInput = sheet.getRange("B3").getValue();
+  const focusCountriesRaw = sheet.getRange("B4").getValue();
+
+  const startDate = Utilities.formatDate(new Date(startDateRaw), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  const endDate = Utilities.formatDate(new Date(endDateRaw), Session.getScriptTimeZone(), "yyyy-MM-dd");
+
+  const bundles = bundleInput.split(',').map(b => `'${b.trim()}'`).join(', ');
+  // const hasPurchaseEvents = purchaseEventInput && purchaseEventInput.trim() !== '';
+  // const purchaseEvents = hasPurchaseEvents
+  //   ? purchaseEventInput.split(',').map(e => `'${e.trim()}'`).join(', ')
+  //   : null;
+
+  const hasFocusCountries = focusCountriesRaw && focusCountriesRaw.trim() !== '';
+  const focusCountries = hasFocusCountries
+    ? focusCountriesRaw.split(',').map(c => `'${c.trim().toUpperCase()}'`).join(', ')
+    : null;
+
+  const countryDeclaration = hasFocusCountries
+    ? `DECLARE focus_country_list ARRAY<STRING> DEFAULT [${focusCountries}];`
+    : '';
+
+  // const countryFilter = hasFocusCountries
+  //   ? `AND country IN UNNEST(focus_country_list)`
+  //   : '';
+
+  const countryFilter_base = hasFocusCountries ? `AND base_raw.country IN UNNEST(focus_country_list)` : '';
+  const countryFilter_r = hasFocusCountries ? `AND r.country IN UNNEST(focus_country_list)` : '';
+  const countryFilter_i = hasFocusCountries ? `AND i.country IN UNNEST(focus_country_list)` : '';
+  const countryFilter_s = hasFocusCountries ? `AND campaign.country IN UNNEST(focus_country_list)` : '';
+
+  const query = `
+    DECLARE start_date DATE DEFAULT DATE('${startDate}');
+    DECLARE end_date DATE DEFAULT DATE('${endDate}');
+    DECLARE store_bundle_list ARRAY<STRING> DEFAULT [${bundles}];
+    ${countryDeclaration}
+
+    -- Step 1: CV Data
+    WITH base_raw AS (
+      SELECT
+        req.device.geo.country AS country,
+        req.device.os AS os,
+        api.product.app.store_id AS bundle,
+        cv.event AS event,
+        cv.event_pb AS event_name,
+        cv.revenue_usd.amount AS revenue,
+        cv.happened_at AS event_time,
+        install.install_at_pb AS install_time,
+        CASE
+          WHEN \`moloco-ods.general_utils.is_idfa_truly_available\`(cv.ifa_pb) THEN 'ifa:' || cv.ifa_pb
+          WHEN \`moloco-ods.general_utils.is_idfa_truly_available\`(cv.anonymized_ifa_pb) THEN 'ifa:' || cv.anonymized_ifa_pb
+          WHEN \`moloco-ml.lat_utils.is_userid_truly_available\`(install.device_ip) THEN 'device:' || install.device_ip
+          ELSE NULL
+        END AS user_id
+      FROM \`focal-elf-631.prod_stream_view.cv\`
+      WHERE
+        api.product.app.store_id IN UNNEST(store_bundle_list)
+        AND DATE(install.install_at_pb) BETWEEN start_date AND end_date
+        AND DATE(timestamp) BETWEEN start_date AND DATE_ADD(end_date, INTERVAL 28 DAY)
+    ),
+
+    base AS (
+      SELECT *
+      FROM base_raw
+      WHERE user_id IS NOT NULL
+      ${countryFilter_base}
+    ),
+
+    installs AS (
+      SELECT DISTINCT bundle, country, user_id
+      FROM base
+      WHERE LOWER(event) = 'install'
+    ),
+
+    purchases AS (
+      SELECT DISTINCT bundle, country, user_id
+      FROM base
+      WHERE
+        revenue IS NOT NULL
+        AND revenue > 0
+        AND revenue < 10000
+        AND DATE(event_time) <= DATE_ADD(end_date, INTERVAL 28 DAY)
+        AND DATE(install_time) BETWEEN start_date AND end_date
+    ),
+
+    revenue_events AS (
+      SELECT
+        bundle,
+        country,
+        os,
+        user_id,
+        DATE_DIFF(DATE(event_time), DATE(install_time), DAY) AS day_diff,
+        revenue
+      FROM base
+      WHERE
+        revenue IS NOT NULL
+        AND revenue > 0
+        AND revenue < 10000
+        AND DATE(event_time) <= DATE_ADD(end_date, INTERVAL 28 DAY)
+        AND DATE(install_time) BETWEEN start_date AND end_date
+    ),
+
+    agg_revenue AS (
+      SELECT
+        bundle,
+        country,
+        os,
+        COUNT(DISTINCT user_id) AS purchase_users,
+        ROUND(AVG(1), 2) AS avg_purchase,
+        ROUND(AVG(revenue), 2) AS arppu,
+        SUM(CASE WHEN day_diff BETWEEN 0 AND 1 THEN revenue ELSE 0 END) AS d1_rev,
+        SUM(CASE WHEN day_diff BETWEEN 0 AND 7 THEN revenue ELSE 0 END) AS d7_rev,
+        SUM(CASE WHEN day_diff BETWEEN 0 AND 14 THEN revenue ELSE 0 END) AS d14_rev,
+        SUM(CASE WHEN day_diff BETWEEN 0 AND 21 THEN revenue ELSE 0 END) AS d21_rev,
+        SUM(CASE WHEN day_diff BETWEEN 0 AND 28 THEN revenue ELSE 0 END) AS d28_rev
+      FROM revenue_events
+      GROUP BY bundle, country, os
+    ),
+
+    inst_summary AS (
+      SELECT
+        bundle,
+        country,
+        COUNT(DISTINCT user_id) AS install_users
+      FROM installs
+      GROUP BY bundle, country
+    ),
+
+    spend_summary AS (
+      SELECT
+        product.app_market_bundle AS bundle,
+        campaign.country,
+        SUM(gross_spend_usd) AS spend
+      FROM \`moloco-ae-view.athena.fact_dsp_core\`
+      WHERE
+        DATE(date_utc) BETWEEN start_date AND end_date
+        AND product.app_market_bundle IN UNNEST(store_bundle_list)
+        ${countryFilter_s}
+      GROUP BY bundle, country
+    ),
+
+    app_meta AS (
+      SELECT 
+        app_market_bundle,
+        os,
+        dataai.unified_app_id,
+        dataai.app_name,
+        dataai.unified_app_name
+      FROM \`moloco-ae-view.athena.dim1_app\`
+      WHERE app_market_bundle IN UNNEST(store_bundle_list)
+    )
+
+    -- Final output
+    SELECT
+      m.unified_app_id,
+      m.unified_app_name,
+      m.app_name,
+      r.bundle,
+      r.country,
+      r.os,
+      i.install_users,
+      r.purchase_users,
+      ROUND(SAFE_DIVIDE(r.purchase_users, i.install_users) * 100, 2) AS i2p_percentage,
+      r.avg_purchase,
+      r.arppu,
+      s.spend,
+      ROUND(SAFE_DIVIDE(r.d1_rev, s.spend), 4) AS d1_roas,
+      ROUND(SAFE_DIVIDE(r.d7_rev, s.spend), 4) AS d7_roas,
+      ROUND(SAFE_DIVIDE(r.d14_rev, s.spend), 4) AS d14_roas,
+      ROUND(SAFE_DIVIDE(r.d21_rev, s.spend), 4) AS d21_roas,
+      ROUND(SAFE_DIVIDE(r.d28_rev, s.spend), 4) AS d28_roas
+    FROM agg_revenue r
+    LEFT JOIN inst_summary i ON r.bundle = i.bundle AND r.country = i.country
+    LEFT JOIN spend_summary s ON r.bundle = s.bundle AND r.country = s.country
+    LEFT JOIN app_meta m ON r.bundle = m.app_market_bundle
+    ORDER BY r.bundle, r.country, r.os;
+  `;
+
+  const request = { query: query, useLegacySql: false };
+  const projectId = 'focal-elf-631';
+
+  notify_(ss, "BigQuery", "Submitting job…", 3);
+
+  let queryResults = BigQuery.Jobs.query(request, projectId);
+  const jobId = queryResults.jobReference.jobId;
+
+  let tick = 0;
+  while (!queryResults.jobComplete) {
+    Utilities.sleep(500);
+    if (++tick % 8 === 0) notify_(ss, "BigQuery", "Still running…", 3);
+
+    queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId);
+  }
+
+  const rows = queryResults.rows || [];
+  notify_(ss, "BigQuery", `Job completed (${rows.length} rows). Writing to sheets…`, 5);
+
+  const fields = queryResults.schema.fields;
+
+  const headers = fields.map(f => f.name);
+  const values = rows.map(r => r.f.map(f => f.v));
+
+  const appIdIndex = headers.indexOf('unified_app_id');
+  const appNameIndex = headers.indexOf('app_name');
+  const unifiedAppNameIndex = headers.indexOf('unified_app_name');
+
+  if (appIdIndex === -1) throw new Error("Missing 'unified_app_id' column in result.");
+
+  const spreadsheet = ss;
+  const grouped = {};
+  const summaryRows = [];
+
+  values.forEach(row => {
+    const appId = row[appIdIndex] || 'UnknownApp';
+    const appName = row[appNameIndex] || '';
+    const unifiedAppName = row[unifiedAppNameIndex] || '';
+    if (!grouped[appId]) {
+      grouped[appId] = {
+        rows: [],
+        appName: appName,
+        unifiedAppName: unifiedAppName
+      };
+    }
+    grouped[appId].rows.push(row);
+  });
+
+  const summarySheetName = 'BMTitlesIndex';
+  const inputSheet = ss.getSheetByName("BM_input");
+
+  let summarySheet = spreadsheet.getSheetByName(summarySheetName);
+  if (summarySheet) spreadsheet.deleteSheet(summarySheet);
+  summarySheet = spreadsheet.insertSheet(summarySheetName);
+  if (summarySheet) moveSheetAfter(ss, summarySheet, inputSheet);  // BMTitlesIndex → immediately right of BM_input
+
+
+
+  let rowIndex = 2;
+  const createdAppSheets = [];  // Collect names to order later
+
+  for (const [appId, { rows: appRows, appName, unifiedAppName }] of Object.entries(grouped)) {
+    const sheetName = makeSafeSheetName(appId, 30);  
+    let sheet = spreadsheet.getSheetByName(sheetName);
+    if (sheet) spreadsheet.deleteSheet(sheet);
+    sheet = spreadsheet.insertSheet(sheetName);
+
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(2, 1, appRows.length, headers.length).setValues(appRows);
+
+    summaryRows.push([
+      String(appId),
+      unifiedAppName,
+      appName,
+      `=HYPERLINK("#gid=${sheet.getSheetId()}", "${sheetName}")`
+    ]);
+    rowIndex++;
+
+    createdAppSheets.push(sheetName);  // Add sheet name to ordering list
+  }
+
+  summarySheet.getRange(1, 1, 1, 4).setValues([["unified_app_id", "unified_app_name", "app_name", "Sheet Link"]]);
+  summarySheet.getRange(2, 1, summaryRows.length, 4).setValues(summaryRows);
+
+  const REF_NAME = 'Reference';          // To locate sheets for each app
+  ensureSheetAtEnd(ss, REF_NAME);        // Create (if needed) and place at the very end
+  moveSheetsAfterInOrder(ss, createdAppSheets, REF_NAME);  // AppId sheets → right after Reference
+
+  SpreadsheetApp.flush();
+  notify_(ss, "BigQuery → Sheets", `BM Titles Summary ready`, 4);
+
+}
+
+function BMdrawBubbleChartsCombineResults_v2(ss) {
+  notify_(ss, "Charts", "Preparing weights & summary…", 3);
+
+  const summarySheet = ss.getSheetByName("BMTitlesIndex");
+  const queryInputSheet = ss.getSheetByName("BM_input");
+  const lastRow = summarySheet.getLastRow();
+  const summaryData = summarySheet.getRange(2, 1, lastRow - 1, 4).getValues();
+
+  // read weights
+  const weight = {
+    spend: Number(queryInputSheet.getRange("B5").getValue()),
+    d28:   Number(queryInputSheet.getRange("B6").getValue()),
+    i2p:   Number(queryInputSheet.getRange("B7").getValue()),
+    arppu: Number(queryInputSheet.getRange("B8").getValue())
+  };
+
+  const explanation = [
+    ["Metric", "Weight"],
+    ["Spend", weight.spend],
+    ["D28 ROAS", weight.d28],
+    ["I2P", weight.i2p],
+    ["ARPPU", weight.arppu]
+  ];
+
+  const globalScores = {};
+  const details = [];
+
+  // --- layout constants for side-by-side charts ---
+  const LEFT_COL  = 7;   // column G
+  const RIGHT_COL = 16;  // column P (adjust if you want more/less spacing)
+  const CH_W = 560;      // width in px
+  const CH_H = 300;      // height in px
+
+  summaryData.forEach(([appId]) => {
+    const sheetName = makeSafeSheetName(appId, 30);  
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return;
+
+    const values = sheet.getDataRange().getValues();
+    if (values.length < 2) return;
+
+    const headers = values[0];
+    const data = values.slice(1);
+    const countryIdx = headers.indexOf("country");
+    const osIdx      = headers.indexOf("os");
+    const spendIdx   = headers.indexOf("spend");
+    const d28Idx     = headers.indexOf("d28_roas");
+    const i2pIdx     = headers.indexOf("i2p_percentage");
+    const arppuIdx   = headers.indexOf("arppu");
+
+    // group by OS
+    const osGroups = {};
+    data.forEach(row => {
+      const os = row[osIdx];
+      if (!osGroups[os]) osGroups[os] = [];
+      osGroups[os].push(row);
+    });
+
+    Object.entries(osGroups).forEach(([os, osData]) => {
+      if (osData.length === 0) return;
+
+      const spends = osData.map(r => Number(r[spendIdx]));
+      const d28s   = osData.map(r => Number(r[d28Idx]));
+      const i2ps   = osData.map(r => Number(r[i2pIdx]));
+      const arppus = osData.map(r => Number(r[arppuIdx]));
+
+      const normalize = (arr, val) => {
+        const min = Math.min(...arr);
+        const max = Math.max(...arr);
+        return max === min ? 0.5 : (val - min) / (max - min);
+      };
+
+      // anchor row for THIS OS block (both charts use this row)
+      const blockTopRow = sheet.getLastRow() + 2;
+
+      // --- table for chart 1
+      const chartData1 = [["Country", "Spend", "D28 ROAS", "Bubble Size"]];
+      osData.forEach(r => chartData1.push([r[countryIdx], Number(r[spendIdx]), Number(r[d28Idx]), 1]));
+      const range1 = sheet.getRange(blockTopRow, 1, chartData1.length, 4);
+      range1.setValues(chartData1);
+
+      // --- table for chart 2 (written below the first table just to store data)
+      const chartData2 = [["Country", "I2P", "ARPPU", "Bubble Size"]];
+      osData.forEach(r => chartData2.push([r[countryIdx], Number(r[i2pIdx]), Number(r[arppuIdx]), 1]));
+      const range2 = sheet.getRange(blockTopRow + chartData1.length + 2, 1, chartData2.length, 4);
+      range2.setValues(chartData2);
+
+      // common visual options
+      const baseOpts = {
+        width: CH_W,
+        height: CH_H,
+        legend: { position: "top" }
+      };
+
+      // --- Chart 1 (left): Spend vs D28 ROAS
+      const chart1 = sheet.newChart()
+        .setChartType(Charts.ChartType.BUBBLE)
+        .addRange(range1)
+        .setOption("title", `${os} - Spend vs D28 ROAS`)
+        .setOption("hAxis", { title: "Spend ($)" })
+        .setOption("vAxis", { title: "D28 ROAS" })
+        .setOption("width", baseOpts.width)
+        .setOption("height", baseOpts.height)
+        .setOption("legend", baseOpts.legend)
+        .setPosition(blockTopRow, LEFT_COL, 0, 0) // 👈 same row, left column
+        .build();
+      sheet.insertChart(chart1);
+
+      // --- Chart 2 (right): I2P vs ARPPU
+      const chart2 = sheet.newChart()
+        .setChartType(Charts.ChartType.BUBBLE)
+        .addRange(range2)
+        .setOption("title", `${os} - I2P vs ARPPU`)
+        .setOption("hAxis", { title: "I2P (%)" })
+        .setOption("vAxis", { title: "ARPPU" })
+        .setOption("width", baseOpts.width)
+        .setOption("height", baseOpts.height)
+        .setOption("legend", baseOpts.legend)
+        .setPosition(blockTopRow, RIGHT_COL, 0, 0) // 👈 same row, right column
+        .build();
+      sheet.insertChart(chart2);
+
+      // --- scoring (unchanged)
+      osData.forEach(r => {
+        const country = r[countryIdx];
+        const spend   = Number(r[spendIdx]);
+        const d28     = Number(r[d28Idx]);
+        const i2p     = Number(r[i2pIdx]);
+        const arppu   = Number(r[arppuIdx]);
+
+        const ns = normalize(spends, spend);
+        const nd = normalize(d28s, d28);
+        const ni = normalize(i2ps, i2p);
+        const na = normalize(arppus, arppu);
+
+        const score = weight.spend * ns + weight.d28 * nd + weight.i2p * ni + weight.arppu * na;
+
+        if (!globalScores[os]) globalScores[os] = {};
+        if (!globalScores[os][country]) globalScores[os][country] = [];
+        globalScores[os][country].push(score);
+
+        details.push([
+          sheetName, os, country, spend, d28, i2p, arppu,
+          ns.toFixed(3), nd.toFixed(3), ni.toFixed(3), na.toFixed(3), score.toFixed(3)
+        ]);
+      });
+    });
+  });
+
+  // --- output (unchanged)
+  notify_(ss, "Charts", "Writing Country Priority…", 3);
+
+  const scoreSheetName = "BM_output";
+  let scoreSheet = ss.getSheetByName(scoreSheetName);
+  if (scoreSheet) ss.deleteSheet(scoreSheet);
+  scoreSheet = ss.insertSheet(scoreSheetName);
+  if (queryInputSheet) moveSheetAfter(ss, scoreSheet, queryInputSheet);  // BM_output (Country priorities) → immediately right of BM_input
+
+
+  scoreSheet.getRange(1, 1, explanation.length, 2).setValues(explanation);
+
+  const detailStart = explanation.length + 2;
+  scoreSheet.getRange(detailStart, 1, 1, 12).setValues([[
+    "Bundle", "OS", "Country", "Spend", "D28 ROAS", "I2P", "ARPPU",
+    "Norm Spend", "Norm D28", "Norm I2P", "Norm ARPPU", "Weighted Score"
+  ]]);
+  if (details.length > 0) {
+    scoreSheet.getRange(detailStart + 1, 1, details.length, 12).setValues(details);
+  }
+
+  const resultStart = detailStart + details.length + 3;
+  let output = [["OS", "Country", "Avg Score", "Priority"]];
+  Object.entries(globalScores).forEach(([os, countryScores]) => {
+    const avgList = Object.entries(countryScores)
+      .map(([country, scores]) => [country, scores.reduce((a,b)=>a+b,0)/scores.length])
+      .sort((a, b) => b[1] - a[1]);
+
+    avgList.forEach(([country, avg], idx) => {
+      const tag = idx < 3 ? "🌟 Top 3" : "";
+      output.push([os, country, avg.toFixed(3), tag]);
+    });
+  });
+
+  scoreSheet.getRange(resultStart, 1, 1, 4).setValues([["OS", "Country", "Avg Score", "Priority"]]);
+  scoreSheet.getRange(resultStart + 1, 1, output.length - 1, 4).setValues(output.slice(1));
+
+  SpreadsheetApp.flush();
+  notify_(ss, "Charts", "Charts & Country Priority updated. ✅", 5);
+
+}
+
+/* GPT Recommendation */
+// TODO: Set your OpenAI API key (do not commit secrets)
+const CHAT_GPT_API_KEY = "YOUR_OPENAI_API_KEY_HERE";
+const BASE_URL = "https://api.openai.com/v1/chat/completions";
+const WEB_SEARCH_URL = "https://api.openai.com/v1/responses";
+
+// ===== Entry point (Execution API) =====
+function GPTPipeline(spreadsheetId, opts) {
+  const startedAt = new Date();
+  const ss = SpreadsheetApp.openById(spreadsheetId);
+  notify_(ss, 'n8n', 'Run LLM started');
+
+  try {
+    const res1 = runGPT(ss);
+
+    notify_(ss, 'n8n', `Done 🎉 (rows: ${res1?.rows ?? 'n/a'})`);
+
+    return {
+      ok: true,
+      processedAt: new Date().toISOString(),              // ✅ Date → ISO string
+      elapsedSec: Math.round((Date.now() - startedAt.getTime()) / 1000),
+      fileId: spreadsheetId,
+      // opts는 직렬화 불가 가능성 -> 생략하거나 필요한 값만 뽑아서 넣기
+      meta: { rows: res1?.rows ?? 0, headerCount: res1?.headers?.length ?? 0 },
+    };
+  } catch (e) {
+    notify_(ss, 'n8n ❌', `Failed: ${e && e.message ? e.message : e}`);
+    return {
+      ok: false,
+      processedAt: new Date().toISOString(),              // ✅
+      errorMessage: String(e && e.message ? e.message : e),
+      stack: String(e && e.stack ? e.stack : '')
+    };
+  }
+}
+
+
+function runGPT(ss) {
+
+  // const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const dataSheet = ss.getSheetByName("target_visualize");
+  const inputSheet = ss.getSheetByName("target_input");
+
+  // --- exclude countries ---
+  const excludeRaw = (inputSheet.getRange("B6").getValue() || '').toString();
+  const excludeCountries = excludeRaw
+    ? excludeRaw.split(',').map(c => `'${c.trim().toUpperCase()}'`).join(', ')
+    : '(none)';
+
+  // data[A]: target_visualize -> CSV (전체 행 사용)
+  const values = dataSheet.getDataRange().getDisplayValues();
+  const headers = values[0];
+  const keepCols = ["Country","I2P (%)","ARPPU","unattributed_installs"];
+
+  // Using only existing columns
+  const idx = keepCols.map(h => headers.indexOf(h)).filter(i => i >= 0);
+  const keepHeaders = idx.map(i => headers[i]);
+  const filtered = [keepHeaders].concat(values.slice(1).map(r => idx.map(i => r[i])));
+
+  const csvA = _valuesToCSV(filtered);
+  const sheetMsgA =
+    `Sheet: target_visualize\n` +
+    `Rows: ${filtered.length - 1}\n` +
+    `Columns: ${keepHeaders.join(", ")}\n\n` +     
+    "```csv\n" + csvA + "\n```";
+
+  // data[B]: Country Priority 하단 연속 블록 -> CSV
+  const csvB = readCountryPriorityBlockCsv_(ss);
+  const sheetMsgB = "data[B] (Country Priority bottom block)\n\n```csv\n" + csvB + "\n```";
+
+  // Ref 시트 PDF -> Files 업로드(캐싱 권장)
+  const refFileId = getOrUploadRefFile_(ss);
+
+  const textFormat = {
+    type: "json_schema",
+    json_schema: {
+      name: "geo_reco_compact_v2",
+      schema: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          method: {
+            // How the decision is computed (weights & source)
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              weighting_a: { type: "number", minimum: 0, maximum: 1 }, // e.g. 0.7
+              weighting_b: { type: "number", minimum: 0, maximum: 1 }, // e.g. 0.3
+              runs:        { type: "integer", minimum: 1 },             // e.g. 10
+              shortlist_source: { type: "string", maxLength: 80 }       // e.g. "Data A unattributed installs"
+            },
+            required: ["weighting_a", "weighting_b", "runs", "shortlist_source"]
+          },
+
+          // Final Top3 per OS + OPTIONAL normalized score & confidence
+          recommendation: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios: {
+                $ref: "#/$defs/top3CountryListWithScore"
+              },
+              android: {
+                $ref: "#/$defs/top3CountryListWithScore"
+              }
+            },
+            required: ["ios","android"]
+          },
+  
+          // OPTIONAL: short reference from Data A (<=6)
+          data_a_signals: {
+            type: "array", maxItems: 6,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },     // ISO-3 preferred, upper-case (e.g., USA, JPN)
+                i2p_pct: { type: "number" },     // percent number (e.g., 6.93)
+                arppu:   { type: "number" },     // USD number (e.g., 37.96)
+                unattributed: { type: "integer"} // install count
+              },
+              required: ["country"]
+            }
+          },
+  
+          // Data B Top3 per OS (compact)
+          data_b_top3: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { $ref: "#/$defs/top3ScoreList" },
+              android: { $ref: "#/$defs/top3ScoreList" }
+            },
+            required: ["ios","android"]
+          },
+  
+  
+          // OPTIONAL: run frequency (how many times each country appeared in Top3)
+          frequency: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { $ref: "#/$defs/freqList" },
+              android: { $ref: "#/$defs/freqList" }
+            }
+          },
+  
+          // One-line rationale per chosen country (<=200 chars)
+          rationale: {
+            type: "array", maxItems: 6, // up to 3 per OS
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                os:      { type: "string", enum: ["ios","android"] },
+                why:     { type: "string", maxLength: 200 }
+              },
+              required: ["country","os","why"]
+            }
+          },
+  
+          // Optional budget split suggestion per OS (sum ≈ 100)
+          budget_split_hint: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { $ref: "#/$defs/splitList" },
+              android: { $ref: "#/$defs/splitList" }
+            }
+          },
+  
+          // Very short actions per OS + common KPIs
+          actions: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { type: "string", maxLength: 160 },
+              android: { type: "string", maxLength: 160 },
+              kpis: {
+                type: "array", maxItems: 4,
+                items: { type: "string", maxLength: 80 }
+              }
+            },
+            required: ["ios","android"]
+          },
+  
+          // Optional global notes (<=3)
+          notes: { type: "array", maxItems: 3, items: { type: "string", maxLength: 140 } }
+        },
+  
+        // Reusable defs
+        $defs: {
+          top3ScoreList: {
+            type: "array",
+            maxItems: 3,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                score:   { type: "number" } // aggregated/normalized
+              },
+              required: ["country","score"]
+            }
+          },
+          top3CountryListWithScore: {
+            type: "array",
+            maxItems: 3,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                score:   { type: "number" } // allow null if unavailable
+              },
+              required: ["country"]
+            }
+          },
+          freqList: {
+            type: "array",
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                count:   { type: "integer", minimum: 0 },
+                of:      { type: "integer", minimum: 1 } // e.g., runs
+              },
+              required: ["country","count","of"]
+            }
+          },
+          splitList: {
+            type: "array", maxItems: 3,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                pct:     { type: "number", minimum: 0, maximum: 100 }
+              },
+              required: ["country","pct"]
+            }
+          }
+        },
+  
+        required: ["method","data_a_signals","data_b_top3","recommendation","rationale"]
+      },
+      strict: true
+    }
+  };
+
+  const payload = {
+    model: "gpt-5",
+
+    max_output_tokens: 4500,
+    text: {
+      format: textFormat,          
+      // verbosity: "low"           // (simple mode)
+    },
+    reasoning: {effort: "low"},
+    text: {format: {type: "text"}},
+    input: [
+      { role: "system", content:
+        "You are a DS/Ads expert. Be concise, numeric where possible, and produce actionable geo recommendations." },
+      {
+        role: "user",
+        content: [
+          { type: "input_text", 
+            text:`1) Situation
+              We’re (including you) part of the Data Scientist and Sales team in a DSP (Demand-side platform) company, running advertising campaigns for many gaming or consumer customers. ` 
+          }
+        ]
+      },
+      {
+        role: "user",
+        content: [
+          { 
+            type: "input_text", 
+            text:
+                `2) Purpose
+                We would like to make a recommendation for new geos(countries) targeting for an advertiser. Attached image 1 shows the flow of recommended geo selection process for the purpose of boosting revenue` 
+          },
+          { type: "input_file", 
+            file_id: refFileId }
+        ]
+      },
+      {
+        role: "user",
+        content: [
+          { 
+            type: "input_text", 
+            text:
+              `3) Inputs
+              [A] Taret bundle's postback data including unattributed data. Shortlist by unattributed installs, excluding: ${excludeCountries}.
+              Below is data[A] (CSV):` 
+          },
+          { type: "input_text", text: sheetMsgA }
+        ]
+      },
+      {
+        role: "user",
+        content: [
+          { 
+            type: "input_text", 
+            text:
+              `[B] Attributed data for benchmark titles. We selected benchmark titles based on customer inputs or top titles in the same genre (those also run campaigns with our company). 
+              Then we pulled B2-B5(in the flow) data for those benchmark titles in the shortlisted countries.
+              We normalized each metric for each title x os x country, and calculated weighted averages to produce aggregated scores across titles, ending up with os x country level scores. 
+              This gave us the top3 countries for each OS across BM titles. Below is data[B] (CSV):` 
+          },
+          { type: "input_text", text: sheetMsgB }
+        ]
+      },
+      {
+        role: "user",
+        content:[
+          {
+            type: "input_text", 
+            text:
+            `4. Task
+              Based on data (A) unattributed install and their revenue-related performance, and (B) the benchmark scores, identify the top 3 countries to target both for Android and iOS and provide rationale for your selection. 
+              Consideration: Give greater weight to data (A) when making your decision. :
+
+              Run the same geo-targeting recommendation prompt 10 times for both Android and iOS, using:
+              Data A (postback): Unattributed installs, I2P, ARPPU
+              Data B (benchmark titles): Aggregated performance scores by OS and country
+              Heavier weight is placed on Data A, as guided in the prompt. 
+              Then aggregate the results, count the frequency of each country appearing in the Top 3, and finalize the Top 3 recommended countries per OS. Provide justification as well.
+              When providing action items, don't include bidding or CPM related contetns as bidding price is not controllable and make them succient w/ section title as 'action items'. (only include 1-2 items) 
+              When showing the result don't use 'Data A' or 'Data B' insteand use 'Unattributed data' or 'Benchmark data'
+              `
+          }
+        ]
+      }
+
+    ]
+  };
+
+  // --- API 호출 + 에러 핸들링 + 시트 출력 ---
+  const outSheet = ensureSheet(ss, FinalRecommendationSheetName);
+  outSheet.clearContents();
+  outSheet.getRange(1,1,1,2).setValues([["Generated at", new Date()]]);
+
+  let httpStatus = 0;
+  let respBody   = "";   // ← 변수명 충돌 방지
+  let json       = null;
+  let textOut    = "";
+
+  notify_(ss, 'n8n', 'Calling OpenAI API...');
+  try {
+    const resp = UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${CHAT_GPT_API_KEY}`
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true        // 4xx/5xx여도 catch로 가지 않고 여기서 결과 받음
+    });
+
+    httpStatus = resp.getResponseCode();
+    respBody   = resp.getContentText();
+
+
+    // JSON Parsing
+    try {
+      json = JSON.parse(respBody);
+    } catch (pe) {
+      throw new Error("JSON parse error: " + pe + "\nRAW: " + respBody.slice(0, 1000));
+    }
+
+    // Error/Success branch
+    if (httpStatus !== 200 || json.error) {
+      textOut = JSON.stringify({ http_status: httpStatus, error: json.error || respBody }, null, 2);
+    } else {
+      // 1) output_text 
+      textOut = (json.output_text || "").trim();
+
+      // 2) If output_text is null, retrieve message from output array
+      if (!textOut && Array.isArray(json.output)) {
+        const msg = json.output.find(x => x.type === "message");
+        if (msg && Array.isArray(msg.content)) {
+          textOut = msg.content.map(c => (c.text || "").trim()).join("\n").trim();
+        }
+      }
+
+      // 3) If still null, output raw json
+      if (!textOut) textOut = JSON.stringify(json, null, 2);
+    }
+
+  } catch (e) {
+    // 네트워크/파싱 등 예외
+    textOut = JSON.stringify({ error: e.toString() }, null, 2);
+    console.error(e);
+  } finally {
+    // Always write ther result in the sheet 
+    outSheet.getRange(3,1).setValue(textOut).setWrap(true);
+    outSheet.setColumnWidth(1, 1000);
+
+    outSheetSummary = []
+    outSheetSummary.push([
+      'Target Analysis Summary',      
+      `=HYPERLINK("#gid=${ss.getSheetId()}", ${TargetOutputSheetName})`
+    ]);
+    outSheetSummary.push([
+      'BM Analysis Summary',      
+      `=HYPERLINK("#gid=${ss.getSheetId()}", ${BMOutputSheetName})`
+    ]);
+    outSheetSummary.push([
+      'BM Analysis by Titles',      
+      `=HYPERLINK("#gid=${ss.getSheetId()}", 'BMTitlesIndex')`
+    ]);
+    summarySheet.getRange(5, 1, outSheetSummary.length, 2).setValues(outSheetSummary);
+
+    SpreadsheetApp.flush();
+    
+    
+
+  }
+ 
+  return json || { error: `See ${FinalRecommendationSheetName} sheet for details.` };
+
+
+
+}
+
+
+
+/* utils */
+function makeSafeSheetName(val, maxLen) {
+  let s = String(val == null ? "UnknownApp" : val);  // 숫자/null 방어
+  s = s.replace(/[\\/?*\[\]:]/g, " ");               // 금지문자 치환
+  const lim = Math.max(1, maxLen || 30);
+  return s.slice(0, lim);
+}
+function columnLetterToNumber(letter) {
+  let col = 0;
+  const L = String(letter || '').toUpperCase();
+  for (let i = 0; i < L.length; i++) col = col * 26 + (L.charCodeAt(i) - 64);
+  return col;
+}
+
+/********************
+ * Sheet ordering helpers
+ ********************/
+
+/** Move targetSheet to immediately AFTER anchorSheet (1-based index). */
+function moveSheetAfter(ss, targetSheet, anchorSheet) {
+  if (!ss || !targetSheet || !anchorSheet) return;
+  ss.setActiveSheet(targetSheet);
+  ss.moveActiveSheet(anchorSheet.getIndex() + 1);
+}
+
+/** Move targetSheet to immediately BEFORE anchorSheet (1-based index). */
+function moveSheetBefore(ss, targetSheet, anchorSheet) {
+  if (!ss || !targetSheet || !anchorSheet) return;
+  ss.setActiveSheet(targetSheet);
+  ss.moveActiveSheet(anchorSheet.getIndex());
+}
+
+/** Ensure a sheet with `name` exists at the very end (rightmost). */
+function ensureSheetAtEnd(ss, name) {
+  let sh = ss.getSheetByName(name);
+  if (!sh) sh = ss.insertSheet(name);          // New sheet is appended at the end by default
+  ss.setActiveSheet(sh);
+  ss.moveActiveSheet(ss.getSheets().length);   // Force to last position
+  return sh;
+}
+
+/** Move multiple sheets (by NAME) to sit right AFTER the anchor, preserving order.
+ *  Safe even when the anchor is already at the last position.
+ */
+function moveSheetsAfterInOrder(ss, sheetNames, anchorName) {
+  if (!ss) throw new Error("Spreadsheet handle is required.");
+  const anchor = ss.getSheetByName(anchorName);
+  if (!anchor) throw new Error(`Anchor sheet '${anchorName}' not found.`);
+
+  // 1) Ensure the anchor is at the very end (rightmost)
+  ss.setActiveSheet(anchor);
+  ss.moveActiveSheet(ss.getSheets().length);
+
+  // 2) Append each target sheet to the end in the given order
+  //    (skip missing names, skip the anchor itself)
+  sheetNames.forEach(name => {
+    if (!name || name === anchorName) return;
+    const sh = ss.getSheetByName(name);
+    if (!sh) return;
+    ss.setActiveSheet(sh);
+    ss.moveActiveSheet(ss.getSheets().length); // append to end safely
+  });
+}
+
+
+/** Move an existing sheet to the very first (leftmost) position. */
+function moveSheetToStart(ss, sheet) {
+  if (!ss || !sheet) return;
+  ss.setActiveSheet(sheet);
+  ss.moveActiveSheet(1); // 1-based index → position #1 (leftmost)
+}
+
+/** Ensure a sheet with `name` exists at the very start.
+ *  - Creates the sheet if missing, then moves it to index 1.
+ */
+function ensureSheetAtStart(ss, name) {
+  let sh = ss.getSheetByName(name);
+  if (!sh) sh = ss.insertSheet(name); // create anywhere, then move
+  ss.setActiveSheet(sh);
+  ss.moveActiveSheet(1);
+  return sh;
+}
+
+/** Move multiple sheets (by name) to the start, preserving the provided order.
+ *  Example: moveSheetsToStartInOrder(ss, ["Summary", "Reference"])
+ *  → "Summary" will be the leftmost, then "Reference" next to it.
+ */
+function moveSheetsToStartInOrder(ss, sheetNames) {
+  // Move in reverse so the first name ends up leftmost at index 1.
+  for (let i = sheetNames.length - 1; i >= 0; i--) {
+    const sh = ss.getSheetByName(sheetNames[i]);
+    if (!sh) continue;
+    ss.setActiveSheet(sh);
+    ss.moveActiveSheet(1);
+  }
+}
+
+// ---- helper: 2D 배열 -> CSV 문자열 ----
+function _valuesToCSV(values) {
+  return values.map(row =>
+    row.map(v => {
+      v = v === null || v === undefined ? "" : String(v);
+      // CSV 안전 처리
+      if (v.includes(",") || v.includes('"') || v.includes("\n")) {
+        v = '"' + v.replace(/"/g, '""') + '"';
+      }
+      return v;
+    }).join(",")
+  ).join("\n");
+}
+
+function getOrUploadRefFile_(ss, force = false) {
+  const props = PropertiesService.getScriptProperties();
+  const KEY_ID   = 'REF_FILE_ID';
+  const KEY_HASH = 'REF_FILE_HASH';
+
+  const blob = exportRefSheetAsPdfBlob_(ss); // 내부에서 flush 호출했다고 가정
+  const hashBytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, blob.getBytes());
+  const hash = Utilities.base64Encode(hashBytes);
+
+  const cachedId   = props.getProperty(KEY_ID);
+  const cachedHash = props.getProperty(KEY_HASH);
+
+  if (!force && cachedId && cachedHash === hash) {
+    return cachedId; // 변경 없음 → 기존 파일 사용
+  }
+
+  const fileId = uploadOpenAIFile_(blob, 'assistants');
+  props.setProperty(KEY_ID, fileId);
+  props.setProperty(KEY_HASH, hash);
+  return fileId;
+}
+
+function exportRefSheetAsPdfBlob_(ss) {
+    // const ss = SpreadsheetApp.getActive();
+    const sheet = ss.getSheetByName('Ref');
+    SpreadsheetApp.flush(); // 최근 변경사항 반영
+  
+    const url =
+      `https://docs.google.com/spreadsheets/d/${ss.getId()}/export` +
+      `?format=pdf&gid=${sheet.getSheetId()}&portrait=false&fitw=true&gridlines=false&scale=2`;
+  
+    const blob = UrlFetchApp.fetch(url, {
+      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }
+    }).getBlob().setName('ref.pdf');
+  
+    return blob;
+  }
+  
+function uploadOpenAIFile_(blob, purpose) {
+  const res = UrlFetchApp.fetch('https://api.openai.com/v1/files', {
+      method: 'post',
+      headers: { Authorization: `Bearer ${CHAT_GPT_API_KEY}` },
+      payload: { 
+        purpose: purpose || 'assistants', 
+        file: blob }, // multipart 자동 처리
+  });
+  const json = JSON.parse(res.getContentText());
+  if (!json.id) throw new Error('OpenAI file upload failed: ' + res.getContentText());
+  return json.id; // return file_id 
+}  
+
+
+function readCountryPriorityBlockCsv_(ss) {
+  const sh = ss.getSheetByName(BMOutputSheetName);
+  if (!sh) throw new Error(`Sheet '${BMOutputSheetName}' not found.`);
+  const lastRow = sh.getLastRow();
+  const lastCol = Math.min(10, sh.getLastColumn()); // 넉넉히 10열까지
+  const vals = sh.getRange(1,1,lastRow,lastCol).getDisplayValues();
+
+  // 마지막 헤더 행 찾기: A:D == OS, Country, Avg Score, Priority
+  let headerRow = -1; // 1-based
+  for (let r = 1; r <= vals.length; r++) {
+    const row = vals[r-1];
+    if (row[0] === 'OS' && row[1] === 'Country' && String(row[2]).toLowerCase().indexOf('avg') === 0 && row[3] === 'Priority') {
+      headerRow = r;
+    }
+  }
+  if (headerRow === -1) throw new Error("Header 'OS, Country, Avg Score, Priority' not found.");
+
+  // 헤더 아래의 연속 데이터 범위 계산
+  const start = headerRow + 1;
+  let end = start - 1;
+  for (let r = start; r <= vals.length; r++) {
+    const row = vals[r-1];
+    const four = row.slice(0,4);
+    const isEmpty = four.every(v => v === '' || v === null);
+    if (isEmpty) break;
+    end = r;
+  }
+  if (end < start) throw new Error('No rows found under Country Priority header.');
+
+  // A:D만 CSV로
+  const block = vals.slice(start-1, end).map(r => r.slice(0,4));
+  return _valuesToCSV([['OS','Country','Avg Score','Priority']].concat(block));
+}

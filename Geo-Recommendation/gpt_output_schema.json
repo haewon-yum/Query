@@ -1,0 +1,167 @@
+const responseFormat = {
+    type: "json_schema",
+    json_schema: {
+      name: "geo_reco_compact_v2",
+      schema: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          method: {
+            // How the decision is computed (weights & source)
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              weighting_a: { type: "number", minimum: 0, maximum: 1 }, // e.g. 0.7
+              weighting_b: { type: "number", minimum: 0, maximum: 1 }, // e.g. 0.3
+              runs:        { type: "integer", minimum: 1 },             // e.g. 10
+              shortlist_source: { type: "string", maxLength: 80 }       // e.g. "Data A unattributed installs"
+            },
+            required: ["weighting_a", "weighting_b", "runs", "shortlist_source"]
+          },
+  
+          // OPTIONAL: short reference from Data A (<=6)
+          data_a_signals: {
+            type: "array", maxItems: 6,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },     // ISO-3 preferred, upper-case (e.g., USA, JPN)
+                i2p_pct: { type: "number" },     // percent number (e.g., 6.93)
+                arppu:   { type: "number" },     // USD number (e.g., 37.96)
+                unattributed: { type: "integer"} // install count
+              },
+              required: ["country"]
+            }
+          },
+  
+          // Data B Top3 per OS (compact)
+          data_b_top3: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { $ref: "#/$defs/top3ScoreList" },
+              android: { $ref: "#/$defs/top3ScoreList" }
+            },
+            required: ["ios","android"]
+          },
+  
+          // Final Top3 per OS + OPTIONAL normalized score & confidence
+          recommendation: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios: {
+                $ref: "#/$defs/top3CountryListWithScore"
+              },
+              android: {
+                $ref: "#/$defs/top3CountryListWithScore"
+              }
+            },
+            required: ["ios","android"]
+          },
+  
+          // OPTIONAL: run frequency (how many times each country appeared in Top3)
+          frequency: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { $ref: "#/$defs/freqList" },
+              android: { $ref: "#/$defs/freqList" }
+            }
+          },
+  
+          // One-line rationale per chosen country (<=200 chars)
+          rationale: {
+            type: "array", maxItems: 6, // up to 3 per OS
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                os:      { type: "string", enum: ["ios","android"] },
+                why:     { type: "string", maxLength: 200 }
+              },
+              required: ["country","os","why"]
+            }
+          },
+  
+          // Optional budget split suggestion per OS (sum ≈ 100)
+          budget_split_hint: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { $ref: "#/$defs/splitList" },
+              android: { $ref: "#/$defs/splitList" }
+            }
+          },
+  
+          // Very short actions per OS + common KPIs
+          actions: {
+            type: "object", additionalProperties: false,
+            properties: {
+              ios:     { type: "string", maxLength: 160 },
+              android: { type: "string", maxLength: 160 },
+              kpis: {
+                type: "array", maxItems: 4,
+                items: { type: "string", maxLength: 80 }
+              }
+            },
+            required: ["ios","android"]
+          },
+  
+          // Optional global notes (<=3)
+          notes: { type: "array", maxItems: 3, items: { type: "string", maxLength: 140 } }
+        },
+  
+        // Reusable defs
+        $defs: {
+          top3ScoreList: {
+            type: "array",
+            maxItems: 3,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                score:   { type: "number" } // aggregated/normalized
+              },
+              required: ["country","score"]
+            }
+          },
+          top3CountryListWithScore: {
+            type: "array",
+            maxItems: 3,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                score:   { type: "number" } // allow null if unavailable
+              },
+              required: ["country"]
+            }
+          },
+          freqList: {
+            type: "array",
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                count:   { type: "integer", minimum: 0 },
+                of:      { type: "integer", minimum: 1 } // e.g., runs
+              },
+              required: ["country","count","of"]
+            }
+          },
+          splitList: {
+            type: "array", maxItems: 3,
+            items: {
+              type: "object", additionalProperties: false,
+              properties: {
+                country: { type: "string" },
+                pct:     { type: "number", minimum: 0, maximum: 100 }
+              },
+              required: ["country","pct"]
+            }
+          }
+        },
+  
+        required: ["method","data_b_top3","recommendation","rationale","actions"]
+      },
+      strict: true
+    }
+  };
+  

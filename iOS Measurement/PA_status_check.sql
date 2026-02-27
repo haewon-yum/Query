@@ -1,3 +1,14 @@
+/* allow_fingerprinting check from campaign_digest 
+  reference: https://mlc.atlassian.net/browse/ODSB-11116
+*/
+
+  SELECT timestamp, allow_fingerprinting, sk_ad_network_input
+  FROM `focal-elf-631.prod.campaign_digest2025122*`
+  WHERE campaign_name = 'wyjz7ZqSixyxKUEE'
+  ORDER BY timestamp 
+
+
+
 -- reference: https://moloco.slack.com/archives/C07G2UKQPD2/p1727155914413519?thread_ts=1727151806.323689&cid=C07G2UKQPD2
 WITH
   raw AS (

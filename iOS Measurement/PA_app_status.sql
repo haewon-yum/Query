@@ -1,3 +1,31 @@
+### CHECK fp_status for an app bundle ###
+## https://www.notion.so/How-to-check-and-Update-probabilistic-attribution-allowance-a5f7aa63892c456c9aa282caa785f68f?pvs=4
+SELECT 
+    utc_date, 
+    mmp, 
+    tracking_bundle, 
+    fp_status_today, 
+    fp_status_prior, 
+    fp_status_2d_prior, 
+    media_cost, 
+    fp_status_today <> fp_status_prior AND fp_status_prior <> fp_status_2d_prior AS oscillating
+  FROM (
+    SELECT
+      utc_date,
+      mmp,
+      tracking_bundle,
+      verdict.fp_status AS fp_status_today,
+      LEAD(verdict.fp_status, 1) OVER(PARTITION BY mmp, tracking_bundle ORDER BY utc_date DESC) AS fp_status_prior,
+      LEAD(verdict.fp_status, 2) OVER(PARTITION BY mmp, tracking_bundle ORDER BY utc_date DESC) AS fp_status_2d_prior,
+      ROUND(spend.total, 2) AS media_cost
+    FROM
+      `focal-elf-631.mmp_pb_summary.app_status`
+    WHERE
+      utc_date >= DATE_SUB(CURRENT_DATE("-8"), INTERVAL 3 DAY)
+      AND tracking_bundle = @tracking_bundle)
+
+
+
 -- PA status by genre (+sub genre) // (2024/07/01 이후 campaign enalbeld 된 iOS App 대상) 앱별 PA 설정 비율 (단위: 앱)
 WITH campaign_digest AS(
   SELECT 
