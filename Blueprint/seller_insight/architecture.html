@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blueprint Seller Insight — Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      color: #212529;
+      background: #f8f9fa;
+      padding: 40px 48px;
+      line-height: 1.6;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; color: #0d6efd; margin-bottom: 4px; }
+    h2 { font-size: 15px; font-weight: 700; color: #212529; margin: 32px 0 12px; border-bottom: 2px solid #dee2e6; padding-bottom: 6px; }
+    h3 { font-size: 13px; font-weight: 700; color: #495057; margin: 16px 0 6px; }
+
+    .subtitle { color: #6c757d; font-size: 12px; margin-bottom: 32px; }
+
+    /* ── Flow diagram ────────────────────────────────────────────────── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 16px 0 24px;
+    }
+    .flow-box {
+      background: white;
+      border: 1.5px solid #dee2e6;
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .flow-box .label { font-weight: 700; font-size: 12px; color: #212529; }
+    .flow-box .sub   { font-size: 10px; color: #6c757d; margin-top: 3px; }
+    .flow-box.blue  { border-color: #0d6efd; background: #e8f0fe; }
+    .flow-box.green { border-color: #198754; background: #d1e7dd; }
+    .flow-box.gray  { border-color: #adb5bd; background: #f8f9fa; }
+    .flow-box.red   { border-color: #dc3545; background: #f8d7da; }
+    .arrow {
+      font-size: 18px;
+      color: #adb5bd;
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Component table ─────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    th {
+      background: #f1f3f5;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 2px solid #dee2e6;
+      color: #495057;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    td code, th code { background: #f1f3f5; padding: 1px 5px; border-radius: 3px; font-size: 11px; font-family: "SF Mono", monospace; }
+
+    /* ── Cards ───────────────────────────────────────────────────────── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 12px 0;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .card h3 { margin-top: 0; color: #0d6efd; }
+    .card ul  { padding-left: 16px; margin-top: 6px; }
+    .card li  { margin-bottom: 3px; }
+
+    /* ── Auth flow ───────────────────────────────────────────────────── */
+    .auth-steps { counter-reset: step; display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+    .auth-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+    .auth-step::before {
+      counter-increment: step;
+      content: counter(step);
+      background: #0d6efd;
+      color: white;
+      font-weight: 700;
+      font-size: 11px;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── IAM table ───────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-green { background: #d1e7dd; color: #0a3622; }
+    .badge-blue  { background: #cfe2ff; color: #084298; }
+    .badge-gray  { background: #e9ecef; color: #495057; }
+
+    /* ── View descriptions ───────────────────────────────────────────── */
+    .view-row { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+    .view-card {
+      flex: 1;
+      min-width: 200px;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-left: 4px solid #0d6efd;
+      border-radius: 6px;
+      padding: 12px 16px;
+    }
+    .view-card h3 { color: #0d6efd; margin-top: 0; }
+    .view-card ul { padding-left: 16px; margin-top: 6px; }
+    .view-card li { margin-bottom: 3px; }
+
+    footer {
+      margin-top: 48px;
+      font-size: 11px;
+      color: #adb5bd;
+      border-top: 1px solid #dee2e6;
+      padding-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Blueprint Seller Insight</h1>
+<p class="subtitle">Architecture Reference · Last updated: 2026-04-23 · Owner: KOR GDS (Haewon Yum)</p>
+
+<!-- ── 1. System Overview ──────────────────────────────────────────────── -->
+<h2>1. System Overview</h2>
+
+<div class="flow">
+  <div class="flow-box blue">
+    <div class="label">Browser</div>
+    <div class="sub">GM / Analyst</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="flow-box blue">
+    <div class="label">Cloud Run</div>
+    <div class="sub">blueprint-seller-insight<br>asia-southeast1 · gds-apac</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="flow-box green">
+    <div class="label">Google OAuth 2.0</div>
+    <div class="sub">accounts.google.com<br>@moloco.com gate</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="flow-box green">
+    <div class="label">BigQuery</div>
+    <div class="sub">ads-bpd-guard-china<br>Jobs billed here</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="flow-box gray">
+    <div class="label">Plotly Dash</div>
+    <div class="sub">Interactive charts<br>+ tables in browser</div>
+  </div>
+</div>
+
+<table>
+  <thead><tr><th>Layer</th><th>Technology</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Web framework</strong></td>
+      <td>Plotly Dash 2.17 on Flask</td>
+      <td>Dash wraps Flask; Flask handles OAuth routes and session management</td>
+    </tr>
+    <tr>
+      <td><strong>Runtime</strong></td>
+      <td>Python 3.11 (Docker, <code>python:3.11-slim</code>)</td>
+      <td>gunicorn, 2 workers, 120 s timeout (accommodates cold BQ queries)</td>
+    </tr>
+    <tr>
+      <td><strong>Hosting</strong></td>
+      <td>Google Cloud Run</td>
+      <td>Service: <code>blueprint-seller-insight</code> · Region: <code>asia-southeast1</code> · Project: <code>gds-apac</code> · 1 vCPU / 1 GiB RAM / 300 s request timeout</td>
+    </tr>
+    <tr>
+      <td><strong>Data source</strong></td>
+      <td>BigQuery</td>
+      <td>Blueprint table: <code>ads-bpd-guard-china.blueprint.project_blueprint_combined_data</code><br>App taxonomy: <code>moloco-dsp-data-view.athena.dim1_app_v3_rmg_vertical</code></td>
+    </tr>
+    <tr>
+      <td><strong>BQ billing project</strong></td>
+      <td><code>ads-bpd-guard-china</code></td>
+      <td>Queries run as the logged-in user's Google account (not a service account)</td>
+    </tr>
+    <tr>
+      <td><strong>Authentication</strong></td>
+      <td>Google OAuth 2.0 (authorization code flow)</td>
+      <td>Restricted to <code>@moloco.com</code> accounts; tokens stored in Flask session cookie (8 h lifetime)</td>
+    </tr>
+    <tr>
+      <td><strong>URL</strong></td>
+      <td colspan="2"><code>https://blueprint-seller-insight-326198683934.asia-southeast1.run.app</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ── 2. Authentication Flow ──────────────────────────────────────────── -->
+<h2>2. Authentication Flow</h2>
+
+<div class="auth-steps">
+  <div class="auth-step">User visits any page → <code>auth.require_auth()</code> before-request hook checks session → if no token, redirect to <code>/auth/login</code></div>
+  <div class="auth-step"><code>/auth/login</code> generates a CSRF state token, redirects browser to Google's OAuth consent screen with scope: <code>openid email profile bigquery</code></div>
+  <div class="auth-step">Google authenticates the user and redirects back to <code>/auth/callback?code=…&state=…</code></div>
+  <div class="auth-step"><code>/auth/callback</code> validates CSRF state, exchanges authorization code for access + refresh tokens, fetches user info</div>
+  <div class="auth-step">Email domain checked — if not <code>@moloco.com</code> → 403 denied; otherwise tokens stored in Flask session</div>
+  <div class="auth-step">All subsequent BigQuery calls use the user's access token (auto-refreshed if within 5 min of expiry). Queries run as the authenticated user, not as a service account.</div>
+  <div class="auth-step"><code>/auth/logout</code> clears the session and redirects to <code>/auth/login</code></div>
+</div>
+
+<h3>OAuth Client</h3>
+<table>
+  <thead><tr><th>Field</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Client name</td><td>Blueprint Seller Insight (GCP Console · gds-apac)</td></tr>
+    <tr><td>Client ID</td><td><code>326198683934-soiscleus544l9q8gt9qi1b1qrd766kg.apps.googleusercontent.com</code></td></tr>
+    <tr><td>Authorized redirect URI</td><td><code>https://blueprint-seller-insight-326198683934.asia-southeast1.run.app/auth/callback</code></td></tr>
+    <tr><td>BQ OAuth scope</td><td><code>https://www.googleapis.com/auth/bigquery</code> (full — required for <code>jobs.insert</code>)</td></tr>
+    <tr><td>Allowed domain (hd)</td><td><code>moloco.com</code></td></tr>
+  </tbody>
+</table>
+
+<!-- ── 3. IAM / Permissions ────────────────────────────────────────────── -->
+<h2>3. IAM &amp; Permissions</h2>
+
+<table>
+  <thead><tr><th>GCP Project</th><th>Role</th><th>Grantee</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>ads-bpd-guard-china</code></td>
+      <td><code>bigquery.dataViewer</code></td>
+      <td><span class="badge badge-blue">group: gcp-bigquery-user@moloco.com</span><br><span class="badge badge-blue">group: gcp-gds-apac@moloco.com</span></td>
+      <td>Read blueprint + taxonomy tables</td>
+    </tr>
+    <tr>
+      <td><code>ads-bpd-guard-china</code></td>
+      <td><code>bigquery.jobUser</code></td>
+      <td><span class="badge badge-blue">group: gcp-bigquery-user@moloco.com</span><br><span class="badge badge-blue">group: gcp-gds-apac@moloco.com</span></td>
+      <td>Submit BQ jobs (query execution) billed to this project</td>
+    </tr>
+    <tr>
+      <td><code>gds-apac</code></td>
+      <td>Cloud Run (hosting)</td>
+      <td><span class="badge badge-gray">Service account (default compute)</span></td>
+      <td>Runs the container — no BQ access needed (users authenticate themselves)</td>
+    </tr>
+    <tr>
+      <td><code>moloco-dsp-data-view</code></td>
+      <td><code>bigquery.dataViewer</code> (athena dataset)</td>
+      <td><span class="badge badge-blue">group: gcp-bigquery-user@moloco.com</span></td>
+      <td>Read <code>dim1_app_v3_rmg_vertical</code> for app taxonomy enrichment</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin-top:8px; color:#6c757d; font-size:11px;">
+  ⚠ Any <code>@moloco.com</code> user who is <strong>not</strong> in <code>gcp-bigquery-user</code> or <code>gcp-gds-apac</code> will pass the OAuth gate but see empty dropdowns (no BQ job permission). Add them to one of those groups to grant access.
+</p>
+
+<!-- ── 4. Code Components ──────────────────────────────────────────────── -->
+<h2>4. Code Components</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h3>app.py</h3>
+    <ul>
+      <li>Creates Flask server + Dash app</li>
+      <li>Registers OAuth routes (<code>/auth/login</code>, <code>/auth/callback</code>, <code>/auth/logout</code>)</li>
+      <li>Sets <code>before_request</code> auth guard</li>
+      <li>Session lifetime: 8 hours</li>
+      <li>Entry point for gunicorn (<code>app:server</code>)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>auth.py</h3>
+    <ul>
+      <li>Full Google OAuth 2.0 authorization code flow</li>
+      <li><code>@moloco.com</code> domain enforcement</li>
+      <li>CSRF state token validation</li>
+      <li>Auto-refresh access token (5 min before expiry)</li>
+      <li><code>get_current_access_token()</code> used by <code>queries.py</code></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>queries.py</h3>
+    <ul>
+      <li>All BigQuery logic</li>
+      <li>BQ client built from user's OAuth token per request</li>
+      <li>Dropdown loaders: platforms, advertisers, bundles, campaigns, taxonomy</li>
+      <li><code>load_scores()</code> — main query returning peer + focal rows</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>layout.py</h3>
+    <ul>
+      <li>Defines the full Dash UI skeleton</li>
+      <li>Left sidebar: filter panel (Required, Focal Entity, Peer Filters)</li>
+      <li>Main area: custom tab buttons + hidden <code>dcc.Tabs</code> + view toggle</li>
+      <li>All component IDs referenced by callbacks</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>callbacks.py</h3>
+    <ul>
+      <li>All Dash reactive callbacks</li>
+      <li>Cascade filter population (platform → advertiser → bundle → campaign)</li>
+      <li>Taxonomy auto-fill on bundle select</li>
+      <li>Run button → BQ query → <code>dcc.Store</code></li>
+      <li>Tab routing + view rendering (Views 1, 2, 3)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Dockerfile</h3>
+    <ul>
+      <li><code>python:3.11-slim</code> base image</li>
+      <li>gunicorn: 2 workers, 120 s timeout</li>
+      <li>Port 8080 (Cloud Run standard)</li>
+      <li>No secrets in image — injected as env vars at deploy time</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── 5. Data Model ───────────────────────────────────────────────────── -->
+<h2>5. Data Model</h2>
+
+<h3>Source Table: <code>ads-bpd-guard-china.blueprint.project_blueprint_combined_data</code></h3>
+<table>
+  <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>platform_id</code></td><td>STRING</td><td>Top-level platform identifier (e.g. NEXON, NCSOFT)</td></tr>
+    <tr><td><code>advertiser_id / advertiser_title</code></td><td>STRING</td><td>Advertiser within the platform</td></tr>
+    <tr><td><code>app_market_bundle</code></td><td>STRING</td><td>App bundle ID (Android) or numeric App Store ID (iOS)</td></tr>
+    <tr><td><code>app_name</code></td><td>STRING</td><td>Human-readable app name</td></tr>
+    <tr><td><code>campaign_id / campaign_title</code></td><td>STRING</td><td>Campaign identifiers</td></tr>
+    <tr><td><code>pillar</code></td><td>STRING</td><td>Blueprint pillar (creative, data_and_signals, duplication, optimization_strategy, supply)</td></tr>
+    <tr><td><code>blueprint_index</code></td><td>STRING</td><td>Sub-pillar check identifier (e.g. <code>1_creative_format_adoption</code>)</td></tr>
+    <tr><td><code>score</code></td><td>FLOAT64</td><td>Campaign-level score for this pillar × blueprint_index (0–100)</td></tr>
+    <tr><td><code>overall_blueprint_score</code></td><td>FLOAT64</td><td>Campaign-level overall Blueprint score (0–100)</td></tr>
+    <tr><td><code>spend_L7</code></td><td>FLOAT64</td><td>Last 7 days spend — used as weight for bundle-level aggregation</td></tr>
+    <tr><td><code>detail</code></td><td>STRING</td><td>Human-readable diagnosis for this check</td></tr>
+    <tr><td><code>recommendations</code></td><td>STRING</td><td>Recommended action for this check</td></tr>
+    <tr><td><code>os</code></td><td>STRING</td><td>Operating system (ANDROID / IOS, mixed case in source)</td></tr>
+  </tbody>
+</table>
+
+<h3>Taxonomy Join: <code>moloco-dsp-data-view.athena.dim1_app_v3_rmg_vertical</code></h3>
+<p style="color:#6c757d; font-size:12px; margin: 4px 0 8px;">Enriches bundles with vertical / sub_vertical / genre for peer group construction.</p>
+
+<h3>Query Output Schema (<code>load_scores()</code>)</h3>
+<p style="color:#6c757d; font-size:12px; margin: 4px 0 8px;">Returns a single DataFrame with two row types, distinguished by <code>is_focal</code>:</p>
+<table>
+  <thead><tr><th>is_focal</th><th>Description</th><th>Used for</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-gray">False</span></td>
+      <td>Global peer pool — all platforms, one row per bundle × pillar × blueprint_index. Bundle-level spend-weighted scores.</td>
+      <td>Box plot distribution, peer benchmark stats (median, IQR, percentile)</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-blue">True</span></td>
+      <td>Focal entity rows — platform + entity filtered, campaign-level grain.</td>
+      <td>Focal diamond on chart, detail table, recommendations, campaign range</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Peer Group Logic</h3>
+<table>
+  <thead><tr><th>Level</th><th>Condition</th><th>Fallback</th></tr></thead>
+  <tbody>
+    <tr><td>Genre</td><td>≥ 10 bundles at this genre</td><td>Try sub-vertical</td></tr>
+    <tr><td>Sub-vertical</td><td>≥ 10 bundles at this sub-vertical</td><td>Try vertical</td></tr>
+    <tr><td>Vertical</td><td>≥ 10 bundles at this vertical</td><td>"insufficient" — banner warning shown</td></tr>
+  </tbody>
+</table>
+
+<!-- ── 6. Filter Logic ─────────────────────────────────────────────────── -->
+<h2>6. Filter Logic</h2>
+
+<table>
+  <thead><tr><th>Filter type</th><th>Applied to</th><th>Filters</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Taxonomy filters</strong></td>
+      <td>Global peer pool only (<code>global_enriched</code>)</td>
+      <td>Vertical, Sub-vertical, Genre — via <code>dim1_app</code> JOIN</td>
+    </tr>
+    <tr>
+      <td><strong>Context filters</strong></td>
+      <td>Both peer pool and focal entity</td>
+      <td>OS — applied as <code>UPPER(b.os) = @os</code> (case-insensitive)</td>
+    </tr>
+    <tr>
+      <td><strong>Focal filters</strong></td>
+      <td>Focal entity only (<code>focal_enriched</code>)</td>
+      <td>Advertiser ID, App Bundle, Campaign ID</td>
+    </tr>
+    <tr>
+      <td><strong>Spend filter</strong></td>
+      <td>Peer pool only</td>
+      <td><code>spend_L7 &gt; 0</code> — ensures only active bundles in peer distribution</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin-top:8px; color:#6c757d; font-size:11px;">
+  Taxonomy filters are intentionally NOT applied to focal_enriched — a focal bundle with a NULL dim1_app taxonomy (new/untagged) would be silently excluded if taxonomy filters were applied there.
+</p>
+
+<!-- ── 7. UI Views ─────────────────────────────────────────────────────── -->
+<h2>7. UI Views</h2>
+
+<div class="view-row">
+  <div class="view-card">
+    <h3>Tab 1 — Overall &amp; Pillar Scores</h3>
+    <ul>
+      <li>Horizontal box plots — one per pillar + overall</li>
+      <li>Peer distribution (gray boxes) + focal diamond (blue = bundle, red = campaigns)</li>
+      <li>Headline callout: percentile, most lagged / most advanced pillar</li>
+      <li>Summary table: Bundle Score | Peer Median | Peer IQR | Gap | Status</li>
+      <li>Campaign view adds "Campaign Range" column (min–max across campaigns)</li>
+      <li>Toggle: Bundle view vs Campaign view</li>
+    </ul>
+  </div>
+  <div class="view-card">
+    <h3>Tab 2 — Pillar Drill-Down</h3>
+    <ul>
+      <li>Select pillar → sub-pillar box plots within that pillar</li>
+      <li>Callout: pillar percentile + most lagged / strongest sub-pillar</li>
+      <li>Peer Benchmark table: per-sub-pillar gap vs peer median</li>
+      <li>Sub-pillar dropdown filters Campaign Detail table</li>
+      <li>Campaign Detail: Campaign | Spend L7 | Score | Detail | Recommendation</li>
+    </ul>
+  </div>
+  <div class="view-card">
+    <h3>Tab 3 — Peer Leaderboard</h3>
+    <ul>
+      <li>Ranked table of all peer bundles by overall Blueprint score</li>
+      <li>Focal bundle highlighted in blue (★) with blue background row</li>
+      <li>Columns: Rank | App | Bundle | Overall | per-pillar scores</li>
+      <li>Score cells color-coded: green ≥ 80 / orange ≥ 50 / red &lt; 50</li>
+      <li>Focal rank shown in subtitle (e.g. "focal bundle ranked #12")</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── 8. Deployment ───────────────────────────────────────────────────── -->
+<h2>8. Deployment</h2>
+
+<h3>Deploy Command</h3>
+<pre style="background:#212529; color:#f8f9fa; padding:16px; border-radius:8px; font-size:12px; overflow-x:auto; line-height:1.7;">
+gcloud run deploy blueprint-seller-insight \
+  --source . \
+  --region asia-southeast1 \
+  --project gds-apac \
+  --allow-unauthenticated \
+  --memory 1Gi --cpu 1 --timeout 300 \
+  --set-env-vars="GOOGLE_CLIENT_ID=&lt;client_id&gt;,GOOGLE_CLIENT_SECRET=&lt;secret&gt;,AUTH_SECRET=&lt;random_key&gt;"</pre>
+
+<table>
+  <thead><tr><th>Environment Variable</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>GOOGLE_CLIENT_ID</code></td><td>OAuth 2.0 client ID from GCP Console</td></tr>
+    <tr><td><code>GOOGLE_CLIENT_SECRET</code></td><td>OAuth 2.0 client secret</td></tr>
+    <tr><td><code>AUTH_SECRET</code></td><td>Flask session signing key (random, keep secret)</td></tr>
+  </tbody>
+</table>
+
+<h3>Local Development</h3>
+<pre style="background:#212529; color:#f8f9fa; padding:16px; border-radius:8px; font-size:12px; overflow-x:auto; line-height:1.7;">
+gcloud auth application-default login
+python app.py   # runs on http://localhost:8080 — auth bypassed, uses ADC</pre>
+
+<!-- ── 9. Known Constraints ────────────────────────────────────────────── -->
+<h2>9. Known Constraints &amp; Gotchas</h2>
+<table>
+  <thead><tr><th>Issue</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>BQ job permission required</td>
+      <td>Users must be in <code>gcp-bigquery-user</code> or <code>gcp-gds-apac</code> Google Groups to run queries. Auth succeeds but dropdowns appear empty without this.</td>
+    </tr>
+    <tr>
+      <td>OS field mixed case</td>
+      <td>Blueprint table stores <code>os</code> in mixed case (e.g. "Android", "android"). Always filter with <code>UPPER(b.os) = @os</code>.</td>
+    </tr>
+    <tr>
+      <td>Taxonomy filters on focal entity</td>
+      <td>Never apply vertical/sub_vertical/genre filters to <code>focal_enriched</code> — untagged bundles have NULL dim1_app joins and would be silently excluded.</td>
+    </tr>
+    <tr>
+      <td>spend_L7 in UNION</td>
+      <td>Campaign-level <code>spend_L7</code> only exists in focal rows. Peer rows carry <code>CAST(NULL AS FLOAT64) AS spend_L7</code> to keep the UNION schema aligned.</td>
+    </tr>
+    <tr>
+      <td>gunicorn session affinity</td>
+      <td>2 workers share the same Flask secret key so sessions are valid across workers. Scaling to multiple instances would require a shared session store.</td>
+    </tr>
+    <tr>
+      <td>Cold start latency</td>
+      <td>First BQ query after a cold start can take 10–20 s. The "Querying BigQuery…" spinner covers this.</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer>
+  Blueprint Seller Insight · KOR GDS · Haewon Yum &nbsp;|&nbsp;
+  Source: <code>/Documents/Queries/Blueprint/seller_insight/</code> &nbsp;|&nbsp;
+  Hosted: <code>gds-apac / Cloud Run / asia-southeast1</code>
+</footer>
+
+</body>
+</html>

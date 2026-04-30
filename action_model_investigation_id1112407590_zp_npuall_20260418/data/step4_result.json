@@ -1,0 +1,43 @@
+{
+  "step": 4,
+  "verdict": "FAIL",
+  "models": [
+    {
+      "model": "action_consol_v2_ifa_cont",
+      "timestamp": 1776430037,
+      "deployed_utc": "2026-04-17 12:47 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false}]
+    },
+    {
+      "model": "action_consol_v2_ifa_cpu_cont",
+      "timestamp": 1776429961,
+      "deployed_utc": "2026-04-17 12:46 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false}]
+    },
+    {
+      "model": "action_consol_v2_lat_cont",
+      "timestamp": 1776429513,
+      "deployed_utc": "2026-04-17 12:38 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false}]
+    },
+    {
+      "model": "action_consol_v2_lat_cpu_cont",
+      "timestamp": 1776429515,
+      "deployed_utc": "2026-04-17 12:38 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false}]
+    },
+    {
+      "model": "ctv_action_v1a",
+      "timestamp": 1776438265,
+      "deployed_utc": "2026-04-17 15:04 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false}]
+    },
+    {
+      "model": "re_action_v8",
+      "timestamp": 1776411691,
+      "deployed_utc": "2026-04-17 07:41 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false}]
+    }
+  ],
+  "note": "id1112407590:ios:zp_npuall NOT FOUND in pb eval or bid-log eval across all 6 active models. Despite training data existing in BQ (Step 3), the eval key is absent — may be key format mismatch (case) or bundle not reaching eval threshold."
+}

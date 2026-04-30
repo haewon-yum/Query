@@ -1,0 +1,159 @@
+{
+  "step": 5,
+  "verdict": "WARN",
+  "models": [
+    {
+      "model": "action_consol_v2_ifa_cont",
+      "timestamp": 1776678283,
+      "deployed_utc": "2026-04-20 09:44 UTC",
+      "entries": [
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D1",
+          "pricing_metadata_type": "TYPE_ACTION",
+          "normalizer": 0.581570941722331,
+          "normalizer_data_source": "POSTBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true
+        },
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D3",
+          "pricing_metadata_type": "TYPE_ACTION",
+          "normalizer": 0.6319711095635042,
+          "normalizer_data_source": "POSTBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true
+        },
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D7",
+          "pricing_metadata_type": "TYPE_ACTION",
+          "normalizer": 0.6623321268065337,
+          "normalizer_data_source": "POSTBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true
+        },
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D14",
+          "pricing_metadata_type": "TYPE_ACTION",
+          "normalizer": 0.6790499604956349,
+          "normalizer_data_source": "POSTBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true,
+          "note": "Only 7 pb positives — unreliable AUC"
+        },
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D28",
+          "pricing_metadata_type": "TYPE_ACTION",
+          "normalizer": 0.6935470776119398,
+          "normalizer_data_source": "POSTBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true,
+          "note": "0 pb positives — normalizer unreliable"
+        },
+        {
+          "campaign": "IV7TA5O07K4JNsjn",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D1/D3/D7/D14/D28",
+          "pricing_metadata_type": "TYPE_ACTION",
+          "normalizer_data_source": "POSTBACK",
+          "note": "Paused campaign. Same normalizers as SqHUbqoeXYnCj6Ow (shared IFA pb eval pool)."
+        },
+        {
+          "campaign": "IV7TA5O07K4JNsjn",
+          "kpi_event": "af_purchase",
+          "prediction_type": "UNIFIED_D1",
+          "pricing_metadata_type": "TYPE_SEC_KPI",
+          "normalizer": 0.0016039046506115145,
+          "normalizer_data_source": "POSTBACK",
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true,
+          "note": "21 positives only — sparse"
+        },
+        {
+          "campaign": "IV7TA5O07K4JNsjn",
+          "kpi_event": "af_purchase",
+          "prediction_type": "UNIFIED_D3",
+          "pricing_metadata_type": "TYPE_SEC_KPI",
+          "normalizer": 0.0027849259179533524,
+          "normalizer_data_source": "POSTBACK",
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true,
+          "note": "12 positives"
+        },
+        {
+          "campaign": "IV7TA5O07K4JNsjn",
+          "kpi_event": "af_purchase",
+          "prediction_type": "UNIFIED_D7",
+          "pricing_metadata_type": "TYPE_SEC_KPI",
+          "normalizer": 0.003874408120456957,
+          "normalizer_data_source": "POSTBACK",
+          "num_examples_for_normalizer": 3551,
+          "pb_eval_empty": false,
+          "bid_eval_empty": true,
+          "note": "4 positives only — extremely sparse"
+        }
+      ]
+    },
+    {
+      "model": "action_consol_v2_lat_cont",
+      "timestamp": 1776677889,
+      "deployed_utc": "2026-04-20 09:38 UTC",
+      "entries": [
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D7",
+          "pricing_metadata_type": "TYPE_ACTION_LAT",
+          "normalizer": 0.8041973226794666,
+          "normalizer_data_source": "FALLBACK",
+          "normalizer_fallback_level": "unknown",
+          "num_examples_for_normalizer": 0,
+          "pb_eval_empty": true,
+          "bid_eval_empty": true,
+          "note": "FALLBACK normalizer — no eval data. Only D7 entry present (matches campaign_goal post_conversion_pred_type). IV7TA5O07K4JNsjn absent from LAT pbtxt."
+        }
+      ]
+    },
+    {
+      "model": "action_consol_v2_lat_cpu_cont",
+      "timestamp": 1776677794,
+      "deployed_utc": "2026-04-20 09:36 UTC",
+      "entries": [
+        {
+          "campaign": "SqHUbqoeXYnCj6Ow",
+          "kpi_event": "af_ad_revenue",
+          "prediction_type": "UNIFIED_D7",
+          "pricing_metadata_type": "TYPE_ACTION_LAT",
+          "normalizer": 0.8041973226794666,
+          "normalizer_data_source": "FALLBACK",
+          "normalizer_fallback_level": "unknown",
+          "num_examples_for_normalizer": 0,
+          "pb_eval_empty": true,
+          "bid_eval_empty": true,
+          "note": "Same as lat_cont — FALLBACK normalizer"
+        }
+      ]
+    }
+  ]
+}

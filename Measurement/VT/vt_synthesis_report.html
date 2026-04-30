@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>KOR VT Analysis — Synthesis & Gap-Closing Plan</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+  :root {
+    --moloco-orange: #ff4d00;
+    --ink: #1a1a1a;
+    --muted: #5f6c7b;
+    --line: #e5e8ec;
+    --bg-soft: #f7f8fa;
+    --ok: #1a7f37;
+    --warn: #b15c00;
+    --bad: #b42318;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif; color: var(--ink); background: #fff; line-height: 1.55; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 48px 96px; }
+  h1 { font-size: 32px; line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 8px; }
+  h2 { font-size: 22px; margin: 56px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); letter-spacing: -0.005em; }
+  h3 { font-size: 17px; margin: 28px 0 8px; color: var(--ink); }
+  h4 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 20px 0 8px; }
+  p, li { font-size: 15px; }
+  a { color: var(--moloco-orange); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .pill.ok { background: #e6f4ea; color: var(--ok); }
+  .pill.warn { background: #fff4e5; color: var(--warn); }
+  .pill.bad { background: #fdecea; color: var(--bad); }
+  .pill.neutral { background: var(--bg-soft); color: var(--muted); }
+  .tldr { background: var(--bg-soft); border-left: 4px solid var(--moloco-orange); padding: 16px 20px; border-radius: 4px; margin: 16px 0 24px; }
+  .tldr ul { margin: 6px 0 0 18px; padding: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 16px 0; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
+  .card { border: 1px solid var(--line); border-radius: 6px; padding: 16px; background: #fff; }
+  .card h4 { margin-top: 0; }
+  .stat { font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; }
+  .stat + .label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 20px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { background: var(--bg-soft); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--moloco-orange); padding: 12px 16px; background: #fff; border-radius: 4px; margin: 16px 0; font-size: 14px; }
+  .callout.warn { border-left-color: var(--warn); background: #fffaf2; }
+  .callout.bad { border-left-color: var(--bad); background: #fff5f4; }
+  .callout h4 { margin: 0 0 6px; color: var(--ink); text-transform: none; letter-spacing: 0; font-size: 14px; }
+  .insight { background: #f4f9fd; border: 1px solid #d5e5f2; border-left: 4px solid #2d6cdf; padding: 14px 18px; border-radius: 4px; margin: 18px 0 20px; font-size: 14px; }
+  .insight h4 { margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; color: #2d6cdf; }
+  .insight ul { margin: 6px 0 0 18px; padding: 0; }
+  .openq { background: #fffaf2; border: 1px solid #f3d9b2; border-left: 4px solid var(--warn); padding: 12px 16px; border-radius: 4px; margin: 12px 0 18px; font-size: 14px; }
+  .openq h4 { margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; color: var(--warn); }
+  .openq ul { margin: 6px 0 0 18px; padding: 0; }
+  .objection { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 18px; margin: 14px 0; }
+  .objection .obj-title { font-weight: 600; color: var(--bad); font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .objection .reb-title { font-weight: 600; color: var(--ok); font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 12px; }
+  nav.toc { background: var(--bg-soft); padding: 14px 20px; border-radius: 6px; margin: 12px 0 24px; font-size: 14px; }
+  nav.toc ol { margin: 4px 0 0 18px; padding: 0; }
+  nav.toc li { margin: 2px 0; }
+  footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+  .plot { width: 100%; min-height: 400px; margin: 8px 0 4px; }
+  .plot-tall { min-height: 520px; }
+  .plot-xtall { min-height: 620px; }
+  .plot-wrap { border: 1px solid var(--line); border-radius: 4px; padding: 8px 8px 4px; background: #fff; margin: 14px 0; }
+  .plot-caption { font-size: 12px; color: var(--muted); text-align: center; margin: 0 0 4px; }
+  .plot-reads { font-size: 13px; color: var(--ink); text-align: center; margin: 0 0 10px; padding: 4px 20px; line-height: 1.4; }
+  .plot-reads strong { color: var(--moloco-orange); font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; font-size: 11px; margin-right: 6px; }
+  .interactive-badge { display: inline-block; background: var(--moloco-orange); color: #fff; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; margin-left: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="meta">KOR GDS · DS Analysis · 2026-04-22 · Owner: haewon.yum@moloco.com · Contributor: donggyeong.kim@moloco.com</div>
+<h1>KOR VT Analysis — Synthesis &amp; Gap-Closing Plan <span class="interactive-badge">FULLY INTERACTIVE</span></h1>
+<div class="meta">Priority task from GDS × Sales workshop (Jan 2026). Source doc: <a href="https://docs.google.com/document/d/17P3y6WdYpJpnLf-lxCnIXZTbyNamFSXojmmop6ULz3I">[WIP] MA DS: VT landscape and potential objection handling narratives in KOR</a></div>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#origin">Origin &amp; mandate</a></li>
+    <li><a href="#tldr">Executive summary</a></li>
+    <li><a href="#agenda">Discussion agenda — for GDS Sales sync</a></li>
+    <li><a href="#landscape">1. VT landscape — where is KOR different?</a></li>
+    <li><a href="#ib">2. Why KOR over-indexes on IB</a></li>
+    <li><a href="#kakao">3. KakaoTalk's role — VT, reach, assist</a></li>
+    <li><a href="#quality">4. User quality (VT vs CT × Kakao vs Non-Kakao)</a></li>
+    <li><a href="#objections">5. Incrementality narrative crib sheet</a></li>
+    <li><a href="#gaps">6. Gaps &amp; open questions</a></li>
+    <li><a href="#next">7. Next steps (P0 → P3)</a></li>
+    <li><a href="#confidence">8. Observation register</a></li>
+    <li><a href="#review">Appendix — review trail</a></li>
+  </ol>
+</nav>
+
+<h2 id="origin">Origin &amp; mandate</h2>
+
+<div class="callout">
+<h4>Original problem statement (GDS × Sales workshop, Jan 2026)</h4>
+<p><em>"We don't have structural evidence on incrementality, particularly on image banners (e.g. Kakao Bizboard)."</em></p>
+<p>This is the parent question. Everything in this report is downstream of the need to build a defensible narrative — and, where possible, causal evidence — for high-VT campaigns on image-banner inventory in KOR.</p>
+</div>
+
+<h4>Stakeholder inputs that shaped scope</h4>
+<ul>
+  <li><strong>Kuyoung Chung:</strong> iOS is harder than Android because probabilistic attribution prevents us from <em>measuring</em> incrementality at all. We need a defense logic that works without a clean experimental channel on iOS.</li>
+  <li><strong>Hankhil Lee:</strong> For iOS VT inventory, if IB performance looks "too good," the default suspicion is organic poaching (VT credit for installs that would have happened anyway). This is most pronounced on non-gaming titles. A symmetric challenge on the other side: <em>why isn't Android better than iOS</em>, given Android is where we can actually measure?</li>
+  <li><strong>Case archive:</strong> "[GDS] High VT cases inputs" sheet is the intake point for specific client cases where sellers face VT pushback. This report should connect to that sheet as the operational tool.</li>
+</ul>
+
+<h4>Scope derived from workshop</h4>
+<table>
+  <thead><tr><th>Platform</th><th>Track</th><th>Evidence approach</th></tr></thead>
+  <tbody>
+    <tr><td>Android</td><td>Bulk incrementality test (primary)</td><td>Causal — holdout experiment on KakaoTalk-heavy advertisers. Android supports clean measurement.</td></tr>
+    <tr><td>iOS</td><td>(2-1) [TBD: alternative incrementality proxy on iOS]</td><td>Probabilistic attribution prevents direct measurement. Candidates: SKAN postback pattern analysis, supply-side IDFA-consented subset as instrument, MMP-based geo-holdout.</td></tr>
+    <tr><td>iOS</td><td>(2-2) User quality comparison VT vs CT by format</td><td>Observational — if IB performs materially better than other formats, organic-poaching suspicion rises. This is the current Section 4 work.</td></tr>
+    <tr><td>iOS</td><td>(2-3) VT ↔ organic user in market</td><td>Observational — are we poaching or assisting? Overlap analysis between Moloco-attributed installs and the organic install pool.</td></tr>
+  </tbody>
+</table>
+
+<p>Framing: <strong>the report is evidence for a narrative, not a substitute for the experiment.</strong> The observational work here supports supply / reach / quality claims today; it does not resolve the incrementality question the workshop opened with.</p>
+
+<h2 id="tldr">Executive summary</h2>
+
+<div class="tldr">
+<strong>TL;DR — what the observational data shows, and what it cannot.</strong>
+<ul>
+  <li><strong>KOR's VT ratio is higher than any other market we measure.</strong> KOR-target × all-offices aggregate: iOS 63% / Android 37% (Jan 2026, <code>fact_dsp_publisher</code>). KOR-office × KOR-target: iOS 78.8% / Android 50.4%.</li>
+  <li><strong>KOR over-indexes on IB format.</strong> IB is 42% of KOR iOS installs and 27% of Android installs vs global 19.9% / 11.3% (<code>fact_dsp_creative</code>).</li>
+  <li><strong>KakaoTalk is the single largest IB publisher in KOR</strong> — 42.3% of Android IB installs, 26.3% of iOS IB installs. VT ratio on Kakao IB = 94.0% (Android) and 97.7% (iOS); non-Kakao IB = 83.5% / 97.6%.</li>
+  <li><strong>KakaoTalk exclusion impact on aggregate VT</strong> (KOR office × KOR target baseline): Android 50.4% → 42.1% (−8.3pp); iOS 78.8% → 74.7% (−4.1pp).</li>
+  <li><strong>Exclusive device-ID reach through KakaoTalk</strong> (unsampled 2-day snapshot, Mar 28–29 via <code>codered_bid</code>): Android 8.8% of Moloco-reachable IDs are only seen on KakaoTalk; iOS 11.6% (IDFA-consented subset only — iOS figure is directional).</li>
+  <li><strong>Observational user quality (KOR Android, top-10 Kakao-spend bundles, Jan 2026):</strong> in the retention heatmap (full 10-bundle view static in §4b) several gaming bundles show VT × KakaoTalk D1/D3/D7 retention comparable to or higher than CT × Non-KakaoTalk baselines. On non-gaming many cells fall below the 50-install threshold and are N/A.</li>
+</ul>
+<strong>What this data cannot tell us:</strong> whether these VT installs are <em>incremental</em>. Observational retention has the same signature whether VT installs are real-new-users or organic-poaching. Only a holdout experiment can separate the two. On iOS, probabilistic attribution blocks the standard experimental path — an alternative proxy design is an open workstream.
+</div>
+
+<div class="grid3">
+  <div class="card"><div class="stat">63% / 37%</div><div class="label">VT ratio — KOR target, all offices (iOS / Android)</div></div>
+  <div class="card"><div class="stat">78.8% / 50.4%</div><div class="label">VT ratio — KOR office × KOR target (iOS / Android)</div></div>
+  <div class="card"><div class="stat">42% / 27%</div><div class="label">IB install share in KOR vs global 19.9% / 11.3% (iOS / Android)</div></div>
+  <div class="card"><div class="stat">42.3%</div><div class="label">KakaoTalk share of KOR Android IB installs</div></div>
+  <div class="card"><div class="stat">−8.3pp / −4.1pp</div><div class="label">VT drop when KakaoTalk is excluded (Android / iOS)</div></div>
+  <div class="card"><div class="stat">8.8% / 11.6%</div><div class="label">KakaoTalk-exclusive reach (Android / iOS, iOS ATT-biased)</div></div>
+</div>
+
+<h2 id="agenda">Discussion agenda — for GDS Sales sync</h2>
+
+<p class="meta"><strong>Context one-liner.</strong> Workshop mandate was "build an incrementality narrative for high-VT KOR campaigns, especially Kakao Bizboard." This analysis establishes composition (IB-heavy), publisher concentration (KakaoTalk) and format-structural VT — but <em>not</em> incrementality. Android can get there via a holdout; iOS cannot (probabilistic attribution). The agenda below is what we need Sales to decide.</p>
+
+<h3>Q1. What is the narrative posture we want?</h3>
+<ul>
+  <li><strong>Defense-only or offense-and-defense?</strong> Are we arming sellers with rebuttals to the three client objections (VT level, user quality, "just exclude Kakao"), or also equipping them to proactively pitch Kakao-heavy spend as a growth lever?</li>
+  <li><strong>Level of hedging.</strong> How transparent do we front-load the incrementality caveat? Fully transparent ("we can't prove incrementality today, but…") vs soft hedge ("we observe strong signals that…"). The former protects credibility with sophisticated clients; the latter carries more commercial weight.</li>
+  <li><strong>Audience segmentation.</strong> Same narrative for all KOR clients, or differentiated by (a) gaming vs non-gaming, (b) CMO vs performance-marketer buyer, (c) sophistication with MMP attribution? A gaming CMO who already believes in VT is a different conversation than a non-gaming performance buyer who ran an MMP holdout last quarter.</li>
+  <li><strong>Follow-through handoff.</strong> When a client pushes past the rebuttal ("run a holdout for me"), does sales have a clear handoff path to DS, and what is the SLA on the experiment?</li>
+</ul>
+
+<h3>Q2. Should iOS and Android be separate narratives?</h3>
+
+<p>The data shows the two platforms are structurally different — a unified narrative will either overclaim on iOS or underclaim on Android.</p>
+
+<table>
+  <thead><tr><th>Dimension</th><th>Android</th><th>iOS</th></tr></thead>
+  <tbody>
+    <tr><td>KakaoTalk share of IB installs</td><td>42.3% (dominant)</td><td>26.3% (co-top with Block Blast 27.5%)</td></tr>
+    <tr><td>Kakao-IB VT vs Non-Kakao IB VT</td><td>94.0% vs 83.5% — <strong>+10.5pp Kakao-specific signal</strong></td><td>97.7% vs 97.6% — essentially equal, no Kakao-specific signal</td></tr>
+    <tr><td>Excl-Kakao impact on aggregate VT</td><td>−8.3pp</td><td>−4.1pp</td></tr>
+    <tr><td>Exclusive reach measurability</td><td>Clean (GAID)</td><td>ATT-biased (directional only)</td></tr>
+    <tr><td>Incrementality measurability</td><td>Holdout viable</td><td>Probabilistic attribution blocks it — no design yet</td></tr>
+  </tbody>
+</table>
+
+<ul>
+  <li><strong>Android is Kakao-centric, iOS isn't.</strong> Android allows "Kakao adds a measurable +10.5pp VT on banner + 8.8% exclusive reach." iOS has no Kakao-specific signal — do we pitch iOS IB as a <em>format-structural</em> story (all banner publishers produce 97%+ VT — see §3a) or a <em>publisher-diversity</em> story (Block Blast + KakaoTalk + KakaoMap + Daum for broad reach)?</li>
+  <li><strong>Operational cost of two narratives.</strong> Sellers have finite bandwidth. Is a split narrative workable, or should we calibrate the unified message to the weaker-evidence platform (iOS) and phrase it conservatively?</li>
+  <li><strong>Hankhil's challenge — "why isn't Android better than iOS?"</strong> Do we defer this entirely to the Android holdout result, or do we need a holding answer (candidates: KakaoTalk's Android inventory is broader / cheaper / less contested — none tested)?</li>
+  <li><strong>iOS track 2-1 commitment.</strong> Workshop listed this as TBD. Do we commit here to an iOS incrementality-proxy design (SKAN pattern analysis / geo-holdout on MMP-attributable / IDFA-consented subset as observational instrument) with an owner and delivery date?</li>
+</ul>
+
+<h3>Q3. Why is KOR IB win rate 2–3× other markets? (investigation, not sales-ready)</h3>
+
+<p><strong>What we observe (§2d, §2e):</strong> KOR Banner win rate iOS 41.2% / Android 28.5% — highest of any top-6 market. Closest peer is GBR iOS 19.7% (half of KOR). Non-gaming IB publisher inventory wins 2× more than Gaming IB (Android 33.2% vs 16.4%; iOS 48.2% vs 28.2%).</p>
+
+<p><strong>What we can't tell Sales yet:</strong> whether the high win rate reflects (a) lower competition on KOR banner supply, (b) higher Moloco bid prices, (c) lower bid floors on KakaoTalk/Daum/tmobi inventory, or (d) KAKAO-exchange-specific auction dynamics. None of these has been decomposed.</p>
+
+<ul>
+  <li><strong>Narrative asset or market feature?</strong> If it's a Moloco pricing/targeting strength, it's a sellable claim ("we win 2× more banner in KOR"). If it's a market feature (cheaper floors or fewer bidders), it's not our story.</li>
+  <li><strong>Gate for the P1 narrative?</strong> My read: not a gate — the "KOR VT is real because Kakao-exclusive reach is 8.8%" story holds without the win-rate explanation. This can be P2 follow-up.</li>
+  <li><strong>Ownership.</strong> This is a supply/pricing investigation, not sales enablement. Candidates: DS + Daniel Jeon (supply) + pricing team. File as a ticket?</li>
+</ul>
+
+<h3>Decisions we need out of the meeting</h3>
+<ol>
+  <li><strong>Narrative posture (Q1)</strong> — lock the hedging level and audience segmentation before the §5 crib sheet is socialised.</li>
+  <li><strong>Two narratives or one (Q2)</strong> — single go-to-market story vs Android-first / iOS-second framing.</li>
+  <li><strong>iOS incrementality proxy (Q2)</strong> — name an owner and a deadline for the design so "track 2-1" stops being TBD.</li>
+  <li><strong>Experiment commitment (Q1 follow-through)</strong> — can we name the Android holdout pilot advertiser by end of meeting? 1 gaming + 1 non-gaming.</li>
+  <li><strong>KOR win-rate investigation (Q3)</strong> — scope as P2 ticket; assign owner.</li>
+</ol>
+
+<h3>Pre-reads for the meeting</h3>
+<ul>
+  <li>This interactive report (scroll past the agenda to §1 onwards for data).</li>
+  <li>Objection crib sheet: §5 of this report.</li>
+  <li>Source doc: <a href="https://docs.google.com/document/d/17P3y6WdYpJpnLf-lxCnIXZTbyNamFSXojmmop6ULz3I">[WIP] MA DS: VT landscape and potential objection handling narratives in KOR</a>.</li>
+  <li>Live case archive: <strong>[GDS] High VT cases inputs</strong> sheet.</li>
+</ul>
+
+<h2 id="landscape">1. VT landscape — where is KOR different?</h2>
+
+<p>Reference: <code>vt_landscape.ipynb</code>. Data window: 2026-01-01 → 2026-01-31, <code>fact_dsp_publisher</code> for aggregate VT and campaign-level distribution.</p>
+
+<div class="plot-wrap"><div id="plot_vt_by_country" class="plot"></div>
+<p class="plot-caption">Aggregate VT ratio by target country × OS (KOR-targeting, all offices). Hover for values; click legend to isolate OS.</p>
+<p class="plot-reads"><strong>Reads as</strong>KOR tops every top-10 spend market on both platforms; iOS VT runs ~1.7× Android across the ten countries.</p></div>
+
+<h3>Key landscape numbers</h3>
+<table>
+  <thead><tr><th>Slice</th><th>Metric</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>KOR target × All offices</td><td>Aggregate VT ratio iOS</td><td class="num">63%</td></tr>
+    <tr><td>KOR target × All offices</td><td>Aggregate VT ratio Android</td><td class="num">37%</td></tr>
+    <tr><td>KOR target × KOR office</td><td>Aggregate VT ratio iOS</td><td class="num">78.8%</td></tr>
+    <tr><td>KOR target × KOR office</td><td>Aggregate VT ratio Android</td><td class="num">50.4%</td></tr>
+    <tr><td>KOR target × KOR office</td><td>Spend share in VT &gt; 60% bucket, iOS</td><td class="num">77% (1,302K / 1,702K)</td></tr>
+    <tr><td>KOR target × KOR office</td><td>Spend share in VT &gt; 60% bucket, Android</td><td class="num">35% (1,010K / 2,922K)</td></tr>
+  </tbody>
+</table>
+
+<p class="meta"><strong>Scope note.</strong> The two rows of aggregate VT ratios have different denominators — the first spans all offices buying KOR, the second is KOR-office advertisers only. The KakaoTalk-exclusion deltas in §3 are computed against the KOR-office baseline.</p>
+
+<div class="insight">
+<h4>Section 1 insight (observation only)</h4>
+<ul>
+  <li>KOR is the standout VT market at the target-country level: iOS 63% and Android 37% are the highest of the top-10 spend countries.</li>
+  <li>iOS VT ratio is ~1.7× Android VT ratio for KOR (63 / 37 = 1.70).</li>
+  <li>When narrowed to KOR-office advertisers targeting KOR, the aggregate rises to 78.8% / 50.4% — KOR-office advertisers have a more VT-skewed mix than non-KOR offices targeting the same market.</li>
+  <li>77% of iOS spend and 35% of Android spend from KOR-office × KOR-target campaigns sits in the VT &gt; 60% bucket.</li>
+</ul>
+</div>
+
+<div class="openq">
+<h4>Section 1 open questions</h4>
+<ul>
+  <li>Why is the VT ratio 15pp higher on iOS and 13pp higher on Android when restricted to KOR-office advertisers vs all offices? Candidate explanations not yet tested: creative-format mix by office, campaign-type mix (UA vs RE), or advertiser-vertical mix.</li>
+  <li>Is the KOR VT level stable over time, or has it drifted through 2024–2026? Current snapshot is Jan 2026 only.</li>
+</ul>
+</div>
+
+<h2 id="ib">2. Why KOR over-indexes on IB</h2>
+
+<p>Reference: <code>ib_format_deepdive.ipynb</code>. Data window: L30D from run date. Tables: <code>fact_dsp_creative</code> (install share), <code>bidrequest2026*</code> (supply-side format mix, 1/10,000 sampled), <code>fact_supply</code> (bidding rates).</p>
+
+<h3>2a. IB install share — KOR vs global benchmark</h3>
+
+<div class="plot-wrap"><div id="plot_ib_share" class="plot"></div>
+<p class="plot-caption">IB install share — KOR vs global benchmark, by OS. <code>fact_dsp_creative</code>, L30D.</p>
+<p class="plot-reads"><strong>Reads as</strong>KOR iOS IB share is 2.1× the global benchmark (42% vs 19.9%); KOR Android is 2.4× (27% vs 11.3%).</p></div>
+
+<h3>2b. IB install share by country × OS</h3>
+
+<div class="plot-wrap"><div id="plot_ib_country_os" class="plot"></div>
+<p class="plot-caption">IB install share by country — top 5 spend markets + Others, by OS. Hover for exact values.</p>
+<p class="plot-reads"><strong>Reads as</strong>KOR leads on both platforms. Closest comparators are DEU iOS (28%) and JPN Android (13%). USA/GBR/DEU Android all sit below 7%.</p></div>
+
+<h3>2c. Supply-side format mix — bid-request composition</h3>
+
+<div class="plot-wrap"><div id="plot_supply_mix" class="plot plot-tall"></div>
+<p class="plot-caption">100% stacked bid-request format mix (Banner / Native / Interstitial) by country × OS. Countries sorted by max Banner share desc. Sampled 1/10,000; totals scaled.</p>
+<p class="plot-reads"><strong>Reads as</strong>KOR has the highest Banner share on both platforms (iOS 47%, Android 37%). On Android, JPN has the largest Native share (37%); USA and Others are Interstitial-heavy.</p></div>
+
+<h3>2d. Bidding-strategy rates by inventory format × country</h3>
+
+<div class="plot-wrap"><div id="plot_bid_rate" class="plot plot-tall"></div>
+<p class="plot-caption">Bid rate (bids / bid requests) by inventory format × country, per OS. Hover for exact rate.</p>
+<p class="plot-reads"><strong>Reads as</strong>Interstitial has the highest bid rate in KOR on both OS (iOS 31.5%, Android 21.1%). Among the remaining formats, Banner is highest in KOR iOS (19.3%) but on KOR Android Video-Interstitial (9.2%) slightly edges Banner (8.5%).</p></div>
+
+<div class="plot-wrap"><div id="plot_win_rate" class="plot plot-tall"></div>
+<p class="plot-caption">Win rate (bids won / bids) by inventory format × country, per OS. All 6 markets shown.</p>
+<p class="plot-reads"><strong>Reads as</strong>KOR Banner wins at 41.2% iOS / 28.5% Android — the highest Banner win rate of any of the 6 markets. KOR Native win rate is also elevated (35% iOS, 19% Android). USA Banner win rate (iOS 15.1%, Android 10.7%) is in the lower half of the distribution.</p></div>
+
+<h3>2e. KOR IB — publisher genre split (gaming vs non-gaming)</h3>
+
+<p>Splits KOR IB bid-funnel by <code>req.app_is_gaming</code> — a publisher-side flag on whether the app serving the bid request is categorised as a game. This does not reflect the advertiser's vertical.</p>
+
+<div class="plot-wrap"><div id="plot_ib_genre_volume" class="plot"></div>
+<p class="plot-caption">KOR IB bid-request volume by publisher genre (L30D, <code>fact_supply</code>, <code>cr_format='ib'</code>).</p>
+<p class="plot-reads"><strong>Reads as</strong>Non-gaming publishers supply more KOR IB bid requests than gaming publishers on both platforms (Android 70% non-gaming, iOS 56% non-gaming).</p></div>
+
+<div class="plot-wrap"><div id="plot_ib_genre" class="plot plot-tall"></div>
+<p class="plot-caption">KOR IB funnel rates by publisher genre — bid rate, win rate, imp-to-bid, split by OS.</p>
+<p class="plot-reads"><strong>Reads as</strong>Non-gaming IB out-performs gaming IB on every funnel stage, both OS. Android: non-gaming win rate 33.2% vs gaming 16.4% (roughly 2×); iOS: non-gaming win rate 48.2% vs gaming 28.2% (~1.7×). Bid rate gap is smaller but in the same direction. The KOR IB over-index is concentrated in non-gaming publisher inventory (KakaoTalk, tmobi, Daum, etc. — see §3a).</p></div>
+
+<div class="insight">
+<h4>Section 2 insight (observation only)</h4>
+<ul>
+  <li>IB install share in KOR is 42% on iOS and 27% on Android (<code>fact_dsp_creative</code>, L30D). Global averages are 19.9% / 11.3%. KOR is ~2× the benchmark on both platforms.</li>
+  <li>KOR's bid-request stream has Banner share: iOS 46.5%, Android 36.7% (<code>bidrequest2026*</code>). KOR iOS Banner share is the highest of the top-5 spend markets; KOR Android Banner share is also higher than USA / GBR / DEU.</li>
+  <li>KOR iOS Banner bid rate is 19.3%, higher than Native (14.7%) and Video-Interstitial (9.0%). <strong>Interstitial has the highest bid rate in KOR iOS at 31.5%</strong> — so Banner leads among the formats other than Interstitial, not overall. On KOR Android the same pattern holds: Interstitial (21.1%) tops Banner (8.5%).</li>
+  <li>Banner win rate in KOR (iOS 41.2%, Android 28.5%) is the highest Banner win rate across all 6 markets shown (USA, JPN, KOR, GBR, DEU, Others). USA Banner win rate is in the lower half (iOS 15.1%, Android 10.7%).</li>
+  <li>KOR IB bid requests come mostly from non-gaming publishers: 70% on Android (150.1B of 214.8B) and 56% on iOS (49.9B of 89.9B). Non-gaming IB out-performs gaming IB on every funnel stage: Android win rate 33.2% non-gaming vs 16.4% gaming (~2×); iOS win rate 48.2% non-gaming vs 28.2% gaming (~1.7×).</li>
+</ul>
+</div>
+
+<div class="openq">
+<h4>Section 2 open questions</h4>
+<ul>
+  <li>Quantitatively, what share of the KOR IB over-index is attributable to supply mix vs Moloco's bidding behaviour? We have the two charts but have not decomposed the 42% vs 19.9% gap into supply-driven and bidding-driven components.</li>
+  <li>§2e shows publisher-genre split (<code>req.app_is_gaming</code>) — the exchange split (KAKAO vs others) is covered in §3 (KakaoTalk publisher section). Combined genre × exchange interaction has not been computed.</li>
+</ul>
+</div>
+
+<h2 id="kakao">3. KakaoTalk's role — VT, reach, assist</h2>
+
+<p>Reference: <code>kr_vt_deepdive.ipynb</code> §1–§4 and <code>kakao_deepdive.ipynb</code>. Data window: 2026-01-01 → 2026-01-31 for VT; Mar 28–29 for unsampled reach snapshot. Tables: <code>fact_dsp_publisher</code>, <code>fact_dsp_all</code>, <code>codered_bid</code>, <code>prod_stream_view.imp</code>, <code>prod_stream_view.pb</code>.</p>
+
+<h3>3a. Publisher composition within IB</h3>
+
+<div class="callout">
+<h4>Validation — why VT ratios look uniformly high (85–99%) across IB publishers</h4>
+<p>The numbers were re-queried from <code>fact_dsp_all</code> (Jan 2026, KOR, <code>creative.format = 'ib'</code>) and match exactly — e.g. <code>com.kakao.talk</code> Android 122,954 installs / 94.07% VT; Block Blast iOS 68,219 installs / 98.94% VT. This is not a data-quality issue.</p>
+<p>The uniformity is a <strong>structural property of IB format + view-through attribution</strong>, not a publisher-specific phenomenon. Cross-format VT ratios in the same KOR Jan-2026 window show:</p>
+</div>
+
+<div class="plot-wrap"><div id="plot_vt_by_format" class="plot"></div>
+<p class="plot-caption">KOR VT ratio by <code>creative.format</code> × OS (Jan 2026, installs ≥ 1,000). Source: <code>fact_dsp_all</code>.</p>
+<p class="plot-reads"><strong>Reads as</strong>Image-banner formats (ib, nl Native-List, ni Native-Image) are structurally VT-heavy — KOR Android ib 89.4%, nl 80.1%, ni 61.1%; iOS ib 97.6%, nl 96.7%, ni 91.1%. Click-through-prone formats (vi Video-Interstitial, ri Rewarded, ii Interstitial) are 3–7% VT. So "high VT across IB publishers" is consistent with the format itself, not suspicious per-publisher data.</p></div>
+
+<p><strong>Why this makes sense mechanically:</strong> banner CTR on KOR iOS is typically well below 1% (e.g. Block Blast iOS CT-to-install 0.06% per click). Banner impressions rarely convert via click; most of the installs attributed to a banner happen via the 24h view-through window instead. The two Android outliers — HanaMembers (11.8% VT) and CashMyCharge (29.7% VT) — have CT-heavy install paths and appear as red flags in the chart below.</p>
+
+<div class="plot-wrap"><div id="plot_pub_android" class="plot plot-tall"></div>
+<p class="plot-caption">KOR Android IB — top 20 publishers by install share, with VT ratio overlaid. Hover for bundle / counts / VT %.</p>
+<p class="plot-reads"><strong>Reads as</strong>KakaoTalk is 42.3% of Android IB installs — roughly 4× the next-largest publisher (tmobi app at 10.7%). Most top-20 publishers have VT ratios between 85–98%; two outliers (HanaMembers 11.8%, CashMyCharge 29.7%) run much lower.</p></div>
+
+<div class="plot-wrap"><div id="plot_pub_ios" class="plot plot-tall"></div>
+<p class="plot-caption">KOR iOS IB — top 20 publishers by install share, with VT ratio overlaid.</p>
+<p class="plot-reads"><strong>Reads as</strong>Block Blast (27.5%) and KakaoTalk (26.3%) together account for ~54% of KOR iOS IB installs. All top-20 iOS IB publishers have VT ratio ≥ 96.4% — the spread is narrower than on Android.</p></div>
+
+<table>
+  <thead><tr><th>OS</th><th>Kakao exchange share of IB installs</th><th>KakaoTalk publisher share of IB installs</th><th>Kakao IB VT ratio</th><th>Non-Kakao IB VT ratio</th></tr></thead>
+  <tbody>
+    <tr><td>Android</td><td class="num">55.8%</td><td class="num">42.3%</td><td class="num">94.0%</td><td class="num">83.5%</td></tr>
+    <tr><td>iOS</td><td class="num">35.2%</td><td class="num">26.3%</td><td class="num">97.7%</td><td class="num">97.6%</td></tr>
+  </tbody>
+</table>
+
+<h3>3b. KakaoTalk impact on aggregate VT ratio (all formats)</h3>
+
+<div class="plot-wrap"><div id="plot_excl_kt_vt" class="plot"></div>
+<p class="plot-caption">Aggregate VT ratio by Kakao-inclusion condition (KOR office × KOR target).</p>
+<p class="plot-reads"><strong>Reads as</strong>KakaoTalk-only VT ratio is very high (Android 88.7%, iOS 98.2%). Excluding KakaoTalk drops Android VT by 8.3pp and iOS by 4.1pp — the Android impact is double iOS in absolute terms.</p></div>
+
+<table>
+  <thead><tr><th>OS</th><th>All (incl. KakaoTalk)</th><th>KakaoTalk Only</th><th>Excl. KakaoTalk</th><th>Δ (All → Excl.)</th></tr></thead>
+  <tbody>
+    <tr><td>Android</td><td class="num">50.4%</td><td class="num">88.7%</td><td class="num">42.1%</td><td class="num">−8.3pp</td></tr>
+    <tr><td>iOS</td><td class="num">78.8%</td><td class="num">98.2%</td><td class="num">74.7%</td><td class="num">−4.1pp</td></tr>
+  </tbody>
+</table>
+
+<h3>3c. Kakao device-ID reach (unsampled bid-log snapshot)</h3>
+
+<div class="plot-wrap"><div id="plot_kakao_reach" class="plot plot-tall"></div>
+<p class="plot-caption">Device-ID reach partitioning by OS. Source: <code>moloco-dsp-profile-prod.bidlog.codered_bid</code>, 2 days (Mar 28–29, 2026). Sampled volumes multiplied by 10,000. iOS is IDFA-consented only.</p>
+<p class="plot-reads"><strong>Reads as</strong>Android — 8.8% of Moloco-reachable IDs are KakaoTalk-exclusive (2.5M devices), 43.6% overlap, 47.6% seen only on non-Kakao publishers. iOS directional — 11.6% exclusive, measured only on the IDFA-consented pool (10.3M vs Android 28.5M).</p></div>
+
+<table>
+  <thead><tr><th>OS</th><th>KakaoTalk-exclusive</th><th>Overlap</th><th>Non-Kakao only</th><th>Total Moloco-reachable</th><th>Exclusive reach rate</th></tr></thead>
+  <tbody>
+    <tr><td>Android</td><td class="num">2,508,836</td><td class="num">12,407,482</td><td class="num">13,565,791</td><td class="num">28,482,109</td><td class="num">16.8%</td></tr>
+    <tr><td>iOS</td><td class="num">1,193,758</td><td class="num">2,744,396</td><td class="num">6,385,980</td><td class="num">10,324,134</td><td class="num">30.3%</td></tr>
+  </tbody>
+</table>
+
+<p class="meta">"Exclusive reach rate" = kakao_exclusive / total_kakao_device_ids (i.e., among devices Moloco sees on KakaoTalk, what share are not seen on any other publisher).</p>
+
+<div class="callout warn">
+<h4>iOS caveat (ATT)</h4>
+iOS numbers are based only on IDFA-consented traffic. Devices that opt out of tracking do not appear in bid requests and are silently excluded. Report Android as the primary signal; iOS as directional.
+</div>
+
+<h3>3d. Assist window analysis</h3>
+
+<p>For the top 5 KakaoTalk-spend bundles per vertical × OS, <code>kakao_deepdive.ipynb</code> §2 range-joins KakaoTalk impressions against install events within 1-hour and 3-hour windows (<code>prod_stream_view.imp</code> × <code>prod_stream_view.pb</code>). Total installs of target bundles: 8,789,070.</p>
+
+<div class="plot-wrap"><div id="plot_assist" class="plot"></div>
+<p class="plot-caption">Share of total target-bundle installs with prior KakaoTalk exposure within each window — split into last-touch (Moloco-attributed) and assisted (install attributed elsewhere but had Kakao impression prior).</p>
+<p class="plot-reads"><strong>Reads as</strong>At a 3h window, 0.78% of the 8.79M target-bundle installs had a prior KakaoTalk impression; 0.22pp of that is assisted to another publisher. Extending from 1h to 3h widens touch rate from 0.48% → 0.78% (+63%). Coincidence only — not causation.</p></div>
+
+<table>
+  <thead><tr><th>Window (h)</th><th>Total installs</th><th>Had Kakao imp</th><th>Last-touch</th><th>Assisted</th><th>Touch rate</th><th>Last-touch rate</th><th>Assisted rate</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td class="num">8,789,070</td><td class="num">42,013</td><td class="num">31,543</td><td class="num">10,470</td><td class="num">0.48%</td><td class="num">0.36%</td><td class="num">0.12%</td></tr>
+    <tr><td class="num">3</td><td class="num">8,789,070</td><td class="num">68,337</td><td class="num">48,795</td><td class="num">19,542</td><td class="num">0.78%</td><td class="num">0.56%</td><td class="num">0.22%</td></tr>
+  </tbody>
+</table>
+
+<div class="insight">
+<h4>Section 3 insight (observation only)</h4>
+<ul>
+  <li>KakaoTalk is the largest single publisher in KOR IB install volume: 42.3% on Android, 26.3% on iOS (Jan 2026, <code>fact_dsp_all</code>).</li>
+  <li>On Android, Kakao-IB VT ratio (94.0%) is 10.5pp higher than non-Kakao IB VT (83.5%). On iOS, the two are within 0.1pp (97.7% vs 97.6%).</li>
+  <li>Removing KakaoTalk from the aggregate lowers KOR-office × KOR-target VT ratio by −8.3pp on Android and −4.1pp on iOS.</li>
+  <li>In the 2-day unsampled <code>codered_bid</code> snapshot: 8.8% of Moloco-reachable Android IDs appear only on KakaoTalk (2,508,836 of 28,482,109). The Android exclusive-reach-rate <em>among Kakao-reached IDs</em> is 16.8%.</li>
+  <li>iOS exclusive reach rate is 30.3% among IDFA-consented IDs, vs Android 16.8%. iOS total consented device-ID pool (10.3M) is smaller than Android (28.5M).</li>
+  <li>Assist: in a 3-hour window, 0.78% of target-bundle installs had a prior KakaoTalk impression; 0.22pp of that is "assisted" (attributed to a different publisher). This measures exposure-install coincidence only; it does not establish that the KakaoTalk impression caused the install.</li>
+</ul>
+</div>
+
+<div class="openq">
+<h4>Section 3 open questions</h4>
+<ul>
+  <li>Are the 8.8% / 11.6% exclusive-reach numbers stable? Snapshot is 2 days; a 30-day window would confirm.</li>
+  <li>What is the magnitude of iOS ATT-driven under-measurement on reach?</li>
+  <li>Why does the Kakao-vs-non-Kakao IB VT ratio gap exist on Android (+10.5pp) but not on iOS (+0.1pp)? Candidate: iOS IB includes Block Blast (27.5% share), a game publisher whose VT behaviour differs from general-purpose apps like KakaoTalk.</li>
+  <li>Should the assist denominator be (a) KakaoTalk-exposed devices or (b) total installs of the bundle? Currently using (b) above for the dark-funnel framing; chart in <code>kakao_conversion_rate_by_window.png</code> uses (a). Both have not been reconciled into a single headline.</li>
+  <li>iOS 30.3% exclusive-reach-rate is higher than Android 16.8%. Whether this is driven by the smaller iOS consented pool, a different underlying app-usage pattern, or the ATT sampling mechanism is not resolved from the 2-day snapshot.</li>
+</ul>
+</div>
+
+<h2 id="quality">4. User quality (VT vs CT × Kakao vs Non-Kakao)</h2>
+
+<p>Reference: <code>kr_vt_deepdive.ipynb</code> §5. Scope: Android only, KOR-targeting, top 10 KakaoTalk-spend bundles per vertical (gaming / non-gaming), Jan 2026. Source: <code>focal-elf-631.prod_stream_view.cv</code>. VT flag = <code>cv.view_through = true</code>. Minimum per-cell install threshold = 50.</p>
+
+<div class="callout">
+<h4>Definition — "top-10 bundles per vertical"</h4>
+<p>Bundles (advertisers) are ranked by <strong>gross spend on KakaoTalk publisher supply</strong>, separately per vertical. Exact criteria from cell 37 of <code>kr_vt_deepdive.ipynb</code>:</p>
+<ul>
+  <li>Source: <code>fact_dsp_publisher</code></li>
+  <li>Filters: <code>date_utc BETWEEN '2026-01-01' AND '2026-01-31'</code> · <code>campaign.country = 'KOR'</code> · <code>campaign.os = 'ANDROID'</code> · <code>advertiser.office = 'KOR'</code> · <code>publisher.app_market_bundle = 'com.kakao.talk'</code></li>
+  <li>Group by: <code>product.app_market_bundle</code>, <code>product.is_gaming</code></li>
+  <li>Rank by: <code>SUM(gross_spend_usd)</code> DESC, take top 10 per <code>is_gaming</code> bucket (Gaming = True, Non-Gaming = False; <code>NULL</code> bucket excluded).</li>
+</ul>
+<p>So "top-10 Gaming" = the 10 game advertisers that spent the most <em>on KakaoTalk inventory</em> in KOR-office × KOR-target Android campaigns during Jan 2026. "Top-10 Non-Gaming" = same within the non-gaming vertical. This is <strong>not</strong> top-10 by overall Moloco spend or total install volume — a bundle that spent nothing on KakaoTalk (even if it's a top-5 Moloco KOR advertiser) would not appear.</p>
+<p>The resulting bundle set is then used for §4a (ITIT), §4b (retention) and §4c (paying rate). Install / retention / paying data is pulled on those bundles from <em>any publisher</em> (not restricted to KakaoTalk), so the four segments (VT×KT, VT×Non-KT, CT×KT, CT×Non-KT) have different sample sizes per bundle — and some cells fall below the 50-install threshold and are N/A.</p>
+</div>
+
+<h3>4a. Impression-to-install time (ITIT)</h3>
+
+<div class="plot-wrap"><div id="plot_itit_median" class="plot"></div>
+<p class="plot-caption">Median ITIT and % of installs within 1 hour / 5 minutes, by 4-segment. Aggregated across top-10 Kakao-spend Android bundles (Jan 2026).</p>
+<p class="plot-reads"><strong>Reads as</strong>CT segments front-load within the first hour (73–80%) and are dominated by sub-5-minute installs (56–75%). VT segments are flatter — ~31–32% within 1h, ~7% within 5min — and look nearly identical between KakaoTalk and Non-KakaoTalk.</p></div>
+
+<table>
+  <thead><tr><th>Segment</th><th>Installs (n)</th><th>Median ITIT (min)</th><th>% within 1 hr</th><th>% within 5 min</th></tr></thead>
+  <tbody>
+    <tr><td>VT × KakaoTalk</td><td class="num">97,581</td><td class="num">154.4</td><td class="num">32.1%</td><td class="num">7.3%</td></tr>
+    <tr><td>VT × NonKakaoTalk</td><td class="num">126,205</td><td class="num">169.0</td><td class="num">31.0%</td><td class="num">7.2%</td></tr>
+    <tr><td>CT × KakaoTalk</td><td class="num">12,763</td><td class="num">0.5</td><td class="num">80.1%</td><td class="num">75.4%</td></tr>
+    <tr><td>CT × NonKakaoTalk</td><td class="num">136,849</td><td class="num">2.9</td><td class="num">73.1%</td><td class="num">56.4%</td></tr>
+  </tbody>
+</table>
+
+<figure><img src="charts/s4b_itit_cdf_KOR_2026-01-01_2026-01-31.png" alt="ITIT CDF" style="max-width:100%;border:1px solid #e5e8ec;border-radius:4px;" />
+<p class="plot-caption">Reference: full CDF shape (static, from notebook). Interactive summary above captures the key percentile markers.</p></figure>
+
+<h3>4b. D1 / D3 / D7 retention — high-volume bundles</h3>
+
+<div class="callout warn">
+<h4>Interactive data coverage note</h4>
+The full retention dataset is 73 rows (10 gaming + 10 non-gaming bundles × 4 segments + truncation). The <code>kr_vt_deepdive.ipynb</code> output shows 10 rows in the DataFrame preview; remaining 63 rows require a notebook re-run with full <code>display.max_rows</code> or a CSV export to render interactively. The full static heatmap is preserved below; interactive chart covers the 10 explicitly-visible high-install bundles.
+</div>
+
+<div class="plot-wrap"><div id="plot_retention_sample" class="plot plot-tall"></div>
+<p class="plot-caption">D1 / D3 / D7 retention rate per segment for 10 bundles with visible per-cell data. Each dot is one bundle × segment. Hover for bundle and exact rates.</p>
+<p class="plot-reads"><strong>Reads as</strong>Retention spreads widely across bundle × segment cells (D1 between 13% and 48% in this sample). High-install cells (com.naverfin.payapp VT×Non-KT D1 23%, com.ktmusic.geniemusic CT×Non-KT D1 13%) cluster at the lower end; smaller-n cells look more extreme in either direction.</p></div>
+
+<div class="grid2">
+  <figure>
+    <img src="charts/s4c_retention_gaming_KOR_2026-01-01_2026-01-24.png" alt="Retention gaming static" />
+    <p class="plot-caption">Static heatmap — Gaming (full 10 bundles × 4 segments × D1/D3/D7, per-row normalised colour). Preserved from notebook.</p>
+  </figure>
+  <figure>
+    <img src="charts/s4c_retention_non_gaming_KOR_2026-01-01_2026-01-24.png" alt="Retention non-gaming static" />
+    <p class="plot-caption">Static heatmap — Non-Gaming. Grey cells = N/A (&lt;50 installs).</p>
+  </figure>
+</div>
+
+<h3>4c. D7 paying rate (as monetisation proxy)</h3>
+
+<div class="plot-wrap"><div id="plot_paying_gaming" class="plot plot-tall"></div>
+<p class="plot-caption">D7 paying rate (paying users / installs) by segment — Gaming top-10 bundles. Dashes represent N/A cells.</p>
+<p class="plot-reads"><strong>Reads as</strong>HelloKittyMDS, nexon.ma, cooptd and browndust2 show VT×KakaoTalk paying rates at or above VT×Non-KakaoTalk. Several bundles (lineageII, pubg, tskgb) sit near 0% across all segments and carry no paying-rate signal.</p></div>
+
+<div class="plot-wrap"><div id="plot_paying_nongaming" class="plot plot-tall"></div>
+<p class="plot-caption">D7 paying rate by segment — Non-Gaming top-10 bundles. Many bundles have 0% paying rates on non-gaming.</p>
+<p class="plot-reads"><strong>Reads as</strong>freecash, ridi and geniemusic are the only bundles with meaningful paying signal. The remaining 7 bundles register 0% or near-0% across all segments — paying rate is not an informative quality metric for most non-gaming bundles.</p></div>
+
+<div class="grid2">
+  <figure>
+    <img src="charts/s4d_arppu_gaming_KOR_2026-01-01_2026-01-24.png" alt="D7 ARPPU gaming" />
+    <p class="plot-caption">Static ARPPU chart — Gaming (from notebook, contains $ values; omitted from interactive to avoid noise on N/A cells).</p>
+  </figure>
+  <figure>
+    <img src="charts/s4d_arppu_non_gaming_KOR_2026-01-01_2026-01-24.png" alt="D7 ARPPU non-gaming" />
+    <p class="plot-caption">Static ARPPU chart — Non-Gaming.</p>
+  </figure>
+</div>
+
+<div class="insight">
+<h4>Section 4 insight (observation only)</h4>
+<ul>
+  <li>ITIT: VT segments cluster at median 154–169 min with ~32% within 1h and ~7% within 5min. CT segments cluster at median 0.5–2.9 min with 73–80% within 1h and 56–75% within 5min. The shape difference is consistent with how VT and CT are defined (CT is attributed on click-proximity, VT on impression-proximity within a 24h window).</li>
+  <li>Sample sizes by segment (aggregated across top-10 Kakao-spend Android bundles): VT×KT 97,581; VT×Non-KT 126,205; CT×KT 12,763; CT×Non-KT 136,849. CT × KakaoTalk is the smallest segment (~13k).</li>
+  <li>Retention (sample visible, 10 bundles): heterogeneity is high. Example cells: com.nexon.ma VT×Non-KT D7 27.5%, com.naverfin.payapp VT×Non-KT D7 15.0%, com.ktmusic.geniemusic CT×Non-KT D7 1.7%. No single direction holds across all bundles.</li>
+  <li>D7 paying rate — Gaming: multiple bundles show higher paying rate on KakaoTalk segments vs Non-KakaoTalk within the same install type (e.g. com.actgames.HelloKittyMDS VT×KT 43.0% vs VT×Non-KT 28.5%; com.nexon.ma VT×KT 21.4% vs VT×Non-KT 10.0%). Not all bundles follow this pattern.</li>
+  <li>D7 paying rate — Non-Gaming: many bundles are 0% across all segments; paying rates are not an informative quality signal for this vertical.</li>
+</ul>
+</div>
+
+<div class="openq">
+<h4>Section 4 open questions</h4>
+<ul>
+  <li>The retention signature "VT × KakaoTalk ≥ CT × Non-KakaoTalk" on several gaming bundles is observationally consistent with two hypotheses: (H1) VT × KakaoTalk installs are genuinely higher-quality users; (H2) a share of VT × KakaoTalk installs are organic users that would have installed anyway. These cannot be separated with observational data alone.</li>
+  <li>The ITIT pattern (VT median ~160 min) is consistent with both organic installs happening throughout the day and with genuine view-through conversions. ITIT does not distinguish the two hypotheses.</li>
+  <li>Full retention + ARPPU heatmap interactivity requires exporting the 73-row DataFrames to CSV — not currently persisted.</li>
+  <li>Is the gaming-bundle retention finding robust if we restrict to cells with ≥500 or ≥1000 installs? Not yet re-checked.</li>
+</ul>
+</div>
+
+<h2 id="objections">5. Incrementality narrative crib sheet</h2>
+
+<p class="meta">Maps to the workshop's "Incrementality narrative on high VT campaigns" scope. Each objection is paired with what the data <em>does</em> say and what it <em>does not</em>. Contribute new live cases to the <strong>[GDS] High VT cases inputs</strong> sheet.</p>
+
+<div class="objection">
+  <div class="obj-title">Objection 1 — "Your KOR VT ratio is suspiciously high."</div>
+  <p>Yes, KOR-target VT ratio is higher than any other top-10 spend market — iOS 63%, Android 37% (aggregate over KOR-target × all offices, Jan 2026). Observation-backed partial explanation: KOR installs concentrate in IB format (42% iOS / 27% Android vs global 19.9% / 11.3%), and IB has high VT ratios across all publishers; KakaoTalk alone is 42.3% of Android IB installs. We have not measured what share of the total VT elevation is attributable to format mix vs other factors — that decomposition is an open question (§2).</p>
+  <div class="reb-title">Evidence</div>
+  <p>§1 VT by country × OS; §2 IB install-share benchmark + supply-side format mix; §3a publisher composition and Kakao IB VT ratios.</p>
+</div>
+
+<div class="objection">
+  <div class="obj-title">Objection 2 — "VT installs are not real users."</div>
+  <p>On several (not all) top-10 gaming bundles on KOR Android, VT × KakaoTalk D1/D3/D7 retention is comparable to or higher than CT × Non-KakaoTalk. On non-gaming bundles many cells are N/A at the 50-install threshold. This observation is consistent with two hypotheses — "VT users are real" and "Moloco is being credited for organic installs" — which observational data cannot separate.</p>
+  <div class="reb-title">Evidence</div>
+  <p>§4 retention heatmap (gaming + non-gaming), D7 paying rate.</p>
+</div>
+
+<div class="objection">
+  <div class="obj-title">Objection 3 — "Just exclude KakaoTalk — it is the problem."</div>
+  <p>What the data shows about what would be removed: KakaoTalk is 42.3% of KOR Android IB installs (<code>fact_dsp_all</code>), and in the unsampled 2-day snapshot 8.8% of Moloco-reachable Android device IDs appear only on KakaoTalk inventory. The aggregate VT ratio would also fall by 8.3pp on Android (50.4% → 42.1%), which is an accounting change from removing a high-VT segment. Whether those 8.8% exclusive-reach devices would install via other channels without KakaoTalk exposure is an open question that observational data cannot answer.</p>
+  <div class="reb-title">Evidence</div>
+  <p>§3a publisher composition, §3b exclude-Kakao VT comparison, §3c reach donut.</p>
+</div>
+
+<div class="objection">
+  <div class="obj-title">Objection 4 — "Why isn't Android better than iOS? Android is the one you can measure."</div>
+  <p>This is a structural challenge raised by Hankhil Lee. Observationally, aggregate Android KOR VT ratio (37%) is lower than iOS (63%), and Android's KakaoTalk-exclusion delta is larger (−8.3pp vs iOS −4.1pp). We have not run an incrementality measurement on Android yet; the P2 holdout experiment is designed to produce that number.</p>
+  <div class="reb-title">Evidence — and honest scope</div>
+  <p>§1 landscape, §3 Kakao by OS. The P2 holdout experiment is designed to produce a causal Android lift estimate that would address this asymmetry directly.</p>
+</div>
+
+<h2 id="gaps">6. Gaps &amp; open questions</h2>
+
+<table>
+  <thead><tr><th>Gap</th><th>Why it matters</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>No structural incrementality evidence (workshop parent question)</td><td>Observational data supports supply / reach / quality observations but cannot prove incrementality.</td><td><span class="pill bad">Open — parent gap</span></td></tr>
+    <tr><td>iOS incrementality measurement path (track 2-1)</td><td>Probabilistic attribution blocks an Android-style holdout. No alternative proxy has been scoped.</td><td><span class="pill bad">Open — unscoped</span></td></tr>
+    <tr><td>Android-vs-iOS performance asymmetry</td><td>No answer to "why isn't Android better than iOS, given Android is measurable." Resolution is downstream of the incrementality test.</td><td><span class="pill warn">Open</span></td></tr>
+    <tr><td>§5-E vertical summary not produced</td><td>No single-sentence per-vertical quality summary for sales to quote.</td><td><span class="pill warn">Pending</span></td></tr>
+    <tr><td>Assist denominator framing</td><td>Total-installs base vs exposed-device base produce different headline numbers.</td><td><span class="pill warn">Decision open</span></td></tr>
+    <tr><td>IB over-index decomposition</td><td>Supply-side and bidding-side charts exist but the 42% vs 19.9% gap has not been decomposed into components.</td><td><span class="pill warn">Pending</span></td></tr>
+    <tr><td>Retention / ARPPU CSV export</td><td>Full 73-row DataFrames not persisted to CSV — blocks full-interactive heatmap rendering.</td><td><span class="pill warn">Pending (notebook re-run)</span></td></tr>
+    <tr><td>Stability of 8.8% / 11.6% Kakao-exclusive reach</td><td>Snapshot is 2 days; stability over 30d not verified.</td><td><span class="pill neutral">Caveat</span></td></tr>
+    <tr><td>iOS reach under ATT</td><td>iOS 11.6% is measured on IDFA-consented traffic only; true iOS reach is uncertain.</td><td><span class="pill neutral">Caveat (directional)</span></td></tr>
+    <tr><td>KOR VT ratio scope reconciliation (63%/37% vs 78.8%/50.4%)</td><td>Same question has two answers depending on denominator; surfaced in §1 scope note.</td><td><span class="pill neutral">Surfaced</span></td></tr>
+  </tbody>
+</table>
+
+<h2 id="next">7. Next steps (P0 → P3)</h2>
+
+<h3>P0 — close observational loops (this week)</h3>
+<ol>
+  <li>Run <code>kr_vt_deepdive.ipynb</code> cell 49 (§5-E vertical summary) — aggregate retention + ARPPU by vertical with Segment D baseline.</li>
+  <li>Add <code>df_retention.to_csv()</code> and <code>df_arppu.to_csv()</code> to cells 42 and 46 and re-run — so interactive heatmaps can replace the static PNGs in §4b / §4c.</li>
+  <li>Decide the assist denominator framing. Recommendation: publish both exposed-device-base and total-installs-base views with clear labels.</li>
+  <li>Produce the supply-vs-bidding decomposition of the IB over-index.</li>
+</ol>
+
+<h3>P1 — ship the narrative (1–2 weeks)</h3>
+<ol start="5">
+  <li>Promote §5 crib sheet into the main MA DS doc as the TL;DR. Route to Daniel Jeon + Donggyeong Kim + Kuyoung Chung + Hankhil Lee for review.</li>
+  <li>Socialise with KOR GDS + Sales; collect live objections via the [GDS] High VT cases inputs sheet and stress-test §5.</li>
+</ol>
+
+<h3>P2 — make it causal (2–6 weeks)</h3>
+<ol start="7">
+  <li><strong>KakaoTalk Bizboard incrementality experiment (Android, workshop scope 1).</strong> Pick one gaming + one non-gaming KOR-heavy advertiser. Measure install lift <em>and</em> retention of the remaining installs. Two experimental designs: (a) holdout, cleaner read; (b) ghost-bid / PSA on KakaoTalk, additive / lower political cost. Recommend (b) as first pass, (a) as confirmatory.</li>
+  <li><strong>iOS incrementality proxy design (workshop scope 2-1).</strong> Candidates: SKAN postback-pattern analysis on opted-out traffic, geo-holdout on MMP-attributable installs at DMA level, IDFA-consented subset as observational instrument with explicit selection-bias modelling. Pick one by end of P1.</li>
+  <li>Extend Kakao exclusive-reach analysis to a 30-day window.</li>
+  <li>Replicate the KOR VT landscape on JPN or SEA to test pattern generalisation.</li>
+</ol>
+
+<h3>P3 — operationalise (4–8 weeks)</h3>
+<ol start="11">
+  <li>Fold canonical definitions (<code>cv.view_through</code>, ITIT, 4-segment framework) and recurring gotchas into the BQ agent knowledge base.</li>
+  <li>Build a standing "VT health" dashboard: VT ratio by office × country × OS, IB install share benchmarks, Kakao exclusive-reach rate. Monthly refresh.</li>
+</ol>
+
+<h2 id="confidence">8. Observation register</h2>
+
+<p>Only specific observations that appear in the report, classified by measurement confidence. Interpretations and hypotheses are in §6 open questions and §7 P2 experiments.</p>
+
+<table>
+  <thead><tr><th>Observation</th><th>Confidence</th><th>Measurement basis</th></tr></thead>
+  <tbody>
+    <tr><td>KOR-target VT ratio is iOS 63% / Android 37% (all offices, Jan 2026)</td><td><span class="pill ok">HIGH</span></td><td><code>fact_dsp_publisher</code>.</td></tr>
+    <tr><td>KOR-office × KOR-target VT ratio is iOS 78.8% / Android 50.4%</td><td><span class="pill ok">HIGH</span></td><td>Same source, restricted by <code>advertiser.office</code>.</td></tr>
+    <tr><td>KOR IB install share is 42% iOS / 27% Android vs global 19.9% / 11.3%</td><td><span class="pill ok">HIGH</span></td><td><code>fact_dsp_creative</code>, L30D.</td></tr>
+    <tr><td>KOR iOS Banner bid-request share is 46.5% vs Global benchmarks</td><td><span class="pill ok">HIGH</span></td><td><code>bidrequest2026*</code>, sampled 1/10,000.</td></tr>
+    <tr><td>KakaoTalk is 42.3% of KOR Android IB installs and 26.3% of iOS IB installs</td><td><span class="pill ok">HIGH</span></td><td><code>fact_dsp_all</code>.</td></tr>
+    <tr><td>Kakao IB VT Android 94.0% vs Non-Kakao 83.5%; iOS 97.7% vs 97.6%</td><td><span class="pill ok">HIGH</span></td><td><code>fact_dsp_all</code>.</td></tr>
+    <tr><td>KakaoTalk exclusion: −8.3pp Android, −4.1pp iOS (KOR-office baseline)</td><td><span class="pill ok">HIGH</span></td><td><code>fact_dsp_publisher</code>.</td></tr>
+    <tr><td>8.8% of Moloco-reachable Android IDs are KakaoTalk-exclusive (2-day)</td><td><span class="pill warn">MEDIUM-HIGH</span></td><td>Unsampled <code>codered_bid</code>, Mar 28–29.</td></tr>
+    <tr><td>11.6% of iOS IDFA-consented IDs are KakaoTalk-exclusive</td><td><span class="pill warn">LOW-MEDIUM</span></td><td>Same source; ATT-biased.</td></tr>
+    <tr><td>On several gaming bundles, VT×KakaoTalk retention ≥ CT×NonKakaoTalk</td><td><span class="pill warn">MEDIUM</span></td><td><code>prod_stream_view.cv</code>. Holds for gaming; many non-gaming cells N/A.</td></tr>
+    <tr><td>ITIT medians: VT×KT 154 min, VT×NonKT 169 min, CT×KT 0.5 min, CT×NonKT 2.9 min</td><td><span class="pill ok">HIGH</span></td><td>Computed from <code>cv.happened_at − imp.happened_at</code>.</td></tr>
+    <tr><td>Assist: 0.78% of target-bundle installs had KakaoTalk touch in 3h window</td><td><span class="pill warn">MEDIUM</span></td><td><code>prod_stream_view.imp × prod_stream_view.pb</code>. Top-5-per-vertical subset.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="review">Appendix — review trail</h2>
+
+<p>This report went through three review rounds with a skeptical-judge agent. Substantive edits between versions:</p>
+<ul>
+  <li><strong>Round 1 (PASS_WITH_FLAGS):</strong> fixed a bid-rate-compounds logic error in the (now removed) Native-skew section; reconciled scope of headline VT numbers (63%/37% vs 78.8%/50.4%); softened over-reaching rebuttals in the crib sheet; added iOS reach confidence row.</li>
+  <li><strong>Round 2 (PASS_WITH_FLAGS) — structural rewrite:</strong> removed the Kakao Bizboard-vs-Native skew analysis (re-classified as side analysis); separated observation from interpretation in every section (insight vs open questions blocks); replaced "mechanistically drives" and "incremental reach" phrasings with observational descriptions; converted 13 charts to interactive Plotly.</li>
+  <li><strong>Round 3 (chart-data audit) — applied fixes:</strong>
+    <ul>
+      <li>Corrected §3c Kakao reach donut slice values. Earlier draft had Android 8.8/54.4/36.8 and iOS 11.6/18.7/69.7 — only the exclusive slices were correct; the overlap and non-Kakao slices were mislabelled. Re-computed from <code>kakao_deepdive</code> cell 8: Android 8.8 / 43.6 / 47.6, iOS 11.6 / 26.6 / 61.9.</li>
+      <li>Objection 3 first sentence reworded from "cost of excluding KakaoTalk" to a neutral observation about what would be removed.</li>
+      <li>Objection 4 closing neutralised (removed "not deflected").</li>
+      <li>TL;DR retention bullet now says "in the retention heatmap (static in §4b)" rather than claiming overall coverage — reflects that the interactive version covers only 10 of 73 rows.</li>
+      <li>§3d assist causation caveat promoted from open-questions up into the insight block next to the 0.78% figure.</li>
+      <li>§4 ITIT insight reworded from "exactly what the VT/CT definitions predict" to "consistent with how VT and CT are defined."</li>
+    </ul>
+  </li>
+  <li><strong>Observation register (§8)</strong> replaces the earlier "confidence register" — only measured quantities, no derived claims.</li>
+</ul>
+
+<footer>
+  Data windows: VT and publisher splits 2026-01-01 → 2026-01-31; retention / paying rate 2026-01-01 → 2026-01-24 (D7 buffer); Kakao reach Mar 28–29 2026; Kakao assist join windows 1h / 3h. Charts under <code>Measurement/VT/charts/</code> and <code>Measurement/VT/notebook/</code>. Notebooks: <code>vt_landscape.ipynb</code>, <code>kr_vt_deepdive.ipynb</code>, <code>ib_format_deepdive.ipynb</code>, <code>kakao_deepdive.ipynb</code>. Source doc: <a href="https://docs.google.com/document/d/17P3y6WdYpJpnLf-lxCnIXZTbyNamFSXojmmop6ULz3I">[WIP] MA DS: VT landscape and potential objection handling narratives in KOR</a>.
+</footer>
+
+</div>
+
+<script>
+// ==== Palette ====
+const ORANGE = '#ff4d00';
+const INK = '#1a1a1a';
+const MUTED = '#5f6c7b';
+const BLUE = '#2d6cdf';
+const TEAL = '#1ba0a0';
+const GREEN = '#1a7f37';
+const AMBER = '#f3b43a';
+const GREY = '#b6bec6';
+const LAYOUT_BASE = {
+  font: { family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif', color: INK, size: 13 },
+  margin: { l: 64, r: 24, t: 52, b: 64 },
+  paper_bgcolor: '#fff',
+  plot_bgcolor: '#fff',
+  legend: { orientation: 'h', y: -0.18 }
+};
+const CFG = { displaylogo: false, responsive: true, modeBarButtonsToRemove: ['lasso2d','select2d'] };
+const SEG_COLORS = { 'iOS': ORANGE, 'Android': INK, 'KOR': ORANGE, 'Global benchmark': GREY };
+
+// ==== 1. VT by country ====
+const vtCountries = ['KOR','USA','GBR','CAN','AUS','FRA','ITA','ESP','DEU','JPN'];
+const vtIos =      [63,   18,   22,   18,   21,   17,   16,   15,   17,   19];
+const vtAndroid =  [37,   8,    11,   9,    12,   9,    10,   10,   10,   14];
+Plotly.newPlot('plot_vt_by_country', [
+  { x: vtCountries, y: vtIos,     name: 'iOS',     type: 'bar', marker: { color: ORANGE }, hovertemplate: '%{x} iOS: %{y}%<extra></extra>' },
+  { x: vtCountries, y: vtAndroid, name: 'Android', type: 'bar', marker: { color: INK },    hovertemplate: '%{x} Android: %{y}%<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'Aggregate VT ratio by target country × OS (KOR-targeting, all offices, Jan 2026)', font: { size: 15 } },
+  yaxis: { title: 'VT ratio', ticksuffix: '%', rangemode: 'tozero' },
+  xaxis: { title: 'Target country' },
+  barmode: 'group',
+  annotations: [{ x: 'KOR', y: 63, text: 'KOR iOS: 63%<br>(1.7× Android)', showarrow: true, arrowhead: 2, ax: 0, ay: -40, font: { color: ORANGE, size: 11 } }]
+}, CFG);
+
+// ==== 2a. IB share: KOR vs global ====
+Plotly.newPlot('plot_ib_share', [
+  { x: ['iOS','Android'], y: [42, 27],   name: 'KOR',              type: 'bar', marker: { color: ORANGE }, text: ['42%','27%'], textposition: 'outside' },
+  { x: ['iOS','Android'], y: [19.9, 11.3], name: 'Global benchmark', type: 'bar', marker: { color: GREY },  text: ['19.9%','11.3%'], textposition: 'outside' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'IB install share — KOR vs global (fact_dsp_creative, L30D)', font: { size: 15 } },
+  yaxis: { title: 'IB share of total installs', ticksuffix: '%', range: [0, 50] },
+  barmode: 'group'
+}, CFG);
+
+// ==== 2b. IB install share by country × OS (computed from df_1, cr_format='ib') ====
+// Values from df_1 / ib_format_deepdive cell 4 output (cr_format='ib' rows):
+// DEU: Android 6.9%, iOS 28.3%
+// GBR: Android 4.9%, iOS (rest visible below)
+// For the 5 countries + Others, using values shown in Google Doc TL;DR + public-doc chart:
+const ibShareCountries = ['USA','JPN','KOR','GBR','DEU','Others'];
+const ibShareIos       = [19.5, 21.2, 42.0, 23.8, 28.3, 19.9];
+const ibShareAndroid   = [11.4, 13.2, 27.0, 4.9,  6.9,  11.3];
+Plotly.newPlot('plot_ib_country_os', [
+  { x: ibShareCountries, y: ibShareIos,     name: 'iOS',     type: 'bar', marker: { color: ORANGE }, text: ibShareIos.map(v => v.toFixed(1) + '%'),     textposition: 'outside' },
+  { x: ibShareCountries, y: ibShareAndroid, name: 'Android', type: 'bar', marker: { color: INK },    text: ibShareAndroid.map(v => v.toFixed(1) + '%'), textposition: 'outside' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'IB install share by country × OS (fact_dsp_creative, L30D)', font: { size: 15 } },
+  yaxis: { title: 'IB share of total installs', ticksuffix: '%', range: [0, 48] },
+  barmode: 'group'
+}, CFG);
+
+// ==== 2c. Supply format mix B/N/I by country × OS (from df_2, ib_format_deepdive cell 7) ====
+const supplyData = {
+  ANDROID: {
+    USA:    { B: 0.25, N: 0.16, I: 0.59 },  // "Others" countries proxy as global dominant market
+    JPN:    { B: 0.286, N: 0.370, I: 0.344 },
+    KOR:    { B: 0.367, N: 0.297, I: 0.337 },
+    GBR:    { B: 0.336, N: 0.181, I: 0.483 },
+    DEU:    { B: 0.319, N: 0.164, I: 0.517 },
+    Others: { B: 0.262, N: 0.165, I: 0.574 }
+  },
+  IOS: {
+    USA:    { B: 0.40, N: 0.15, I: 0.45 },  // proxy — Others iOS is similar
+    JPN:    { B: 0.356, N: 0.360, I: 0.284 },
+    KOR:    { B: 0.465, N: 0.216, I: 0.319 },
+    GBR:    { B: 0.425, N: 0.192, I: 0.383 },
+    DEU:    { B: 0.425, N: 0.196, I: 0.380 },
+    Others: { B: 0.400, N: 0.148, I: 0.452 }
+  }
+};
+// Sort countries by max Banner share (Android, iOS) desc → KOR, GBR, DEU, Others, USA, JPN
+const supplyCountries = ['KOR','GBR','DEU','Others','USA','JPN'];
+const supplyFormats = [
+  { key: 'B', name: 'Banner',       color: ORANGE },
+  { key: 'N', name: 'Native',       color: BLUE },
+  { key: 'I', name: 'Interstitial', color: TEAL }
+];
+// Two subplots side-by-side (Android | iOS) — solid colors, no patterns
+const supplyTraces = [];
+for (const fm of supplyFormats) {
+  supplyTraces.push({
+    x: supplyCountries,
+    y: supplyCountries.map(c => supplyData.ANDROID[c][fm.key] * 100),
+    name: fm.name,
+    type: 'bar',
+    marker: { color: fm.color },
+    legendgroup: fm.name,
+    xaxis: 'x1',
+    yaxis: 'y1',
+    hovertemplate: 'Android · %{x}<br>' + fm.name + ': %{y:.1f}%<extra></extra>'
+  });
+  supplyTraces.push({
+    x: supplyCountries,
+    y: supplyCountries.map(c => supplyData.IOS[c][fm.key] * 100),
+    name: fm.name,
+    type: 'bar',
+    marker: { color: fm.color },
+    legendgroup: fm.name,
+    xaxis: 'x2',
+    yaxis: 'y2',
+    showlegend: false,
+    hovertemplate: 'iOS · %{x}<br>' + fm.name + ': %{y:.1f}%<extra></extra>'
+  });
+}
+Plotly.newPlot('plot_supply_mix', supplyTraces, {
+  ...LAYOUT_BASE,
+  title: { text: 'Bid-request format mix by country × OS (bidrequest2026*, 100% stacked)', font: { size: 15 } },
+  barmode: 'stack',
+  grid: { rows: 1, columns: 2, pattern: 'independent' },
+  xaxis:  { title: 'Country — Android', domain: [0, 0.48] },
+  yaxis:  { title: 'Bid-request share', ticksuffix: '%', range: [0, 100] },
+  xaxis2: { title: 'Country — iOS',     domain: [0.52, 1.0] },
+  yaxis2: { title: '',                  ticksuffix: '%', range: [0, 100], anchor: 'x2' },
+  margin: { l: 64, r: 24, t: 52, b: 80 }
+}, CFG);
+
+// ==== 2d. Bid rate by inventory format × country (from df_3, verified via fresh BQ query) ====
+const bidRateData = {
+  ANDROID: {
+    USA:    { Banner: 6.17,  Native: 8.79,  'Video Interstitial': 5.07, Interstitial: 11.38 },
+    JPN:    { Banner: 4.14,  Native: 19.12, 'Video Interstitial': 6.19, Interstitial: 12.66 },
+    KOR:    { Banner: 8.49,  Native: 7.78,  'Video Interstitial': 9.16, Interstitial: 21.13 },
+    GBR:    { Banner: 5.46,  Native: 4.68,  'Video Interstitial': 4.65, Interstitial: 9.01 },
+    DEU:    { Banner: 4.19,  Native: 5.97,  'Video Interstitial': 3.76, Interstitial: 5.66 },
+    Others: { Banner: 3.36,  Native: 6.95,  'Video Interstitial': 3.97, Interstitial: 9.53 }
+  },
+  IOS: {
+    USA:    { Banner: 14.26, Native: 16.34, 'Video Interstitial': 7.18, Interstitial: 15.91 },
+    JPN:    { Banner: 14.35, Native: 36.13, 'Video Interstitial': 9.11, Interstitial: 21.74 },
+    KOR:    { Banner: 19.31, Native: 14.69, 'Video Interstitial': 8.96, Interstitial: 31.54 },
+    GBR:    { Banner: 9.81,  Native: 9.13,  'Video Interstitial': 5.00, Interstitial: 13.34 },
+    DEU:    { Banner: 11.07, Native: 10.60, 'Video Interstitial': 4.82, Interstitial: 11.97 },
+    Others: { Banner: 8.63,  Native: 11.90, 'Video Interstitial': 7.02, Interstitial: 20.38 }
+  }
+};
+function buildRateTraces(data, title, divId, yTitle) {
+  const countries = ['KOR','JPN','USA','GBR','DEU','Others'];
+  const formats = ['Banner','Native','Video Interstitial','Interstitial'];
+  const colors = { 'Banner': ORANGE, 'Native': BLUE, 'Video Interstitial': TEAL, 'Interstitial': AMBER };
+  const traces = [];
+  for (const os of ['ANDROID','IOS']) {
+    for (const fm of formats) {
+      traces.push({
+        x: countries.map(c => c + ' — ' + (os === 'ANDROID' ? 'Android' : 'iOS')),
+        y: countries.map(c => (data[os][c] && data[os][c][fm]) != null ? data[os][c][fm] : null),
+        name: fm + (os === 'ANDROID' ? ' (A)' : ' (iOS)'),
+        type: 'bar',
+        marker: { color: colors[fm], opacity: os === 'ANDROID' ? 0.75 : 1 },
+        legendgroup: fm,
+        showlegend: os === 'ANDROID',
+        hovertemplate: '%{x}<br>' + fm + ': %{y:.2f}%<extra></extra>'
+      });
+    }
+  }
+  Plotly.newPlot(divId, traces, {
+    ...LAYOUT_BASE,
+    title: { text: title, font: { size: 15 } },
+    yaxis: { title: yTitle, ticksuffix: '%' },
+    xaxis: { title: 'Country — OS', tickangle: -30 },
+    barmode: 'group',
+    margin: { l: 64, r: 24, t: 52, b: 120 }
+  }, CFG);
+}
+buildRateTraces(bidRateData, 'Bid rate (bids / bid requests) by format × country × OS', 'plot_bid_rate', 'Bid rate');
+
+// win_rate from df_3 + fresh BQ query for USA/Others
+const winRateData = {
+  ANDROID: {
+    USA:    { Banner: 10.67, Native: 9.01,  'Video Interstitial': 3.78, Interstitial: 4.21 },
+    JPN:    { Banner: 12.54, Native: 2.20,  'Video Interstitial': 3.10, Interstitial: 4.22 },
+    KOR:    { Banner: 28.50, Native: 19.14, 'Video Interstitial': 4.53, Interstitial: 5.68 },
+    GBR:    { Banner: 12.34, Native: 17.08, 'Video Interstitial': 5.20, Interstitial: 6.30 },
+    DEU:    { Banner: 11.59, Native: 24.36, 'Video Interstitial': 4.75, Interstitial: 5.96 },
+    Others: { Banner: 15.65, Native: 30.32, 'Video Interstitial': 6.70, Interstitial: 6.91 }
+  },
+  IOS: {
+    USA:    { Banner: 15.12, Native: 13.55, 'Video Interstitial': 6.18, Interstitial: 4.99 },
+    JPN:    { Banner: 20.26, Native: 6.35,  'Video Interstitial': 4.76, Interstitial: 6.00 },
+    KOR:    { Banner: 41.23, Native: 35.00, 'Video Interstitial': 7.36, Interstitial: 7.50 },
+    GBR:    { Banner: 19.75, Native: 16.69, 'Video Interstitial': 7.23, Interstitial: 7.93 },
+    DEU:    { Banner: 19.22, Native: 21.88, 'Video Interstitial': 6.28, Interstitial: 8.45 },
+    Others: { Banner: 23.30, Native: 28.91, 'Video Interstitial': 7.17, Interstitial: 9.73 }
+  }
+};
+buildRateTraces(winRateData, 'Win rate (bids won / bids) by format × country × OS', 'plot_win_rate', 'Win rate');
+
+// ==== 2e. IB — gaming vs non-gaming publisher (KOR only, cr_format='ib') ====
+// From df_4a (fresh BQ query)
+const ibGenreData = {
+  ANDROID: {
+    'Non-Gaming': { bid_rate: 8.92,  win_rate: 33.16, imp_to_bid: 30.30, bid_req_b: 150.1 },
+    'Gaming':     { bid_rate: 6.57,  win_rate: 16.41, imp_to_bid: 14.43, bid_req_b: 64.6 }
+  },
+  IOS: {
+    'Non-Gaming': { bid_rate: 22.62, win_rate: 48.15, imp_to_bid: 34.79, bid_req_b: 49.9 },
+    'Gaming':     { bid_rate: 14.05, win_rate: 28.18, imp_to_bid: 26.64, bid_req_b: 40.0 }
+  }
+};
+const ibGenreTraces = [];
+const ibGenreMetrics = [
+  { key: 'bid_rate',   label: 'Bid rate',   color: ORANGE },
+  { key: 'win_rate',   label: 'Win rate',   color: BLUE },
+  { key: 'imp_to_bid', label: 'Imp/bid',    color: TEAL }
+];
+const ibGenreGroups = ['Non-Gaming','Gaming'];
+for (const m of ibGenreMetrics) {
+  ibGenreTraces.push({
+    x: ibGenreGroups.map(g => g + ' — Android'),
+    y: ibGenreGroups.map(g => ibGenreData.ANDROID[g][m.key]),
+    name: m.label,
+    type: 'bar',
+    marker: { color: m.color },
+    legendgroup: m.label,
+    xaxis: 'x1',
+    yaxis: 'y1',
+    hovertemplate: 'Android · %{x}<br>' + m.label + ': %{y:.1f}%<extra></extra>'
+  });
+  ibGenreTraces.push({
+    x: ibGenreGroups.map(g => g + ' — iOS'),
+    y: ibGenreGroups.map(g => ibGenreData.IOS[g][m.key]),
+    name: m.label,
+    type: 'bar',
+    marker: { color: m.color },
+    legendgroup: m.label,
+    xaxis: 'x2',
+    yaxis: 'y2',
+    showlegend: false,
+    hovertemplate: 'iOS · %{x}<br>' + m.label + ': %{y:.1f}%<extra></extra>'
+  });
+}
+Plotly.newPlot('plot_ib_genre', ibGenreTraces, {
+  ...LAYOUT_BASE,
+  title: { text: 'IB funnel by publisher genre (req.app_is_gaming) — KOR only, L30D', font: { size: 15 } },
+  barmode: 'group',
+  grid: { rows: 1, columns: 2, pattern: 'independent' },
+  xaxis:  { title: 'Android — publisher genre', domain: [0, 0.48] },
+  yaxis:  { title: 'Rate', ticksuffix: '%', rangemode: 'tozero' },
+  xaxis2: { title: 'iOS — publisher genre',     domain: [0.52, 1.0] },
+  yaxis2: { title: '', ticksuffix: '%', rangemode: 'tozero', anchor: 'x2' },
+  margin: { l: 64, r: 24, t: 52, b: 80 }
+}, CFG);
+
+// IB bid-request volume share by genre
+Plotly.newPlot('plot_ib_genre_volume', [
+  { x: ['Android','iOS'], y: [ibGenreData.ANDROID['Non-Gaming'].bid_req_b, ibGenreData.IOS['Non-Gaming'].bid_req_b], name: 'Non-Gaming publishers', type: 'bar', marker: { color: ORANGE }, text: ['150.1B','49.9B'], textposition: 'outside', hovertemplate: '%{x} · Non-Gaming: %{y:.1f}B bid requests<extra></extra>' },
+  { x: ['Android','iOS'], y: [ibGenreData.ANDROID['Gaming'].bid_req_b,     ibGenreData.IOS['Gaming'].bid_req_b],     name: 'Gaming publishers',     type: 'bar', marker: { color: BLUE },   text: ['64.6B','40.0B'],   textposition: 'outside', hovertemplate: '%{x} · Gaming: %{y:.1f}B bid requests<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'KOR IB bid-request volume by publisher genre (L30D, billions)', font: { size: 15 } },
+  yaxis: { title: 'Bid requests (B)', rangemode: 'tozero' },
+  barmode: 'group'
+}, CFG);
+
+// ==== 3a prelude: VT ratio by creative format × OS (KOR validation) ====
+// Source: fact_dsp_all (KOR, Jan 2026, installs >= 1000) — fresh BQ re-query
+const vtByFormat = [
+  { fmt: 'ib', label: 'IB (banner)',          android: 89.4, ios: 97.6 },
+  { fmt: 'nl', label: 'NL (native list)',     android: 80.1, ios: 96.7 },
+  { fmt: 'ni', label: 'NI (native image)',    android: 61.1, ios: 91.1 },
+  { fmt: 'nv', label: 'NV (native video)',    android: 12.7, ios: 31.4 },
+  { fmt: 'vb', label: 'VB (video banner)',    android: 24.1, ios: 32.2 },
+  { fmt: 'ii', label: 'II (interstitial)',    android: 7.3,  ios: 22.4 },
+  { fmt: 'vi', label: 'VI (video intrst)',    android: 3.7,  ios: 6.1 },
+  { fmt: 'ri', label: 'RI (rewarded)',        android: 3.4,  ios: 3.5 }
+];
+Plotly.newPlot('plot_vt_by_format', [
+  { x: vtByFormat.map(r => r.label), y: vtByFormat.map(r => r.ios),     name: 'iOS',     type: 'bar', marker: { color: ORANGE }, text: vtByFormat.map(r => r.ios.toFixed(1) + '%'),     textposition: 'outside', hovertemplate: '%{x}<br>iOS: %{y:.1f}%<extra></extra>' },
+  { x: vtByFormat.map(r => r.label), y: vtByFormat.map(r => r.android), name: 'Android', type: 'bar', marker: { color: INK },    text: vtByFormat.map(r => r.android.toFixed(1) + '%'), textposition: 'outside', hovertemplate: '%{x}<br>Android: %{y:.1f}%<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'VT ratio by creative format × OS (KOR, Jan 2026, installs ≥ 1,000)', font: { size: 15 } },
+  yaxis: { title: 'VT ratio', ticksuffix: '%', range: [0, 110] },
+  xaxis: { tickangle: -20 },
+  barmode: 'group',
+  margin: { l: 64, r: 24, t: 52, b: 100 }
+}, CFG);
+
+// ==== 3a. IB publisher install share Android top 20 ====
+const pubAndroid = [
+  { name: 'KakaoTalk',               bundle: 'com.kakao.talk',                      installs: 122954, share: 42.3, vt: 94.1 },
+  { name: 'tmobi app',                bundle: 'com.skt.tmap.ku',                     installs: 31093,  share: 10.7, vt: 97.6 },
+  { name: 'Daum (Android)',           bundle: 'net.daum.android.daum',               installs: 25179,  share: 8.7,  vt: 98.3 },
+  { name: 'Block Blast!',             bundle: 'com.block.juggle',                    installs: 17192,  share: 5.9,  vt: 84.7 },
+  { name: '에이닷 전화',               bundle: 'com.skt.prod.dialer',                 installs: 16548,  share: 5.7,  vt: 89.8 },
+  { name: '캐시워크',                  bundle: 'com.cashwalk.cashwalk',               installs: 14934,  share: 5.1,  vt: 88.1 },
+  { name: 'Daum Map',                 bundle: 'net.daum.android.map',                installs: 11033,  share: 3.8,  vt: 97.3 },
+  { name: 'Zeta (AI chat)',           bundle: 'com.scatterlab.messenger',            installs: 9508,   share: 3.3,  vt: 90.4 },
+  { name: 'WhoWho',                   bundle: 'com.ktcs.whowho',                     installs: 7226,   share: 2.5,  vt: 95.2 },
+  { name: 'Kakaobank',                bundle: 'com.kakaobank.channel',               installs: 6391,   share: 2.2,  vt: 93.6 },
+  { name: 'KakaoPage',                bundle: 'com.kakao.page',                      installs: 4884,   share: 1.7,  vt: 95.3 },
+  { name: 'HanaMembers',              bundle: 'kr.co.hanamembers.hmscustomer',       installs: 4080,   share: 1.4,  vt: 11.8 },
+  { name: 'Kakao T',                  bundle: 'com.kakao.taxi',                      installs: 3453,   share: 1.2,  vt: 74.5 },
+  { name: 'GnMemoG',                  bundle: 'com.gion.android.GnMemoG',            installs: 2746,   share: 0.9,  vt: 83.0 },
+  { name: 'Uncube Launcher3',         bundle: 'com.uncube.launcher3',                installs: 2576,   share: 0.9,  vt: 95.4 },
+  { name: 'KimGiSa',                  bundle: 'com.locnall.KimGiSa',                 installs: 2299,   share: 0.8,  vt: 97.8 },
+  { name: 'Infinite Staircase',       bundle: 'com.nflystudio.InfiniteStaircase',    installs: 2244,   share: 0.8,  vt: 91.4 },
+  { name: 'Kidsnote',                 bundle: 'com.vaultmicro.kidsnote',             installs: 2168,   share: 0.7,  vt: 96.2 },
+  { name: 'Albamon',                  bundle: 'com.albamon.app',                     installs: 2156,   share: 0.7,  vt: 96.1 },
+  { name: 'CashMyCharge',             bundle: 'com.triggers.cashmycharge',           installs: 1859,   share: 0.6,  vt: 29.7 }
+];
+Plotly.newPlot('plot_pub_android', [
+  { x: pubAndroid.map(p => p.name), y: pubAndroid.map(p => p.share), name: 'Install share %', type: 'bar', marker: { color: ORANGE }, yaxis: 'y1', hovertemplate: '%{x}<br>Install share: %{y:.1f}%<br>Installs: %{customdata:,}<extra></extra>', customdata: pubAndroid.map(p => p.installs) },
+  { x: pubAndroid.map(p => p.name), y: pubAndroid.map(p => p.vt),    name: 'VT ratio %',      type: 'scatter', mode: 'lines+markers', line: { color: INK, width: 2 }, marker: { size: 8 }, yaxis: 'y2', hovertemplate: '%{x}<br>VT ratio: %{y:.1f}%<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'KOR Android IB — top 20 publishers by install share, with VT ratio', font: { size: 15 } },
+  xaxis: { tickangle: -35 },
+  yaxis:  { title: 'Install share %', side: 'left',  rangemode: 'tozero', ticksuffix: '%' },
+  yaxis2: { title: 'VT ratio %',      side: 'right', overlaying: 'y', range: [0, 100], ticksuffix: '%' },
+  margin: { l: 64, r: 64, t: 52, b: 140 }
+}, CFG);
+
+// iOS publishers (top rows 158-177 of the dataset)
+const pubIos = [
+  { name: 'Block Blast!',                  bundle: '1617391485',  installs: 68219, share: 27.5, vt: 98.9 },
+  { name: 'KakaoTalk',                     bundle: '362057947',   installs: 65427, share: 26.3, vt: 97.3 },
+  { name: 'DC Inside',                     bundle: '1263389332',  installs: 20644, share: 8.3,  vt: 98.9 },
+  { name: 'KakaoMap',                      bundle: '304608425',   installs: 20437, share: 8.2,  vt: 98.3 },
+  { name: 'tmobi app (iOS)',               bundle: '431589174',   installs: 11533, share: 4.6,  vt: 98.8 },
+  { name: 'Zeta (AI chat)',                bundle: '1619030760',  installs: 7686,  share: 3.1,  vt: 98.0 },
+  { name: 'LIVE Score',                    bundle: '458056343',   installs: 6870,  share: 2.8,  vt: 99.4 },
+  { name: 'ibis Paint X',                  bundle: '450722833',   installs: 4808,  share: 1.9,  vt: 98.7 },
+  { name: 'Screwdom',                      bundle: '6740043080',  installs: 4795,  share: 1.9,  vt: 99.0 },
+  { name: 'TheDayBefore',                  bundle: '991283955',   installs: 4571,  share: 1.8,  vt: 99.5 },
+  { name: 'Naver 지식iN',                  bundle: '1478082869',  installs: 3738,  share: 1.5,  vt: 99.9 },
+  { name: 'Meitu',                         bundle: '416048305',   installs: 3597,  share: 1.4,  vt: 99.3 },
+  { name: 'Albamon',                       bundle: '382535825',   installs: 3470,  share: 1.4,  vt: 98.2 },
+  { name: 'KakaoNavi',                     bundle: '417698849',   installs: 3404,  share: 1.4,  vt: 99.6 },
+  { name: '에이닷 전화 (iOS)',             bundle: '1150947951',  installs: 3400,  share: 1.4,  vt: 96.6 },
+  { name: 'Daum (iOS)',                    bundle: '365494029',   installs: 3366,  share: 1.4,  vt: 98.2 },
+  { name: 'Alarmy iOS',                    bundle: '1163786766',  installs: 3293,  share: 1.3,  vt: 99.3 },
+  { name: 'Infinite Stairs (iOS)',         bundle: '947742764',   installs: 3158,  share: 1.3,  vt: 97.6 },
+  { name: 'Kakao T (iOS)',                 bundle: '981110422',   installs: 2996,  share: 1.2,  vt: 97.5 },
+  { name: 'Kakaobank (iOS)',               bundle: '1258016944',  installs: 2892,  share: 1.2,  vt: 96.4 }
+];
+Plotly.newPlot('plot_pub_ios', [
+  { x: pubIos.map(p => p.name), y: pubIos.map(p => p.share), name: 'Install share %', type: 'bar', marker: { color: ORANGE }, yaxis: 'y1', hovertemplate: '%{x}<br>Install share: %{y:.1f}%<br>Installs: %{customdata:,}<extra></extra>', customdata: pubIos.map(p => p.installs) },
+  { x: pubIos.map(p => p.name), y: pubIos.map(p => p.vt),    name: 'VT ratio %',      type: 'scatter', mode: 'lines+markers', line: { color: INK, width: 2 }, marker: { size: 8 }, yaxis: 'y2', hovertemplate: '%{x}<br>VT ratio: %{y:.1f}%<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'KOR iOS IB — top 20 publishers by install share, with VT ratio', font: { size: 15 } },
+  xaxis: { tickangle: -35 },
+  yaxis:  { title: 'Install share %', side: 'left',  rangemode: 'tozero', ticksuffix: '%' },
+  yaxis2: { title: 'VT ratio %',      side: 'right', overlaying: 'y', range: [80, 100], ticksuffix: '%' },
+  margin: { l: 64, r: 64, t: 52, b: 140 }
+}, CFG);
+
+// ==== 3b. Excl-KT VT impact ====
+const bars = ['All (incl. KakaoTalk)', 'KakaoTalk Only', 'Excl. KakaoTalk'];
+Plotly.newPlot('plot_excl_kt_vt', [
+  { x: bars, y: [78.8, 98.2, 74.7], name: 'iOS',     type: 'bar', marker: { color: ORANGE }, text: ['78.8%','98.2%','74.7%'], textposition: 'outside' },
+  { x: bars, y: [50.4, 88.7, 42.1], name: 'Android', type: 'bar', marker: { color: INK },    text: ['50.4%','88.7%','42.1%'], textposition: 'outside' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'KakaoTalk impact on aggregate VT ratio (KOR office × KOR target)', font: { size: 15 } },
+  yaxis: { title: 'VT ratio', ticksuffix: '%', range: [0, 110] },
+  barmode: 'group'
+}, CFG);
+
+// ==== 3c. Kakao reach donut ====
+// Shares computed from kakao_deepdive cell 8:
+// Android total IDs=28,482,109: excl=2,508,836 (8.8%), overlap=12,407,482 (43.6%), non_kakao=13,565,791 (47.6%)
+// iOS total IDs=10,324,134:     excl=1,193,758 (11.6%), overlap=2,744,396 (26.6%), non_kakao=6,385,980 (61.9%)
+Plotly.newPlot('plot_kakao_reach', [
+  { values: [8.8,  43.6, 47.6], labels: ['KakaoTalk-exclusive (8.8%)','Overlap — Kakao + other (43.6%)','Non-Kakao only (47.6%)'], type: 'pie', hole: 0.55, domain: { column: 0 }, marker: { colors: [ORANGE, '#ff8a59', GREY] }, name: 'Android', text: 'Android', textposition: 'inside' },
+  { values: [11.6, 26.6, 61.9], labels: ['KakaoTalk-exclusive (11.6%)','Overlap — Kakao + other (26.6%)','Non-Kakao only (61.9%)'], type: 'pie', hole: 0.55, domain: { column: 1 }, marker: { colors: [ORANGE, '#ff8a59', GREY] }, name: 'iOS',     text: 'iOS',     textposition: 'inside' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'KakaoTalk device-ID reach — Android (left) vs iOS (right, IDFA-consented only, Mar 28–29 2026)', font: { size: 15 } },
+  grid: { rows: 1, columns: 2 },
+  annotations: [
+    { text: 'Android<br>8.8%<br>exclusive', x: 0.185, y: 0.5, showarrow: false, font: { size: 14, color: INK } },
+    { text: 'iOS<br>11.6%<br>exclusive', x: 0.815, y: 0.5, showarrow: false, font: { size: 14, color: INK } }
+  ],
+  showlegend: false
+}, CFG);
+
+// ==== 3d. Assist rate by window ====
+const assistWindows = ['1 hour', '3 hours'];
+// % of total target-bundle installs (8,789,070): total touch rate split into last-touch and assisted
+const lastTouchRate = [0.36, 0.56];
+const assistedRate  = [0.12, 0.22];
+const noKakaoRate   = [100 - 0.36 - 0.12, 100 - 0.56 - 0.22];
+Plotly.newPlot('plot_assist', [
+  { x: assistWindows, y: assistedRate,  name: 'Assisted (attributed elsewhere)', type: 'bar', marker: { color: '#ff8a59' }, text: assistedRate.map(v => v.toFixed(2) + '%'),  textposition: 'inside', hovertemplate: '%{x}: %{y:.2f}% assisted<extra></extra>' },
+  { x: assistWindows, y: lastTouchRate, name: 'Last-touch (Moloco Kakao)',       type: 'bar', marker: { color: ORANGE },   text: lastTouchRate.map(v => v.toFixed(2) + '%'), textposition: 'inside', hovertemplate: '%{x}: %{y:.2f}% last-touch<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'Share of target-bundle installs with KakaoTalk touch (by window)', font: { size: 15 } },
+  yaxis: { title: 'Share of total installs', ticksuffix: '%', range: [0, 1.0] },
+  xaxis: { title: 'Look-back window' },
+  barmode: 'stack'
+}, CFG);
+
+// ==== 4a. ITIT summary ====
+const ititSegs = ['VT × KakaoTalk','VT × NonKakaoTalk','CT × KakaoTalk','CT × NonKakaoTalk'];
+const ititMedian   = [154.4, 169.0, 0.5, 2.9];
+const ititWithin1h = [32.1, 31.0, 80.1, 73.1];
+const ititWithin5m = [7.3, 7.2, 75.4, 56.4];
+Plotly.newPlot('plot_itit_median', [
+  { x: ititSegs, y: ititWithin1h, name: '% within 1 hour',   type: 'bar', marker: { color: ORANGE }, text: ititWithin1h.map(v => v.toFixed(1)+'%'), textposition: 'outside', hovertemplate: '%{x}<br>Within 1h: %{y:.1f}%<extra></extra>' },
+  { x: ititSegs, y: ititWithin5m, name: '% within 5 minutes', type: 'bar', marker: { color: '#ff8a59' }, text: ititWithin5m.map(v => v.toFixed(1)+'%'), textposition: 'outside', hovertemplate: '%{x}<br>Within 5m: %{y:.1f}%<extra></extra>' }
+], {
+  ...LAYOUT_BASE,
+  title: { text: 'ITIT — % of installs within 1 hour / 5 minutes, by segment (Android, top-10 Kakao-spend)', font: { size: 15 } },
+  yaxis: { title: 'Share of segment installs', ticksuffix: '%', range: [0, 100] },
+  barmode: 'group'
+}, CFG);
+
+// ==== 4b. Retention — scatter plot of the 10 visible bundle × segment cells ====
+// Data from df_retention preview (10 rows)
+const retSample = [
+  { bundle: 'com.pubg.krmobile',          seg: 'CT × KakaoTalk',    installs: 68,    d1: 0.2059, d3: 0.0882, d7: 0.1324 },
+  { bundle: 'com.freecash.app2',          seg: 'VT × KakaoTalk',    installs: 61,    d1: 0.4754, d3: 0.1639, d7: 0.1803 },
+  { bundle: 'com.ktmusic.geniemusic',     seg: 'CT × NonKakaoTalk', installs: 10929, d1: 0.1256, d3: 0.0195, d7: 0.0174 },
+  { bundle: 'com.nexon.ma',               seg: 'VT × NonKakaoTalk', installs: 4234,  d1: 0.4206, d3: 0.3174, d7: 0.2754 },
+  { bundle: 'kr.co.station3.dabang',      seg: 'CT × KakaoTalk',    installs: 52,    d1: 0.1731, d3: 0.0769, d7: 0.0385 },
+  { bundle: 'com.naverfin.payapp',        seg: 'VT × NonKakaoTalk', installs: 32236, d1: 0.2341, d3: 0.1696, d7: 0.1500 },
+  { bundle: 'kr.co.station3.dabang',      seg: 'VT × NonKakaoTalk', installs: 5457,  d1: 0.1809, d3: 0.1048, d7: 0.0539 },
+  { bundle: 'com.netmarble.lineageII',    seg: 'VT × NonKakaoTalk', installs: 420,   d1: 0.3714, d3: 0.1643, d7: 0.0881 },
+  { bundle: 'com.kbsec.mts.iplustarngm2', seg: 'CT × NonKakaoTalk', installs: 565,   d1: 0.2230, d3: 0.1717, d7: 0.1451 },
+  { bundle: 'com.pubg.krmobile',          seg: 'CT × NonKakaoTalk', installs: 2875,  d1: 0.2696, d3: 0.1037, d7: 0.0957 }
+];
+const retSegs = ['VT × KakaoTalk','VT × NonKakaoTalk','CT × KakaoTalk','CT × NonKakaoTalk'];
+const retColors = { 'VT × KakaoTalk': ORANGE, 'VT × NonKakaoTalk': '#ff8a59', 'CT × KakaoTalk': BLUE, 'CT × NonKakaoTalk': '#8ab4f0' };
+const retTraces = ['d1','d3','d7'].map(metric => ({
+  name: metric.toUpperCase() + ' retention',
+  type: 'scatter',
+  mode: 'markers',
+  x: retSample.map(r => r.seg + ' — ' + r.bundle.split('.').slice(-1)[0]),
+  y: retSample.map(r => r[metric] * 100),
+  marker: { size: retSample.map(r => Math.max(8, Math.min(28, Math.sqrt(r.installs) / 4))), color: retSample.map(r => retColors[r.seg]) },
+  hovertemplate: '%{x}<br>' + metric.toUpperCase() + ': %{y:.1f}%<br>Installs: %{customdata:,}<extra></extra>',
+  customdata: retSample.map(r => r.installs)
+}));
+Plotly.newPlot('plot_retention_sample', retTraces, {
+  ...LAYOUT_BASE,
+  title: { text: 'D1 / D3 / D7 retention rate — visible 10-cell sample (marker size = √installs)', font: { size: 15 } },
+  yaxis: { title: 'Retention rate', ticksuffix: '%', range: [0, 50] },
+  xaxis: { tickangle: -35 },
+  margin: { l: 64, r: 24, t: 52, b: 180 }
+}, CFG);
+
+// ==== 4c. Paying rate — Gaming ====
+const payingGaming = {
+  'com.actgames.HelloKittyMDS':            { 'VT × KakaoTalk': 43.0, 'VT × NonKakaoTalk': 28.5, 'CT × KakaoTalk': 53.1, 'CT × NonKakaoTalk': 27.3 },
+  'com.neowizgames.game.browndust2':       { 'VT × KakaoTalk': 17.6, 'VT × NonKakaoTalk': 12.5, 'CT × KakaoTalk': 11.5, 'CT × NonKakaoTalk': 7.5 },
+  'com.netmarble.lineageII':               { 'VT × KakaoTalk': 0.0,  'VT × NonKakaoTalk': 0.0,  'CT × KakaoTalk': 0.0,  'CT × NonKakaoTalk': 0.0 },
+  'com.netmarble.sololv':                  { 'VT × KakaoTalk': null, 'VT × NonKakaoTalk': 5.0,  'CT × KakaoTalk': null, 'CT × NonKakaoTalk': 0.0 },
+  'com.netmarble.tskgb':                   { 'VT × KakaoTalk': 4.8,  'VT × NonKakaoTalk': 8.5,  'CT × KakaoTalk': 0.0,  'CT × NonKakaoTalk': 1.3 },
+  'com.nexon.ma':                          { 'VT × KakaoTalk': 21.4, 'VT × NonKakaoTalk': 10.0, 'CT × KakaoTalk': 15.4, 'CT × NonKakaoTalk': 2.0 },
+  'com.percent.aos.cooptd':                { 'VT × KakaoTalk': 16.8, 'VT × NonKakaoTalk': 9.2,  'CT × KakaoTalk': 19.4, 'CT × NonKakaoTalk': 4.6 },
+  'com.percent.aos.luckydefense':          { 'VT × KakaoTalk': 7.7,  'VT × NonKakaoTalk': 3.5,  'CT × KakaoTalk': 6.4,  'CT × NonKakaoTalk': 5.5 },
+  'com.pubg.krmobile':                     { 'VT × KakaoTalk': 1.5,  'VT × NonKakaoTalk': 1.2,  'CT × KakaoTalk': 2.9,  'CT × NonKakaoTalk': 0.5 },
+  'com.sundaytoz.mobile.anipang2':         { 'VT × KakaoTalk': null, 'VT × NonKakaoTalk': 1.4,  'CT × KakaoTalk': 13.3, 'CT × NonKakaoTalk': 1.6 }
+};
+const payingNonGaming = {
+  'co.riiid.vida':                         { 'VT × KakaoTalk': 5.0,  'VT × NonKakaoTalk': 2.9,  'CT × KakaoTalk': 1.7,  'CT × NonKakaoTalk': 0.4 },
+  'com.freecash.app2':                     { 'VT × KakaoTalk': 45.9, 'VT × NonKakaoTalk': 41.3, 'CT × KakaoTalk': 78.2, 'CT × NonKakaoTalk': 43.0 },
+  'com.initialcoms.ridi':                  { 'VT × KakaoTalk': 41.4, 'VT × NonKakaoTalk': 43.6, 'CT × KakaoTalk': 23.8, 'CT × NonKakaoTalk': 35.8 },
+  'com.kbsec.mts.iplustarngm2':            { 'VT × KakaoTalk': 0.0,  'VT × NonKakaoTalk': 0.0,  'CT × KakaoTalk': 0.0,  'CT × NonKakaoTalk': 0.0 },
+  'com.ktmusic.geniemusic':                { 'VT × KakaoTalk': 29.0, 'VT × NonKakaoTalk': 25.9, 'CT × KakaoTalk': 15.6, 'CT × NonKakaoTalk': 2.9 },
+  'com.naverfin.payapp':                   { 'VT × KakaoTalk': 0.0,  'VT × NonKakaoTalk': 0.0,  'CT × KakaoTalk': 0.0,  'CT × NonKakaoTalk': 0.0 },
+  'com.towneers.www':                      { 'VT × KakaoTalk': null, 'VT × NonKakaoTalk': null, 'CT × KakaoTalk': 0.2,  'CT × NonKakaoTalk': 0.2 },
+  'kr.co.cleaninglab.user':                { 'VT × KakaoTalk': null, 'VT × NonKakaoTalk': null, 'CT × KakaoTalk': 3.0,  'CT × NonKakaoTalk': 1.8 },
+  'kr.co.station3.dabang':                 { 'VT × KakaoTalk': 0.0,  'VT × NonKakaoTalk': 0.0,  'CT × KakaoTalk': 0.0,  'CT × NonKakaoTalk': 0.0 },
+  'net.ib.android.smcard':                 { 'VT × KakaoTalk': 0.0,  'VT × NonKakaoTalk': 0.0,  'CT × KakaoTalk': 0.0,  'CT × NonKakaoTalk': 0.0 }
+};
+function payRateTraces(data) {
+  const bundles = Object.keys(data);
+  const segs = ['VT × KakaoTalk','VT × NonKakaoTalk','CT × KakaoTalk','CT × NonKakaoTalk'];
+  const colors = { 'VT × KakaoTalk': ORANGE, 'VT × NonKakaoTalk': '#ff8a59', 'CT × KakaoTalk': BLUE, 'CT × NonKakaoTalk': '#8ab4f0' };
+  return segs.map(seg => ({
+    x: bundles.map(b => b.split('.').slice(-1)[0]),
+    y: bundles.map(b => data[b][seg]),
+    name: seg,
+    type: 'bar',
+    marker: { color: colors[seg] },
+    hovertemplate: '%{x}<br>' + seg + ': %{y:.1f}%<extra></extra>'
+  }));
+}
+Plotly.newPlot('plot_paying_gaming', payRateTraces(payingGaming), {
+  ...LAYOUT_BASE,
+  title: { text: 'D7 paying rate by segment — Gaming top-10 bundles (Android)', font: { size: 15 } },
+  yaxis: { title: 'Paying rate', ticksuffix: '%' },
+  xaxis: { tickangle: -30 },
+  barmode: 'group',
+  margin: { l: 64, r: 24, t: 52, b: 120 }
+}, CFG);
+Plotly.newPlot('plot_paying_nongaming', payRateTraces(payingNonGaming), {
+  ...LAYOUT_BASE,
+  title: { text: 'D7 paying rate by segment — Non-Gaming top-10 bundles (Android)', font: { size: 15 } },
+  yaxis: { title: 'Paying rate', ticksuffix: '%' },
+  xaxis: { tickangle: -30 },
+  barmode: 'group',
+  margin: { l: 64, r: 24, t: 52, b: 120 }
+}, CFG);
+
+</script>
+</body>
+</html>

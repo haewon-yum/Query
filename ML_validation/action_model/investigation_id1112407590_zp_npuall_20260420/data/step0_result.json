@@ -1,0 +1,9 @@
+{
+  "step": 0,
+  "verdict": "OK",
+  "campaigns": [
+    {"campaign_id": "RGPQHVtHfPNlSXcU", "kpi_event": "zp_npuall", "state": "ACTIVE", "inactive_since": null, "note": "Continuously ACTIVE on 2026-04-20 (00:35, 02:21, 02:41 UTC)"},
+    {"campaign_id": "f6EhdMGNHwGpKD4l", "kpi_event": "zp_npuall", "state": "UNKNOWN", "inactive_since": null, "note": "No entity_history in 30d (last: 2026-03-31), likely pre-launch"},
+    {"campaign_id": "Nu3RqJ9SKxUQHmK4", "kpi_event": "zp_npuall", "state": "PAUSED", "inactive_since": "2026-04-09T06:58:13Z", "note": "Paused 11 days ago"}
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "step": 3,
+  "event": "af_ad_revenue",
+  "verdict": "FAIL",
+  "most_recent_date": null,
+  "total_examples_14d": 0,
+  "campaigns_seen": [],
+  "note": "Zero training examples in last 14 days. Both campaigns were paused during this window — IV7TA5O07K4JNsjn inactive since 2025-12-18, SqHUbqoeXYnCj6Ow paused from Apr 14 until Apr 20 04:31 UTC."
+}

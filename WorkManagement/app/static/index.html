@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .card { transition: box-shadow 0.15s, transform 0.15s; }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); transform: translateY(-1px); }
+    .sortable-ghost { opacity: 0.4; }
+    .sortable-drag { box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important; }
+    .col-scroll { max-height: calc(100vh - 160px); overflow-y: auto; }
+    .col-scroll::-webkit-scrollbar { width: 4px; }
+    .col-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans" x-data="dashboard()" x-init="init()" x-cloak
+  @keydown.escape.window="selectedItem = null; showAddModal = false; editingTodoIdx = -1">
+
+  <!-- Header -->
+  <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-4">
+      <span class="text-xl font-bold text-gray-900">My Work Dashboard</span>
+      <!-- Tab switcher -->
+      <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <button @click="activeTab = 'kanban'"
+          class="px-3 py-1 text-sm rounded-md transition"
+          :class="activeTab === 'kanban' ? 'bg-white shadow text-gray-800 font-medium' : 'text-gray-500 hover:text-gray-700'">
+          Kanban
+        </button>
+        <button @click="activeTab = 'calendar'; loadCalendar()"
+          class="px-3 py-1 text-sm rounded-md transition"
+          :class="activeTab === 'calendar' ? 'bg-white shadow text-gray-800 font-medium' : 'text-gray-500 hover:text-gray-700'">
+          📅 Calendar
+        </button>
+        <button @click="activeTab = 'docs'; loadDocs()"
+          class="px-3 py-1 text-sm rounded-md transition"
+          :class="activeTab === 'docs' ? 'bg-white shadow text-gray-800 font-medium' : 'text-gray-500 hover:text-gray-700'">
+          📂 Docs
+        </button>
+        <button @click="activeTab = 'okr'; loadOkr()"
+          class="px-3 py-1 text-sm rounded-md transition"
+          :class="activeTab === 'okr' ? 'bg-white shadow text-gray-800 font-medium' : 'text-gray-500 hover:text-gray-700'">
+          🎯 OKR
+        </button>
+        <button @click="activeTab = 'gmail'; loadGmail()"
+          class="px-3 py-1 text-sm rounded-md transition flex items-center gap-1"
+          :class="activeTab === 'gmail' ? 'bg-white shadow text-gray-800 font-medium' : 'text-gray-500 hover:text-gray-700'">
+          ✉️ Gmail
+          <span x-show="gmailUnreadCount > 0"
+            class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none"
+            x-text="gmailUnreadCount"></span>
+        </button>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <input x-model="kanbanSearch" type="search" placeholder="Search cards…"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-400 w-48">
+      <button @click="showDueDates = !showDueDates"
+        class="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+        :class="showDueDates ? 'bg-amber-50 border-amber-300 text-amber-700 font-medium' : ''"
+        x-text="showDueDates ? '📅 Due Dates ✕' : '📅 Due Dates'">
+      </button>
+      <button @click="showDone = !showDone"
+        class="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+        :class="showDone ? 'bg-gray-100 text-gray-500' : ''"
+        x-text="showDone ? 'Hide Done' : 'Show Done (' + doneCount() + ')'">
+      </button>
+      <button @click="addManual()" class="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        + Add
+      </button>
+      <button @click="deepScanSlack()" :disabled="slackScanning"
+        title="Deep scan: uses Glean AI to find unreplied @mentions and action requests (takes ~30–60s)"
+        class="px-3 py-1.5 text-sm bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 transition disabled:opacity-50 flex items-center gap-1.5">
+        <span x-show="slackScanning" class="inline-block w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></span>
+        <span x-text="slackScanning ? 'Scanning Slack…' : '💬 Scan Slack'"></span>
+      </button>
+      <div class="flex items-center gap-2">
+        <span x-show="lastRefresh" class="text-xs text-gray-400 whitespace-nowrap"
+          :title="'Last synced: ' + lastRefresh">
+          Updated <span x-text="formatTime(lastRefresh)"></span>
+        </span>
+        <button @click="refresh()" :disabled="refreshing"
+          title="Sync latest changes from Jira, Slack, Gmail, and Google Drive (incremental — only fetches items updated since last refresh)"
+          class="px-4 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center gap-2">
+          <span x-show="refreshing" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span x-text="refreshing ? 'Syncing…' : 'Sync'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error banner -->
+  <div x-show="errors.length > 0" class="bg-amber-50 border-b border-amber-200 px-6 py-2 text-sm text-amber-800">
+    ⚠️ Some sources failed: <span x-text="errors.join(', ')"></span>
+  </div>
+
+  <!-- 현황판 Banner -->
+  <div x-show="activeTab === 'kanban'" class="px-6 pt-4 pb-2">
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl px-5"
+         :class="bannerExpanded ? 'py-3' : 'py-2'">
+      <!-- Always-visible header bar (click to toggle) -->
+      <div class="flex items-center justify-between gap-4 cursor-pointer select-none"
+           @click="bannerExpanded = !bannerExpanded">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-indigo-500 uppercase tracking-wide">Situation Room</span>
+          <span x-show="bannerData.generated_at" class="text-xs text-gray-400"
+            x-text="'· ' + formatTime(bannerData.generated_at)"></span>
+          <span x-show="bannerLoading" class="inline-block w-3 h-3 border-2 border-indigo-300 border-t-transparent rounded-full animate-spin ml-1"></span>
+          <!-- Collapsed preview: plain 2h prose summary -->
+          <span x-show="!bannerExpanded && (bannerData.plain_2h || bannerData.summary_4h)"
+            class="text-xs text-gray-500 truncate max-w-sm ml-1"
+            x-text="bannerData.plain_2h || (bannerData.summary_4h || '').split('\n').filter(l => l.trim())[0]?.replace(/^[•\-\*]\s*/, '').replace(/\*\*([^*]+)\*\*/g, '$1') || ''">
+          </span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Signal badges (always visible) -->
+          <div x-show="bannerData.signals_4h" class="flex gap-2 text-xs text-gray-400">
+            <span x-show="bannerData.signals_4h?.git_commits > 0" x-text="'⌥ ' + bannerData.signals_4h?.git_commits"></span>
+            <span x-show="bannerData.signals_4h?.jira_count > 0" x-text="'🎫 ' + bannerData.signals_4h?.jira_count"></span>
+            <span x-show="bannerData.signals_4h?.slack_count > 0" x-text="'💬 ' + bannerData.signals_4h?.slack_count"></span>
+            <span x-show="bannerData.signals_4h?.drive_count > 0" x-text="'📄 ' + bannerData.signals_4h?.drive_count"></span>
+          </div>
+          <button @click.stop="loadBanner(true)" :disabled="bannerLoading"
+            class="text-indigo-400 hover:text-indigo-600 transition text-sm disabled:opacity-40" title="Regenerate">↻</button>
+          <span class="text-indigo-300 text-xs transition-transform duration-200"
+            :style="bannerExpanded ? 'transform: rotate(180deg)' : ''">▼</span>
+        </div>
+      </div>
+
+      <!-- Expandable body -->
+      <div x-show="bannerExpanded" x-transition:enter="transition ease-out duration-150"
+           x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+           x-transition:leave="transition ease-in duration-100"
+           x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+           class="mt-3">
+
+        <!-- Plain-text "what I'm doing now" summary -->
+        <div x-show="!bannerLoading && bannerData.plain_2h" class="mb-3 pb-3 border-b border-indigo-100">
+          <p class="text-sm font-medium text-gray-800 leading-relaxed" x-text="bannerData.plain_2h"></p>
+        </div>
+
+        <!-- Three-window panels -->
+        <div x-show="!bannerLoading && (bannerData.summary_4h || bannerData.summary_8h || bannerData.summary_24h)" class="grid grid-cols-3 gap-4">
+          <!-- Last 4h -->
+          <div class="min-w-0">
+            <div class="text-xs font-semibold text-indigo-400 uppercase tracking-wide mb-1.5">Last 4h</div>
+            <ul class="flex flex-col gap-1" x-html="renderBullets(bannerData.summary_4h)"></ul>
+          </div>
+          <!-- 4–8h ago -->
+          <div class="min-w-0">
+            <div class="text-xs font-semibold text-purple-400 uppercase tracking-wide mb-1.5">4–8h ago</div>
+            <ul class="flex flex-col gap-1" x-html="renderBullets(bannerData.summary_8h)"></ul>
+          </div>
+          <!-- 8–24h ago -->
+          <div class="min-w-0">
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">8–24h ago</div>
+            <ul class="flex flex-col gap-1" x-html="renderBullets(bannerData.summary_24h)"></ul>
+          </div>
+        </div>
+        <p x-show="!bannerLoading && !bannerData.summary_4h && !bannerData.summary_8h && !bannerData.summary_24h"
+          class="text-sm text-gray-400 italic">Click ↻ to generate your current status summary.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Due Dates view -->
+  <div x-show="activeTab === 'kanban' && showDueDates" class="px-6 py-4 max-w-3xl mx-auto">
+    <h2 class="text-base font-semibold text-gray-700 mb-5">Items with Due Dates</h2>
+
+    <!-- Grouped by bucket -->
+    <template x-for="col in columns" :key="col.id">
+      <div x-show="itemsWithDueDatesByBucket(col.id).length > 0" class="mb-7">
+        <!-- Bucket header -->
+        <div class="flex items-center gap-2 mb-2">
+          <span x-text="col.icon" class="text-sm"></span>
+          <span class="text-xs font-semibold uppercase tracking-wider"
+            :class="{
+              'text-blue-600':   col.id===1,
+              'text-green-600':  col.id===2,
+              'text-yellow-600': col.id===3,
+              'text-orange-500': col.id===7,
+              'text-purple-600': col.id===4,
+              'text-gray-400':   col.id===5,
+              'text-teal-600':   col.id===6
+            }"
+            x-text="col.name"></span>
+          <span class="text-xs text-gray-300"
+            x-text="'(' + itemsWithDueDatesByBucket(col.id).length + ')'"></span>
+        </div>
+        <!-- Divider -->
+        <div class="border-t mb-3"
+          :class="{
+            'border-blue-100':   col.id===1,
+            'border-green-100':  col.id===2,
+            'border-yellow-100': col.id===3,
+            'border-orange-100': col.id===7,
+            'border-purple-100': col.id===4,
+            'border-gray-100':   col.id===5,
+            'border-teal-100':   col.id===6
+          }"></div>
+
+        <div class="flex flex-col gap-2">
+          <template x-for="item in itemsWithDueDatesByBucket(col.id)" :key="item.id">
+            <div @click="openDetail(item)"
+              class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-4 cursor-pointer hover:border-indigo-200 hover:shadow-sm transition"
+              :class="item.status_flag === 'overdue' ? 'border-l-4 border-l-red-400' : item.status_flag === 'blocked' ? 'border-l-4 border-l-orange-400' : 'border-l-4 border-l-transparent'">
+              <div class="w-20 shrink-0 text-center">
+                <span class="text-sm font-semibold"
+                  :class="item.status_flag === 'overdue' ? 'text-red-500' : 'text-gray-700'"
+                  x-text="formatDate(item.due_date)"></span>
+                <p class="text-xs text-gray-400 mt-0.5" x-text="daysUntil(item.due_date)"></p>
+              </div>
+              <div class="flex-1 min-w-0">
+                <template x-if="item.source_url">
+                  <a :href="item.source_url" target="_blank" rel="noopener" @click.stop
+                    class="text-sm font-medium text-gray-800 truncate block hover:text-indigo-600 hover:underline transition-colors"
+                    x-text="item.title"></a>
+                </template>
+                <template x-if="!item.source_url">
+                  <p class="text-sm font-medium text-gray-800 truncate" x-text="item.title"></p>
+                </template>
+                <div class="flex gap-2 mt-1 items-center">
+                  <span class="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                    :class="flagClass(item.status_flag)"
+                    x-text="item.status_flag"></span>
+                  <span class="text-xs text-gray-300" x-text="item.source?.toUpperCase()"></span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <p x-show="itemsWithDueDates().length === 0" class="text-center text-gray-400 py-12 text-sm">No items with due dates.</p>
+  </div>
+
+  <!-- Kanban board -->
+  <div x-show="activeTab === 'kanban' && !showDueDates" class="flex gap-5 px-6 py-4 overflow-x-auto min-h-screen">
+    <template x-for="col in columns" :key="col.id">
+      <div class="flex-shrink-0 flex flex-col"
+        :class="collapsedBuckets.includes(col.id) ? 'w-10 items-center cursor-pointer group' : 'w-96'"
+        @click="collapsedBuckets.includes(col.id) && (collapsedBuckets = collapsedBuckets.filter(id => id !== col.id), localStorage.setItem('collapsedBuckets', JSON.stringify(collapsedBuckets)))">
+
+        <!-- Collapsed strip -->
+        <div x-show="collapsedBuckets.includes(col.id)" class="flex flex-col items-center pt-1 select-none">
+          <span x-text="col.icon" class="text-base mb-2"></span>
+          <span class="bg-gray-200 text-gray-600 text-xs font-medium px-1.5 py-0.5 rounded-full mb-3"
+            x-text="itemsForBucket(col.id).length"></span>
+          <span class="text-xs font-semibold text-gray-400 group-hover:text-gray-600 transition"
+            style="writing-mode: vertical-rl; letter-spacing: 0.05em;"
+            x-text="col.name"></span>
+        </div>
+
+        <!-- Expanded column header -->
+        <div x-show="!collapsedBuckets.includes(col.id)" class="flex items-center justify-between mb-2 px-1">
+          <div class="flex items-center gap-2">
+            <span x-text="col.icon" class="text-lg"></span>
+            <span class="font-semibold text-gray-700 text-sm" x-text="col.name"></span>
+            <span class="bg-gray-200 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full"
+              x-text="itemsForBucket(col.id).length"></span>
+          </div>
+          <button @click.stop="collapsedBuckets = [...collapsedBuckets, col.id]; localStorage.setItem('collapsedBuckets', JSON.stringify(collapsedBuckets))"
+            class="text-gray-300 hover:text-gray-500 transition text-sm px-1" title="Collapse column">‹</button>
+        </div>
+
+        <!-- Cards drop zone (hidden when collapsed) -->
+        <div x-show="!collapsedBuckets.includes(col.id)"
+          class="col-scroll bg-gray-100 rounded-xl p-2 flex flex-col gap-2 min-h-24"
+          :id="'col-' + col.id"
+          x-ref="col.id">
+
+          <template x-for="item in itemsForBucket(col.id)" :key="item.id">
+            <div class="card bg-white rounded-lg p-3 cursor-pointer border border-gray-100"
+              :class="[cardBorderClass(item), item.status_flag === 'done' ? 'opacity-50' : '']"
+              x-show="item.status_flag !== 'done' || showDone"
+              :data-id="item.id"
+              @click="openDetail(item)">
+
+              <!-- Source badge + confirm + done button -->
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs px-1.5 py-0.5 rounded font-medium"
+                  :class="sourceBadgeClass(item.source)"
+                  x-text="item.source.toUpperCase()"></span>
+                <div class="flex items-center gap-1">
+                  <span x-show="!item.human_confirmed && item.status_flag !== 'done'"
+                    class="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium cursor-pointer hover:bg-yellow-200"
+                    @click.stop="confirmItem(item)"
+                    title="AI suggestion — click to confirm">AI ✓?</span>
+                  <span x-show="item.human_confirmed && item.status_flag !== 'done'"
+                    class="text-xs text-green-500" title="Confirmed">✓</span>
+                  <!-- Mark done button -->
+                  <button x-show="item.status_flag !== 'done'"
+                    @click.stop="markDone(item)"
+                    class="text-xs text-gray-300 hover:text-green-500 transition px-1"
+                    title="Mark as done">✓ Done</button>
+                  <span x-show="item.status_flag === 'done'"
+                    class="text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded font-medium">Done</span>
+                </div>
+              </div>
+
+              <!-- Title -->
+              <template x-if="item.source_url">
+                <a :href="item.source_url" target="_blank" rel="noopener"
+                  @click.stop
+                  class="text-sm font-medium leading-snug mb-2 block hover:underline transition-colors"
+                  :class="item.status_flag === 'done' ? 'text-gray-400 line-through' : 'text-gray-800 hover:text-indigo-600'"
+                  x-text="item.title"></a>
+              </template>
+              <template x-if="!item.source_url">
+                <p class="text-sm font-medium leading-snug mb-2"
+                  :class="item.status_flag === 'done' ? 'text-gray-400 line-through' : 'text-gray-800'"
+                  x-text="item.title"></p>
+              </template>
+
+              <!-- Checklist mini-progress on card -->
+              <div x-show="(item.todos||[]).length > 0" class="mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <div class="flex-1 bg-gray-100 rounded-full h-1">
+                    <div class="bg-indigo-400 h-1 rounded-full transition-all"
+                      :style="'width:' + ((item.todos||[]).filter(t=>t.done).length / ((item.todos||[]).length||1) * 100) + '%'"></div>
+                  </div>
+                  <span class="text-xs text-gray-400"
+                    x-text="(item.todos||[]).filter(t=>t.done).length + '/' + (item.todos||[]).length"></span>
+                </div>
+              </div>
+              <!-- OKR tag badge -->
+              <div x-show="item.okr_tag" class="mb-1.5">
+                <span class="text-xs px-1.5 py-0.5 rounded-full font-medium border border-transparent"
+                  :class="okrTagColorClass(item.okr_tag)"
+                  x-text="okrTagLabel(item.okr_tag)"></span>
+              </div>
+              <!-- Footer: flag + due date -->
+              <div class="flex items-center justify-between" x-show="item.status_flag !== 'done'">
+                <span class="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                  :class="flagClass(item.status_flag)"
+                  x-text="item.status_flag"></span>
+                <span x-show="item.due_date" class="text-xs text-gray-400"
+                  x-text="'Due ' + formatDate(item.due_date)"
+                  :class="item.status_flag === 'overdue' ? 'text-red-500 font-medium' : ''"></span>
+              </div>
+            </div>
+          </template>
+
+          <!-- Empty state -->
+          <div x-show="itemsForBucket(col.id).length === 0"
+            class="text-center py-6 text-gray-300 text-sm select-none">
+            Drop here
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Calendar tab -->
+  <div x-show="activeTab === 'calendar'" class="p-6 max-w-4xl mx-auto">
+    <div x-show="calendarLoading" class="text-center py-12 text-gray-400">Loading calendar…</div>
+    <div x-show="calendarError" class="text-center py-12">
+      <p class="text-amber-600 mb-2" x-text="calendarError"></p>
+      <p class="text-sm text-gray-400">Authorize Google Calendar access first, then restart the server.</p>
+    </div>
+    <div x-show="!calendarLoading && !calendarError">
+      <!-- Events grouped by day -->
+      <template x-for="group in calendarGroups()" :key="group.date">
+        <div class="mb-6">
+          <!-- Day header -->
+          <div class="flex items-center gap-3 mb-3">
+            <div class="text-center w-12 shrink-0">
+              <div class="text-xs text-gray-400 uppercase" x-text="group.dayName"></div>
+              <div class="text-2xl font-bold leading-none"
+                :class="group.isToday ? 'text-indigo-600' : 'text-gray-800'"
+                x-text="group.dayNum"></div>
+            </div>
+            <div class="flex-1 h-px bg-gray-200"></div>
+            <span x-show="group.isToday" class="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-medium">Today</span>
+          </div>
+
+          <!-- Events for this day -->
+          <div class="ml-16 space-y-2">
+            <template x-for="event in group.events" :key="event.id">
+              <div class="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-sm transition">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-sm font-semibold text-gray-800" x-text="event.title"></span>
+                      <span x-show="event.attendee_count > 1"
+                        class="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                        <span x-text="event.attendee_count"></span> people
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-gray-400">
+                      <span x-text="formatEventTime(event.start, event.end, event.is_allday)"></span>
+                      <span x-show="event.location" x-text="'📍 ' + event.location"></span>
+                    </div>
+                    <p x-show="event.description" class="text-xs text-gray-500 mt-1 line-clamp-2"
+                      x-text="event.description"></p>
+                  </div>
+                  <div class="flex gap-2 shrink-0">
+                    <a :href="event.link" target="_blank"
+                      class="text-xs text-gray-400 hover:text-indigo-500 transition">↗</a>
+                    <button @click="addPrepTodo(event)"
+                      class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 transition whitespace-nowrap">
+                      + Prep todo
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Suggested prep todos -->
+                <div x-show="prepTodos[event.id] !== undefined" class="mt-3 pt-3 border-t border-gray-50">
+                  <p class="text-xs text-gray-400 mb-1.5">Suggested prep:</p>
+                  <div class="flex flex-wrap gap-1.5 mb-2">
+                    <template x-for="todo in prepTodos[event.id]" :key="todo">
+                      <button @click="addTodoFromPrep(todo, event)"
+                        class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition">
+                        + <span x-text="todo"></span>
+                      </button>
+                    </template>
+                  </div>
+                  <!-- Custom prep input -->
+                  <div class="flex gap-1.5 mt-1">
+                    <input type="text"
+                      :id="'prep-input-' + event.id"
+                      placeholder="Write your own prep item…"
+                      @keydown.enter="if ($event.target.value.trim()) { addTodoFromPrep($event.target.value.trim(), event); $event.target.value = ''; }"
+                      class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-300" />
+                    <button
+                      @click="const el = document.getElementById('prep-input-' + event.id); if (el.value.trim()) { addTodoFromPrep(el.value.trim(), event); el.value = ''; }"
+                      class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1.5 rounded-lg border border-indigo-200 hover:bg-indigo-100 transition">
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      <div x-show="calendarEvents.length === 0 && !calendarLoading" class="text-center py-12 text-gray-400">
+        No upcoming events in the next 14 days.
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail modal -->
+  <div x-show="selectedItem" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    @click.self="selectedItem = null">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 z-10" x-show="selectedItem">
+      <template x-if="selectedItem">
+        <div>
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex-1 pr-4">
+              <p class="text-xs text-gray-400 mb-1" x-text="selectedItem.id"></p>
+              <input type="text" x-model="selectedItem.title"
+                @change="saveField('title', selectedItem.title)"
+                class="w-full text-base font-semibold text-gray-900 bg-transparent border-b border-transparent hover:border-gray-200 focus:border-indigo-300 focus:outline-none rounded px-0.5 py-0.5 transition-colors"
+                title="Click to rename">
+            </div>
+            <button @click="selectedItem = null" class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          </div>
+
+          <!-- Context -->
+          <p x-show="selectedItem.context" class="text-sm text-gray-600 mb-4 leading-relaxed"
+            x-text="selectedItem.context"></p>
+
+          <!-- Fields -->
+          <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Bucket</label>
+              <select
+                :value="selectedItem.bucket"
+                @change="selectedItem.bucket = +$event.target.value; saveField('bucket', +$event.target.value)"
+                class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm">
+                <template x-for="col in columns" :key="col.id">
+                  <option :value="col.id" :selected="col.id === selectedItem.bucket" x-text="col.name"></option>
+                </template>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Status</label>
+              <select x-model="selectedItem.status_flag" @change="saveField('status_flag', selectedItem.status_flag); if (selectedItem.status_flag === 'done') { selectedItem = null; }"
+                class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm">
+                <template x-for="flag in flagsForBucket(selectedItem.bucket)" :key="flag">
+                  <option :value="flag" x-text="flag"></option>
+                </template>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Due Date</label>
+              <input type="date" x-model="selectedItem.due_date" @change="saveField('due_date', selectedItem.due_date)"
+                class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Delegated To</label>
+              <input type="text" x-model="selectedItem.delegated_to" @change="saveField('delegated_to', selectedItem.delegated_to)"
+                placeholder="Name or email"
+                class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm" />
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-4">
+            <label class="block text-xs text-gray-400 mb-1">Notes</label>
+            <textarea x-model="selectedItem.notes" @change="saveField('notes', selectedItem.notes)"
+              rows="2" placeholder="Add context, blockers, next steps…"
+              class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm resize-none"></textarea>
+          </div>
+
+          <!-- OKR link -->
+          <div class="mb-4" x-show="okrPillars.length > 0">
+            <label class="block text-xs text-gray-400 mb-1">OKR Link</label>
+            <div class="flex items-center gap-2">
+              <select
+                x-model="selectedItem._okrTagStr"
+                @change="selectedItem.okr_tag = $event.target.value ? JSON.parse($event.target.value) : null; setItemOkrTag(selectedItem, selectedItem.okr_tag)"
+                class="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-sm">
+                <option value="">— None —</option>
+                <template x-for="p in okrPillars" :key="p.id">
+                  <template x-for="(obj, oi) in p.objectives" :key="oi">
+                    <optgroup :label="p.icon + ' ' + p.title + (p.objectives.length > 1 ? ' O' + (oi+1) : '')">
+                      <option :value="JSON.stringify({pillar_id: p.id, obj_idx: oi, kr_idx: null})">Objective</option>
+                      <template x-for="(kr, ki) in obj.key_results" :key="ki">
+                        <option :value="JSON.stringify({pillar_id: p.id, obj_idx: oi, kr_idx: ki})"
+                          x-text="'KR' + (ki+1) + ': ' + (kr.length > 40 ? kr.slice(0,40)+'…' : kr)"></option>
+                      </template>
+                    </optgroup>
+                  </template>
+                </template>
+              </select>
+              <span x-show="selectedItem.okr_tag"
+                class="text-xs px-2 py-1 rounded-full font-medium"
+                :class="okrTagColorClass(selectedItem.okr_tag)"
+                x-text="okrTagLabel(selectedItem.okr_tag)"></span>
+            </div>
+          </div>
+
+          <!-- Checklist -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs text-gray-400">Checklist
+                <span x-show="(selectedItem.todos||[]).length > 0"
+                  class="ml-1 text-gray-400"
+                  x-text="'(' + (selectedItem.todos||[]).filter(t=>t.done).length + '/' + (selectedItem.todos||[]).length + ')'"></span>
+              </label>
+            </div>
+            <!-- Progress bar -->
+            <div x-show="(selectedItem.todos||[]).length > 0" class="w-full bg-gray-100 rounded-full h-1 mb-2">
+              <div class="bg-indigo-400 h-1 rounded-full transition-all"
+                :style="'width:' + ((selectedItem.todos||[]).filter(t=>t.done).length / ((selectedItem.todos||[]).length||1) * 100) + '%'"></div>
+            </div>
+            <!-- Todo items -->
+            <div class="flex flex-col gap-1 mb-2">
+              <template x-for="(todo, idx) in (selectedItem.todos||[])" :key="idx">
+                <div class="flex items-center gap-2 group">
+                  <input type="checkbox" :checked="todo.done"
+                    @change="selectedItem.todos[idx].done = $event.target.checked; saveField('todos', selectedItem.todos)"
+                    class="w-3.5 h-3.5 accent-indigo-500 cursor-pointer flex-shrink-0 mt-0.5">
+                  <!-- View mode: double-click to edit -->
+                  <span x-show="editingTodoIdx !== idx"
+                    class="text-sm flex-1 leading-snug cursor-text select-none"
+                    :class="todo.done ? 'line-through text-gray-300' : 'text-gray-700'"
+                    @dblclick="editingTodoIdx = idx; editingTodoText = todo.text"
+                    x-text="todo.text"></span>
+                  <!-- Edit mode -->
+                  <input x-show="editingTodoIdx === idx"
+                    type="text"
+                    x-model="editingTodoText"
+                    @keydown.enter.prevent="selectedItem.todos[idx].text = editingTodoText.trim() || todo.text; saveField('todos', selectedItem.todos); editingTodoIdx = -1"
+                    @keydown.escape.prevent.stop="editingTodoIdx = -1"
+                    @blur="if (editingTodoText.trim()) { selectedItem.todos[idx].text = editingTodoText.trim(); saveField('todos', selectedItem.todos); } editingTodoIdx = -1"
+                    class="text-sm flex-1 border-b border-indigo-300 focus:outline-none bg-transparent py-0.5 text-gray-800">
+                  <!-- Edit pencil (hover) -->
+                  <button x-show="editingTodoIdx !== idx"
+                    @click="editingTodoIdx = idx; editingTodoText = todo.text"
+                    class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-indigo-400 transition text-xs px-1" title="Edit">✎</button>
+                  <!-- Delete (hover) -->
+                  <button x-show="editingTodoIdx !== idx"
+                    @click="selectedItem.todos.splice(idx, 1); saveField('todos', selectedItem.todos)"
+                    class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition text-xs px-1">✕</button>
+                  <!-- Confirm edit -->
+                  <button x-show="editingTodoIdx === idx"
+                    @click="selectedItem.todos[idx].text = editingTodoText.trim() || todo.text; saveField('todos', selectedItem.todos); editingTodoIdx = -1"
+                    class="text-indigo-500 hover:text-indigo-700 text-xs px-1 font-medium">✓</button>
+                  <!-- Cancel edit -->
+                  <button x-show="editingTodoIdx === idx"
+                    @click.prevent.stop="editingTodoIdx = -1"
+                    class="text-gray-400 hover:text-gray-600 text-xs px-1">✕</button>
+                </div>
+              </template>
+            </div>
+            <!-- Add new todo -->
+            <div class="flex gap-1">
+              <input type="text" x-model="newTodoText"
+                @keydown.enter.prevent="if(newTodoText.trim()){selectedItem.todos = [...(selectedItem.todos||[]), {text: newTodoText.trim(), done: false}]; saveField('todos', selectedItem.todos); newTodoText=''}"
+                placeholder="Add a task…"
+                class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-indigo-300">
+              <button @click="if(newTodoText.trim()){selectedItem.todos = [...(selectedItem.todos||[]), {text: newTodoText.trim(), done: false}]; saveField('todos', selectedItem.todos); newTodoText=''}"
+                class="px-2 py-1 text-xs bg-gray-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg border border-gray-200 transition">+ Add</button>
+            </div>
+          </div>
+
+          <!-- Footer actions -->
+          <div class="flex items-center justify-between">
+            <div class="flex gap-2 items-center">
+              <a x-show="selectedItem.source_url" :href="selectedItem.source_url" target="_blank"
+                class="text-xs text-indigo-600 hover:underline">Open source ↗</a>
+              <button x-show="selectedItem.source === 'gmail'" @click="markGmailRead(selectedItem)"
+                class="text-xs px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition"
+                :class="gmailReadStatus[selectedItem.id] === 'done' ? 'bg-green-50 border-green-300 text-green-700' : ''"
+                x-text="gmailReadStatus[selectedItem.id] === 'loading' ? 'Marking…' : gmailReadStatus[selectedItem.id] === 'done' ? '✓ Marked Read' : '✉ Mark as Read'">
+              </button>
+            </div>
+            <div class="flex gap-2">
+              <button x-show="!selectedItem.human_confirmed"
+                @click="confirmItem(selectedItem); selectedItem = null"
+                class="px-3 py-1.5 text-xs bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100">
+                Confirm AI suggestion
+              </button>
+              <button @click="deleteItem(selectedItem.id); selectedItem = null"
+                class="px-3 py-1.5 text-xs bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100">
+                Remove
+              </button>
+              <button @click="saveAll(selectedItem); selectedItem = null"
+                class="px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                Save & Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Add manual item modal -->
+  <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    @click.self="showAddModal = false">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
+      <h2 class="text-base font-semibold mb-4">Add Item Manually</h2>
+      <div class="space-y-3 text-sm">
+        <input type="text" x-model="newItem.title" placeholder="Title *"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2" />
+        <select x-model.number="newItem.bucket"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2">
+          <template x-for="col in columns" :key="col.id">
+            <option :value="col.id" x-text="col.name"></option>
+          </template>
+        </select>
+        <input type="date" x-model="newItem.due_date"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2" />
+        <input type="url" x-model="newItem.source_url" placeholder="Link (optional)"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2" />
+        <textarea x-model="newItem.notes" placeholder="Notes" rows="2"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 resize-none"></textarea>
+        <!-- OKR link -->
+        <div x-show="okrPillars.length > 0">
+          <label class="text-xs text-gray-400 block mb-1">Link to OKR (optional)</label>
+          <select x-model="newItem.okr_tag_str"
+            @change="newItem.okr_tag = $event.target.value ? JSON.parse($event.target.value) : null"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+            <option value="">— None —</option>
+            <template x-for="p in okrPillars" :key="p.id">
+              <template x-for="(obj, oi) in p.objectives" :key="oi">
+                <optgroup :label="p.icon + ' ' + p.title + (p.objectives.length > 1 ? ' O' + (oi+1) : '')">
+                  <option :value="JSON.stringify({pillar_id: p.id, obj_idx: oi, kr_idx: null})">Objective</option>
+                  <template x-for="(kr, ki) in obj.key_results" :key="ki">
+                    <option :value="JSON.stringify({pillar_id: p.id, obj_idx: oi, kr_idx: ki})"
+                      x-text="'KR' + (ki+1) + ': ' + (kr.length > 45 ? kr.slice(0,45)+'…' : kr)"></option>
+                  </template>
+                </optgroup>
+              </template>
+            </template>
+          </select>
+        </div>
+      </div>
+      <p x-show="addModalError" x-text="addModalError" class="mt-2 text-xs text-red-500"></p>
+      <div class="flex justify-end gap-2 mt-4">
+        <button @click="showAddModal = false; addModalError = ''"
+          class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
+        <button @click="submitManual()" :disabled="addModalSubmitting"
+          class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1.5">
+          <span x-show="addModalSubmitting" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span x-text="addModalSubmitting ? 'Adding…' : 'Add'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Docs tab -->
+  <div x-show="activeTab === 'docs'" class="flex min-h-screen">
+
+    <!-- Left sidebar: category nav -->
+    <div class="w-44 shrink-0 border-r border-gray-100 pt-6 pb-10 sticky top-0 self-start h-screen overflow-y-auto">
+      <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 px-4 mb-2">Categories</p>
+      <button @click="activeDocCat = null"
+        class="w-full text-left px-4 py-1.5 text-sm rounded-lg transition flex items-center justify-between"
+        :class="activeDocCat === null ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-50'">
+        <span>All</span>
+        <span class="text-xs text-gray-400" x-text="pinnedDocs.length"></span>
+      </button>
+      <template x-for="cat in docCategories" :key="cat">
+        <button x-show="docsByCategory[cat] && docsByCategory[cat].length > 0"
+          @click="activeDocCat = cat"
+          class="w-full text-left px-4 py-1.5 text-sm rounded-lg transition flex items-center justify-between"
+          :class="activeDocCat === cat ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-50'">
+          <span x-text="cat"></span>
+          <span class="text-xs text-gray-400" x-text="docsByCategory[cat].length"></span>
+        </button>
+      </template>
+    </div>
+
+    <!-- Main content area -->
+    <div class="flex-1 p-6 min-w-0">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-800" x-text="activeDocCat || 'Always-On Docs'"></h2>
+      <div class="flex gap-2 items-center">
+        <input x-model="docSearch" @input="if(docSearch.trim()) activeDocCat = null" type="search" placeholder="Search docs…"
+          class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-400 w-44">
+        <button @click="scanCalendarDocs()"
+          :disabled="docScanLoading"
+          class="px-3 py-1.5 text-sm border border-gray-300 bg-white rounded-lg hover:bg-gray-50 disabled:opacity-50 transition">
+          <span x-show="!docScanLoading">🔍 Scan Calendar</span>
+          <span x-show="docScanLoading">Scanning…</span>
+        </button>
+        <button @click="showAddDocModal = true"
+          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          + Add Doc
+        </button>
+      </div>
+    </div>
+
+    <!-- Scan error banner -->
+    <div x-show="docScanError" class="mb-4 bg-red-50 border border-red-100 rounded-xl px-4 py-3 flex items-start justify-between gap-3">
+      <p class="text-sm text-red-700" x-text="docScanError"></p>
+      <button @click="docScanError = ''" class="text-xs text-red-300 hover:text-red-500 shrink-0">✕</button>
+    </div>
+
+    <!-- Scan results panel -->
+    <div x-show="docCandidates.length > 0" class="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-medium text-blue-800">
+          Found <span x-text="docCandidates.length"></span> doc(s) — select to add:
+        </p>
+        <button @click="docCandidates = []; docCandidateSelected = {}" class="text-xs text-blue-400 hover:text-blue-600">Dismiss</button>
+      </div>
+      <div class="flex flex-col gap-2 max-h-72 overflow-y-auto">
+        <template x-for="c in docCandidates" :key="c.url">
+          <label class="flex items-start gap-2.5 bg-white rounded-lg px-3 py-2 border cursor-pointer transition"
+            :class="docCandidateSelected[c.url] ? 'border-indigo-300 bg-indigo-50' : 'border-blue-100 hover:border-indigo-200'">
+            <input type="checkbox" :checked="docCandidateSelected[c.url]"
+              @change="docCandidateSelected = {...docCandidateSelected, [c.url]: $event.target.checked}"
+              class="mt-0.5 shrink-0" />
+            <div class="flex-1 min-w-0">
+              <input type="text" x-model="c.suggested_title"
+                class="w-full text-sm font-medium text-gray-800 border-0 bg-transparent focus:outline-none focus:ring-0 p-0"
+                placeholder="Doc title" />
+              <p class="text-xs text-gray-400 truncate" x-text="c.url"></p>
+              <div class="flex gap-2 mt-1 items-center">
+                <span class="text-xs text-gray-400 flex-1" x-text="'From: ' + c.event_title + ' (' + c.event_date + ')'"></span>
+                <select x-model="c.category" class="text-xs border border-gray-200 rounded px-1 py-0.5">
+                  <template x-for="cat in docCategories" :key="cat">
+                    <option :value="cat" x-text="cat"></option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </label>
+        </template>
+      </div>
+      <div class="flex justify-end gap-2 mt-3">
+        <button @click="docCandidates.forEach(c => docCandidateSelected = {...docCandidateSelected, [c.url]: true})"
+          class="text-xs text-indigo-600 hover:underline">Select all</button>
+        <button @click="addSelectedCandidates()"
+          :disabled="Object.values(docCandidateSelected).filter(Boolean).length === 0"
+          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+          Add Selected (<span x-text="Object.values(docCandidateSelected).filter(Boolean).length"></span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- Group by category -->
+    <template x-for="cat in docCategories" :key="cat">
+      <div x-show="filteredDocsByCategory[cat] && filteredDocsByCategory[cat].length > 0 && (activeDocCat === null || activeDocCat === cat)" class="mb-6">
+        <h3 x-show="activeDocCat === null" class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3" x-text="cat"></h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <template x-for="doc in filteredDocsByCategory[cat]" :key="doc.id">
+            <div class="bg-white rounded-xl border border-gray-200 p-4 hover:border-indigo-200 hover:shadow-sm transition group">
+              <div class="flex items-start justify-between gap-2">
+                <a :href="doc.url" target="_blank"
+                  class="text-sm font-medium text-gray-800 hover:text-indigo-600 hover:underline leading-snug flex-1 flex items-start gap-1.5">
+                  <span x-text="driveTypeIcon(doc.mime_type)" class="shrink-0 mt-0.5"></span>
+                  <span x-text="doc.title"></span>
+                </a>
+                <button @click="removeDoc(doc.id)"
+                  class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition text-xs shrink-0">✕</button>
+              </div>
+              <p x-show="doc.notes" class="text-xs text-gray-400 mt-1.5 leading-snug" x-text="doc.notes"></p>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-xs text-gray-300" x-text="formatDate(doc.added_at && doc.added_at.split('T')[0])"></span>
+                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <button @click="addDocToKanban(doc)"
+                    class="text-xs text-indigo-500 hover:text-indigo-700">+ Kanban</button>
+                  <button @click="editingDoc = doc; showEditDocModal = true"
+                    class="text-xs text-gray-400 hover:text-indigo-500">Edit</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <div x-show="pinnedDocs.length === 0" class="text-center py-16 text-gray-400 text-sm">
+      No docs yet — add meeting agendas, cadence docs, or reference sheets.
+    </div>
+    </div><!-- /main content -->
+  </div><!-- /docs flex -->
+
+  <!-- Add Doc Modal -->
+  <div x-show="showAddDocModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+    @click.self="showAddDocModal = false" @keydown.escape.window="showAddDocModal = false">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+      <h3 class="text-base font-semibold text-gray-800 mb-4">Add Doc</h3>
+      <div class="flex flex-col gap-3">
+        <input type="text" x-model="newDoc.title" placeholder="Title"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+        <input type="url" x-model="newDoc.url" placeholder="URL"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+        <select x-model="newDoc.category"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <template x-for="cat in docCategories" :key="cat">
+            <option :value="cat" x-text="cat"></option>
+          </template>
+        </select>
+        <textarea x-model="newDoc.notes" placeholder="Notes (optional)" rows="2"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button @click="showAddDocModal = false"
+          class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
+        <button @click="submitDoc()"
+          class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Doc Modal -->
+  <div x-show="showEditDocModal && editingDoc" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+    @click.self="showEditDocModal = false; editingDoc = null" @keydown.escape.window="showEditDocModal = false; editingDoc = null">
+    <div x-show="editingDoc" class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+      <h3 class="text-base font-semibold text-gray-800 mb-4">Edit Doc</h3>
+      <div class="flex flex-col gap-3">
+        <input type="text" x-model="editingDoc.title" placeholder="Title"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+        <input type="url" x-model="editingDoc.url" placeholder="URL"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+        <select x-model="editingDoc.category"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <template x-for="cat in docCategories" :key="cat">
+            <option :value="cat" x-text="cat"></option>
+          </template>
+        </select>
+        <textarea x-model="editingDoc.notes" placeholder="Notes (optional)" rows="2"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button @click="showEditDocModal = false; editingDoc = null"
+          class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
+        <button @click="saveDocEdit()"
+          class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OKR tab -->
+  <div x-show="activeTab === 'okr'" class="px-6 py-5 max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900">Q2 2026 OKRs</h2>
+        <p class="text-xs text-gray-400 mt-0.5" x-text="okrView === 'summary' ? 'Check off KRs · click items count to see linked work' : 'Click any field to edit · ✨ to draft with AI from Glean evidence'"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- View toggle -->
+        <div class="flex rounded-lg overflow-hidden border border-gray-200 text-xs">
+          <button @click="okrView = 'summary'; okrFocus = null"
+            class="px-3 py-1.5 transition"
+            :class="okrView === 'summary' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'">Summary</button>
+          <button @click="okrView = 'edit'"
+            class="px-3 py-1.5 transition border-l border-gray-200"
+            :class="okrView === 'edit' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'">Edit</button>
+        </div>
+        <button @click="draftAllOkr()" :disabled="okrDraftingAll"
+          class="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center gap-2">
+          <span x-show="okrDraftingAll" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span x-text="okrDraftingAll ? 'Drafting…' : '✨ Draft all'"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Summary view ─────────────────────────────────────────────────── -->
+    <div x-show="okrView === 'summary'" class="flex flex-col gap-4">
+      <div class="grid grid-cols-2 gap-4">
+        <template x-for="pillar in okrPillars" :key="'sum-' + pillar.id">
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <!-- Pillar header -->
+            <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-base" x-text="pillar.icon"></span>
+                  <span class="font-semibold text-sm text-gray-800" x-text="pillar.title"></span>
+                  <span x-show="pillar.draft_status === 'ai-drafted'"
+                    class="text-xs bg-indigo-50 text-indigo-600 border border-indigo-200 px-1.5 py-0.5 rounded-full">AI draft</span>
+                </div>
+                <span class="text-xs text-gray-400"
+                  x-text="pillar.objectives.reduce((a,o)=>a+(o.kr_completed||[]).filter(Boolean).length,0) + '/' + pillar.objectives.reduce((a,o)=>a+(o.key_results||[]).length,0) + ' KRs'"></span>
+              </div>
+              <!-- Progress bar: total across all objectives -->
+              <div class="h-1.5 bg-gray-100 rounded-full">
+                <div class="h-1.5 rounded-full bg-indigo-400 transition-all"
+                  :style="(() => { const t=pillar.objectives.reduce((a,o)=>a+(o.key_results||[]).length,0); const d=pillar.objectives.reduce((a,o)=>a+(o.kr_completed||[]).filter(Boolean).length,0); return 'width:'+(t?d/t*100:0)+'%'; })()"></div>
+              </div>
+            </div>
+            <!-- Body: one section per objective -->
+            <template x-for="(obj, oi) in pillar.objectives" :key="oi">
+              <div class="px-4 py-3 flex flex-col gap-2.5" :class="oi > 0 ? 'border-t border-gray-100' : ''">
+                <!-- Objective -->
+                <div>
+                  <span class="text-xs font-bold text-indigo-400 uppercase tracking-widest block mb-1"
+                    x-text="pillar.objectives.length > 1 ? 'O' + (oi+1) : 'O'"></span>
+                  <p class="text-sm font-semibold text-gray-800 leading-snug line-clamp-3"
+                    :class="obj.text ? '' : 'italic font-normal text-gray-300'"
+                    x-text="obj.text || 'No objective set'"></p>
+                </div>
+                <!-- KRs with checkboxes -->
+                <ul class="flex flex-col gap-1.5">
+                  <template x-for="(kr, idx) in obj.key_results" :key="idx">
+                    <li class="flex items-start gap-2 group">
+                      <input type="checkbox"
+                        :checked="(obj.kr_completed||[])[idx]"
+                        @change="toggleKrComplete(pillar, oi, idx)"
+                        class="mt-0.5 rounded border-gray-300 text-indigo-500 cursor-pointer shrink-0">
+                      <span class="text-xs flex-1 leading-snug cursor-pointer select-none"
+                        :class="(obj.kr_completed||[])[idx] ? 'line-through text-gray-400' : 'text-gray-700'"
+                        x-text="'KR' + (idx+1) + ': ' + kr"></span>
+                      <!-- Items linked to this KR -->
+                      <button
+                        @click="okrFocus = (okrFocus && okrFocus.pillar_id===pillar.id && okrFocus.obj_idx===oi && okrFocus.kr_idx===idx) ? null : {pillar_id:pillar.id,obj_idx:oi,kr_idx:idx}"
+                        class="text-xs shrink-0 transition tabular-nums"
+                        :class="okrFocus && okrFocus.pillar_id===pillar.id && okrFocus.obj_idx===oi && okrFocus.kr_idx===idx
+                          ? 'text-indigo-600 font-semibold'
+                          : itemsForOkrTag(pillar.id,oi,idx).length>0 ? 'text-indigo-400 group-hover:text-indigo-600' : 'text-gray-200 group-hover:text-gray-400'"
+                        x-text="itemsForOkrTag(pillar.id,oi,idx).length + ' ▸'">
+                      </button>
+                    </li>
+                  </template>
+                  <li x-show="(obj.key_results||[]).length === 0" class="text-xs text-gray-300 italic">No key results yet</li>
+                </ul>
+                <!-- Footer: objective-level items + edit shortcut -->
+                <div class="flex items-center justify-between pt-1 border-t border-gray-50">
+                  <button
+                    x-show="itemsForOkrTag(pillar.id, oi, null).length > 0"
+                    @click="okrFocus = (okrFocus && okrFocus.pillar_id===pillar.id && okrFocus.obj_idx===oi && okrFocus.kr_idx==null) ? null : {pillar_id:pillar.id,obj_idx:oi,kr_idx:null}"
+                    class="text-xs transition"
+                    :class="okrFocus && okrFocus.pillar_id===pillar.id && okrFocus.obj_idx===oi && okrFocus.kr_idx==null ? 'text-indigo-600 font-semibold' : 'text-indigo-400 hover:text-indigo-600'"
+                    x-text="itemsForOkrTag(pillar.id, oi, null).length + ' items on objective'">
+                  </button>
+                  <span x-show="itemsForOkrTag(pillar.id, oi, null).length === 0"></span>
+                  <button x-show="oi === pillar.objectives.length - 1" @click="okrView = 'edit'" class="text-xs text-gray-300 hover:text-indigo-400 transition">✏ Edit</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- Related items panel -->
+      <template x-if="okrFocus !== null">
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="text-sm font-semibold text-indigo-800 flex items-center gap-1.5">
+              <span x-text="okrPillars.find(p => p.id === okrFocus.pillar_id)?.icon"></span>
+              <span x-text="okrPillars.find(p => p.id === okrFocus.pillar_id)?.title"></span>
+              <template x-if="okrPillars.find(p => p.id === okrFocus.pillar_id)?.objectives?.length > 1">
+                <span class="text-indigo-500" x-text="' O' + (okrFocus.obj_idx + 1)"></span>
+              </template>
+              <span class="text-indigo-400 font-normal mx-1">›</span>
+              <span x-text="okrFocus.kr_idx !== null && okrFocus.kr_idx !== undefined
+                ? 'KR' + (okrFocus.kr_idx + 1) + ': ' + (okrPillars.find(p => p.id === okrFocus.pillar_id)?.objectives?.[okrFocus.obj_idx]?.key_results?.[okrFocus.kr_idx] || '')
+                : 'Objective'"></span>
+            </div>
+            <button @click="okrFocus = null" class="text-xs text-indigo-300 hover:text-indigo-600 transition">✕ Close</button>
+          </div>
+          <div x-show="itemsForOkrTag(okrFocus.pillar_id, okrFocus.obj_idx, okrFocus.kr_idx).length === 0"
+            class="text-xs text-indigo-300 italic">No linked items yet. Tag a kanban item to this OKR component.</div>
+          <div class="flex flex-col gap-2">
+            <template x-for="item in itemsForOkrTag(okrFocus.pillar_id, okrFocus.obj_idx, okrFocus.kr_idx)" :key="item.id">
+              <div class="bg-white rounded-lg px-3 py-2.5 flex items-center justify-between gap-3 cursor-pointer hover:bg-indigo-50/50 transition border border-indigo-100/50"
+                @click="openDetail(item)">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-800 leading-snug truncate" x-text="item.title"></p>
+                  <span class="text-xs text-gray-400" x-text="bucketLabel(item.bucket)"></span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                    :class="flagClass(item.status_flag)"
+                    x-text="item.status_flag"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- ── Edit view ────────────────────────────────────────────────────── -->
+    <!-- Pillar cards -->
+    <div class="flex flex-col gap-4" x-show="okrView === 'edit'">
+      <template x-for="pillar in okrPillars" :key="pillar.id">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+
+          <!-- Pillar header -->
+          <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
+            <div class="flex items-center gap-2">
+              <span class="text-lg" x-text="pillar.icon"></span>
+              <span class="font-semibold text-sm text-gray-800" x-text="pillar.title"></span>
+              <span x-show="pillar.draft_status === 'ai-drafted'"
+                class="text-xs bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-0.5 rounded-full">AI draft</span>
+              <span x-show="pillar.draft_status === 'edited'"
+                class="text-xs bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded-full">Edited</span>
+            </div>
+            <button @click="draftOkrPillar(pillar)" :disabled="pillar._drafting"
+              class="text-xs px-3 py-1.5 border border-indigo-200 text-indigo-600 rounded-lg hover:bg-indigo-50 transition disabled:opacity-50 flex items-center gap-1.5">
+              <span x-show="pillar._drafting" class="inline-block w-2.5 h-2.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></span>
+              <span x-text="pillar._drafting ? 'Drafting…' : '✨ Draft from evidence'"></span>
+            </button>
+          </div>
+
+          <div class="px-5 py-4 flex flex-col gap-3">
+
+            <!-- Objectives loop -->
+            <template x-for="(obj, oi) in pillar.objectives" :key="oi">
+              <div class="border border-gray-100 rounded-xl p-3 flex flex-col gap-2.5">
+                <!-- Objective header -->
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide"
+                    x-text="pillar.objectives.length > 1 ? 'Objective ' + (oi+1) : 'Objective'"></label>
+                  <button x-show="pillar.objectives.length > 1"
+                    @click="pillar.objectives.splice(oi, 1); saveOkrPillar(pillar)"
+                    class="text-xs text-gray-300 hover:text-red-400 transition">✕ Remove</button>
+                </div>
+                <!-- Objective text -->
+                <textarea
+                  x-model="obj.text"
+                  @input="clearTimeout(pillar._saveTimer); pillar._saveTimer = setTimeout(() => saveOkrPillar(pillar), 800)"
+                  rows="2"
+                  placeholder="Start with an action verb — what do you want to achieve this quarter?"
+                  class="w-full text-sm text-gray-800 border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-indigo-300 placeholder-gray-300"></textarea>
+                <!-- Key Results -->
+                <div>
+                  <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1.5">Key Results</label>
+                  <div class="flex flex-col gap-1.5 mb-2">
+                    <template x-for="(kr, idx) in obj.key_results" :key="idx">
+                      <div class="flex items-start gap-2 group">
+                        <span class="text-xs text-indigo-400 font-bold mt-2 shrink-0" x-text="'KR' + (idx+1)"></span>
+                        <input type="text"
+                          :value="kr"
+                          @input="obj.key_results[idx] = $event.target.value; clearTimeout(pillar._saveTimer); pillar._saveTimer = setTimeout(() => saveOkrPillar(pillar), 800)"
+                          class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-300">
+                        <button @click="obj.key_results.splice(idx, 1); (obj.kr_completed||[]).splice(idx, 1); saveOkrPillar(pillar)"
+                          class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition text-xs px-1 mt-2">✕</button>
+                      </div>
+                    </template>
+                  </div>
+                  <button @click="obj.key_results.push(''); (obj.kr_completed = obj.kr_completed || []).push(false); saveOkrPillar(pillar)"
+                    class="text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1 transition">
+                    + Add key result
+                  </button>
+                </div>
+              </div>
+            </template>
+            <!-- Add objective -->
+            <button @click="pillar.objectives.push({text:'',key_results:[],kr_completed:[]}); saveOkrPillar(pillar)"
+              class="text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1.5 transition px-1">
+              ＋ Add objective
+            </button>
+
+            <!-- Notes -->
+            <div>
+              <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Notes / Context</label>
+              <textarea
+                x-model="pillar.notes"
+                @input="clearTimeout(pillar._saveTimer); pillar._saveTimer = setTimeout(() => saveOkrPillar(pillar), 800)"
+                rows="2"
+                placeholder="Why this matters, dependencies, current status…"
+                class="w-full text-sm text-gray-500 border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-indigo-300 placeholder-gray-300"></textarea>
+            </div>
+
+            <!-- Footer: save status + save button + draft error -->
+            <div class="flex items-center justify-between mt-1">
+              <p x-show="pillar._draftError" x-text="pillar._draftError" class="text-xs text-red-400"></p>
+              <div class="flex items-center gap-2 ml-auto">
+                <span x-show="pillar._saveStatus === 'saved'" class="text-xs text-green-500">✓ Saved</span>
+                <span x-show="pillar._saveStatus === 'error'" class="text-xs text-red-400">Save failed</span>
+                <button @click="saveOkrPillar(pillar)" :disabled="pillar._saveStatus === 'saving'"
+                  class="text-xs px-3 py-1 border border-gray-200 text-gray-500 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 flex items-center gap-1">
+                  <span x-show="pillar._saveStatus === 'saving'" class="inline-block w-2 h-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                  <span x-text="pillar._saveStatus === 'saving' ? 'Saving…' : 'Save'"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Gmail tab -->
+  <div x-show="activeTab === 'gmail'" class="px-6 py-4">
+
+    <!-- Toolbar: reload + date filter + category filters -->
+    <div class="flex flex-col gap-2 mb-4">
+      <!-- Row 1: Refresh + date range -->
+      <div class="flex items-center gap-3">
+        <button @click="loadGmail()" :disabled="gmailLoading"
+          class="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 flex items-center gap-1.5 shrink-0">
+          <span x-show="gmailLoading" class="inline-block w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+          <span x-text="gmailLoading ? 'Loading…' : '↻ Refresh'"></span>
+        </button>
+        <div class="flex gap-1">
+          <template x-for="opt in [{label:'Today',days:1},{label:'7d',days:7},{label:'30d',days:30},{label:'90d',days:90},{label:'All',days:0}]" :key="opt.days">
+            <button @click="gmailDayFilter = opt.days"
+              class="px-3 py-1 text-xs rounded-full border transition"
+              :class="gmailDayFilter === opt.days ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'"
+              x-text="opt.label">
+            </button>
+          </template>
+        </div>
+        <span class="text-xs text-gray-400"
+          x-text="gmailEmailsFiltered.length + ' of ' + gmailEmails.length + ' unread'"></span>
+      </div>
+      <!-- Row 2: Category filters -->
+      <div class="flex gap-1.5 flex-wrap">
+        <button @click="gmailCatFilter = null"
+          class="px-3 py-1 text-xs rounded-full border transition"
+          :class="gmailCatFilter === null ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'">
+          All
+        </button>
+        <template x-for="[key, cat] in Object.entries(gmailCategories)" :key="key">
+          <button @click="gmailCatFilter = gmailCatFilter === key ? null : key"
+            class="px-3 py-1 text-xs rounded-full border transition flex items-center gap-1"
+            :class="gmailCatFilter === key ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'"
+            x-show="gmailEmailsInWindow.filter(e => e.category === key).length > 0">
+            <span x-text="cat.icon"></span>
+            <span x-text="cat.label"></span>
+            <span class="opacity-70" x-text="'(' + gmailEmailsInWindow.filter(e => e.category === key).length + ')'"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Empty / error state -->
+    <div x-show="!gmailLoading && gmailEmails.length === 0" class="text-sm text-gray-400 py-8 text-center">
+      <span x-text="gmailError || 'No unread emails 🎉'"></span>
+    </div>
+
+    <!-- Email list -->
+    <div class="flex flex-col gap-2">
+      <template x-for="email in gmailEmailsFiltered" :key="email.id">
+        <div class="bg-white border rounded-xl shadow-sm overflow-hidden transition"
+          :class="email._read ? 'opacity-40' : ''">
+          <!-- Header row (always visible) -->
+          <div class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition"
+            @click="toggleGmailExpand(email)">
+            <!-- Category icon -->
+            <span class="text-lg shrink-0 mt-0.5"
+              x-text="(gmailCategories[email.category] || gmailCategories['other']).icon"></span>
+            <!-- Main content -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+                <span class="text-sm font-medium text-gray-900 truncate" x-text="email.subject"></span>
+                <span x-show="email.is_important"
+                  class="text-xs bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full shrink-0">Important</span>
+                <span class="text-xs px-2 py-0.5 rounded-full shrink-0"
+                  :class="{
+                    'bg-violet-50 text-violet-700': email.category === 'explab',
+                    'bg-blue-50 text-blue-700': email.category === 'gdoc',
+                    'bg-cyan-50 text-cyan-700': email.category === 'jira',
+                    'bg-orange-50 text-orange-700': email.category === 'launch_doc',
+                    'bg-teal-50 text-teal-700': email.category === 'calendar',
+                    'bg-red-50 text-red-700': email.category === 'announcement',
+                    'bg-gray-100 text-gray-500': email.category === 'digest',
+                    'bg-slate-100 text-slate-600': email.category === 'other',
+                  }"
+                  x-text="(gmailCategories[email.category] || gmailCategories['other']).label"></span>
+              </div>
+              <div class="flex items-center gap-2 text-xs text-gray-400">
+                <span class="font-medium text-gray-600" x-text="email.sender_display"></span>
+                <span>·</span>
+                <span x-text="formatTime(email.date)"></span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2" x-text="email.snippet"></p>
+            </div>
+            <!-- Actions -->
+            <div class="flex items-center gap-2 shrink-0 ml-2">
+              <button @click.stop="markGmailEmailRead(email)"
+                x-show="!email._read"
+                class="text-xs px-2.5 py-1 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition whitespace-nowrap">
+                ✓ Mark Read
+              </button>
+              <a :href="email.gmail_url" target="_blank" @click.stop
+                class="text-xs text-indigo-500 hover:underline whitespace-nowrap">Open ↗</a>
+              <span class="text-gray-300 text-sm" x-text="email._expanded ? '▲' : '▼'"></span>
+            </div>
+          </div>
+
+          <!-- Expanded: AI summary -->
+          <div x-show="email._expanded" class="border-t border-gray-100 px-4 py-3 bg-gray-50">
+            <!-- Loading summary -->
+            <div x-show="email._summaryLoading" class="flex items-center gap-2 text-sm text-gray-400">
+              <span class="inline-block w-3 h-3 border-2 border-indigo-300 border-t-transparent rounded-full animate-spin"></span>
+              Summarizing with Claude…
+            </div>
+            <!-- Summary content -->
+            <div x-show="!email._summaryLoading && email.summary" class="text-sm text-gray-700 leading-relaxed">
+              <p class="text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">AI Summary</p>
+              <div x-html="formatGmailSummary(email.summary)"></div>
+              <!-- Extracted URLs -->
+              <div x-show="(email.urls || []).length > 0" class="mt-2.5 flex flex-col gap-1">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Links</p>
+                <template x-for="url in (email.urls || [])" :key="url">
+                  <a :href="url" target="_blank"
+                    class="text-xs text-indigo-600 hover:underline truncate block"
+                    x-text="url"></a>
+                </template>
+              </div>
+            </div>
+            <!-- Error -->
+            <div x-show="!email._summaryLoading && !email.summary && email._summaryError"
+              class="text-xs text-red-400" x-text="email._summaryError"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+<script>
+function dashboard() {
+  return {
+    items: [],
+    lastRefresh: null,
+    refreshing: false,
+    errors: [],
+    selectedItem: null,
+    showAddModal: false,
+    addModalError: '',
+    addModalSubmitting: false,
+    showDone: false,
+    showDueDates: false,
+    gmailReadStatus: {},
+    activeTab: 'kanban',
+    calendarEvents: [],
+    calendarLoading: false,
+    calendarError: '',
+    prepTodos: {},
+    newItem: { title: '', bucket: 1, due_date: '', source_url: '', notes: '', okr_tag: null, okr_tag_str: '' },
+    sortables: [],
+    pinnedDocs: [],
+    kanbanSearch: '',
+    docSearch: '',
+    slackScanning: false,
+    bannerLoading: false,
+    bannerData: {},
+    bannerExpanded: true,
+    collapsedBuckets: JSON.parse(localStorage.getItem('collapsedBuckets') || '[]'),
+    newTodoText: '',
+    editingTodoIdx: -1,
+    editingTodoText: '',
+    activeDocCat: null,
+    showAddDocModal: false,
+    showEditDocModal: false,
+    editingDoc: null,
+    newDoc: { title: '', url: '', category: 'Meeting Agenda', notes: '' },
+    docCategories: ['Meeting Agenda', 'Cadence', 'KR GDS', 'APAC GDS', 'GDS', 'Client Work', 'Strategy', 'Analysis', 'Reference', 'Other'],
+    docScanLoading: false,
+    docScanError: '',
+    docCandidates: [],
+    docCandidateSelected: {},
+
+    // OKR tab
+    okrPillars: [],
+    okrDraftingAll: false,
+    okrView: 'summary',   // 'summary' | 'edit'
+    okrFocus: null,       // {pillar_id, obj_idx: int, kr_idx: int|null} — related items panel
+    okrPillarColors: {
+      mission:  { bg: 'bg-purple-100', text: 'text-purple-700' },
+      regional: { bg: 'bg-blue-100',   text: 'text-blue-700'   },
+      global:   { bg: 'bg-teal-100',   text: 'text-teal-700'   },
+      people:   { bg: 'bg-orange-100', text: 'text-orange-700' },
+      personal: { bg: 'bg-amber-100',  text: 'text-amber-700'  },
+    },
+
+    // Gmail tab
+    gmailEmails: [],
+    gmailCategories: {},
+    gmailLoading: false,
+    gmailError: '',
+    gmailCatFilter: null,
+    gmailDayFilter: 30,
+
+    columns: [
+      { id: 1, name: 'To-Do',         icon: '📋', color: 'blue'   },
+      { id: 2, name: 'Ongoing',        icon: '🔄', color: 'green'  },
+      { id: 3, name: 'Pending',        icon: '⏳', color: 'yellow' },
+      { id: 7, name: 'Under Review',   icon: '🔍', color: 'orange' },
+      { id: 4, name: 'Delegated',      icon: '👥', color: 'purple' },
+      { id: 5, name: 'Deprioritized',  icon: '💤', color: 'gray'   },
+      { id: 6, name: 'Watching',       icon: '👁️', color: 'teal'  },
+    ],
+
+    flagsByBucket: {
+      1: ['soon', 'this-week', 'overdue', 'done'],
+      2: ['on-track', 'at-risk', 'overdue', 'done'],
+      3: ['waiting-response', 'waiting-info', 'blocked', 'done'],
+      7: ['pending-review', 'changes-requested', 'approved', 'done'],
+      4: ['on-track', 'no-update', 'done'],
+      5: ['revisit-date', 'done'],
+      6: ['watching', 'done'],
+    },
+
+    async init() {
+      await this.loadItems();
+      this.$nextTick(() => this.initSortable());
+      this.loadBanner(false);
+    },
+
+    async loadItems() {
+      const resp = await fetch('/api/items');
+      const data = await resp.json();
+      this.items = data.items;
+      this.lastRefresh = data.last_refresh;
+    },
+
+    async loadBanner(force = false) {
+      this.bannerLoading = true;
+      try {
+        const resp = await fetch('/api/banner' + (force ? '?force=true' : ''));
+        this.bannerData = await resp.json();
+      } catch (e) {
+        this.bannerData = { summary: 'Could not load summary.' };
+      } finally {
+        this.bannerLoading = false;
+      }
+    },
+
+    async refresh(force = false) {
+      this.refreshing = true;
+      this.errors = [];
+      const url = force ? '/api/refresh?force=true' : '/api/refresh';
+      const resp = await fetch(url, { method: 'POST' });
+      const init = await resp.json();
+
+      if (init.status === 'cooldown') {
+        this.refreshing = false;
+        const mins = Math.ceil(init.retry_in_seconds / 60);
+        const ok = confirm(`Last refresh was ${mins} min ago. Sources unlikely to have changed.\n\nForce refresh anyway?`);
+        if (ok) this.refresh(true);
+        return;
+      }
+
+      // Poll until refresh completes
+      const poll = setInterval(async () => {
+        const resp = await fetch('/api/refresh/status');
+        const data = await resp.json();
+        if (!data.running) {
+          clearInterval(poll);
+          this.errors = data.errors || [];
+          this.lastRefresh = data.last_refresh;
+          this.refreshing = false;
+          await this.loadItems();
+          await this.loadDocs();
+          if (this.activeTab === 'calendar') await this.loadCalendar();
+          this.$nextTick(() => this.initSortable());
+        }
+      }, 3000);
+    },
+
+    itemsForBucket(bucketId) {
+      const q = this.kanbanSearch.trim().toLowerCase();
+      return this.items
+        .filter(i => +i.bucket === +bucketId && (this.showDone || i.status_flag !== 'done'))
+        .filter(i => !q || i.title.toLowerCase().includes(q) || (i.context || '').toLowerCase().includes(q) || (i.source || '').toLowerCase().includes(q))
+        .sort((a, b) => {
+          // Overdue first, then by last_signal desc
+          if (a.status_flag === 'overdue' && b.status_flag !== 'overdue') return -1;
+          if (b.status_flag === 'overdue' && a.status_flag !== 'overdue') return 1;
+          return (b.last_signal || '').localeCompare(a.last_signal || '');
+        });
+    },
+
+    flagsForBucket(bucketId) {
+      return this.flagsByBucket[bucketId] || [];
+    },
+
+    initSortable() {
+      // Destroy existing
+      this.sortables.forEach(s => s.destroy());
+      this.sortables = [];
+
+      this.columns.forEach(col => {
+        const el = document.getElementById('col-' + col.id);
+        if (!el) return;
+        const s = Sortable.create(el, {
+          group: 'kanban',
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          dragClass: 'sortable-drag',
+          dataIdAttr: 'data-id',
+          onEnd: (evt) => {
+            const itemId = evt.item.dataset.id;
+            const newBucket = parseInt(evt.to.id.replace('col-', ''));
+            this.moveItem(itemId, newBucket);
+          },
+        });
+        this.sortables.push(s);
+      });
+    },
+
+    async moveItem(itemId, newBucket) {
+      const item = this.items.find(i => i.id === itemId);
+      if (!item || item.bucket === newBucket) return;
+      item.bucket = newBucket;
+      item.human_confirmed = true;
+      item.status_flag = this.flagsByBucket[newBucket]?.[0] || 'on-track';
+      await this.patchItem(itemId, {
+        bucket: newBucket,
+        status_flag: item.status_flag,
+        human_confirmed: true,
+      });
+    },
+
+    async confirmItem(item) {
+      item.human_confirmed = true;
+      await this.patchItem(item.id, { human_confirmed: true });
+    },
+
+    async markDone(item) {
+      item.status_flag = 'done';
+      item.human_confirmed = true;
+      await this.patchItem(item.id, { status_flag: 'done', human_confirmed: true });
+    },
+
+    doneCount() {
+      return this.items.filter(i => i.status_flag === 'done').length;
+    },
+
+    async markGmailRead(item) {
+      if (!item.source_url) return;
+      this.gmailReadStatus = { ...this.gmailReadStatus, [item.id]: 'loading' };
+      try {
+        const resp = await fetch('/api/gmail/mark-read-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_url: item.source_url }),
+        });
+        const data = await resp.json();
+        this.gmailReadStatus = { ...this.gmailReadStatus, [item.id]: data.ok ? 'done' : 'error' };
+        if (!data.ok) alert('Could not mark as read: ' + (data.error || 'unknown error'));
+      } catch (e) {
+        this.gmailReadStatus = { ...this.gmailReadStatus, [item.id]: 'error' };
+        alert('Failed: ' + e.message);
+      }
+    },
+
+    async saveAll(item) {
+      await this.patchItem(item.id, {
+        title: item.title,
+        bucket: item.bucket,
+        status_flag: item.status_flag,
+        due_date: item.due_date || null,
+        notes: item.notes,
+        delegated_to: item.delegated_to,
+        human_confirmed: item.human_confirmed,
+        todos: item.todos || [],
+      });
+      this.$nextTick(() => this.initSortable());
+    },
+
+    async saveField(field, value) {
+      if (!this.selectedItem) return;
+      if (field === 'bucket') {
+        this.selectedItem.human_confirmed = true;
+        this.selectedItem.status_flag = this.flagsByBucket[value]?.[0] || 'on-track';
+        await this.patchItem(this.selectedItem.id, {
+          bucket: value,
+          status_flag: this.selectedItem.status_flag,
+          human_confirmed: true,
+        });
+        this.$nextTick(() => this.initSortable());
+      } else {
+        await this.patchItem(this.selectedItem.id, { [field]: value });
+      }
+    },
+
+    async patchItem(itemId, updates) {
+      await fetch('/api/items/' + encodeURIComponent(itemId), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const idx = this.items.findIndex(i => i.id === itemId);
+      if (idx !== -1) Object.assign(this.items[idx], updates);
+    },
+
+    async deleteItem(itemId) {
+      await fetch('/api/items/' + encodeURIComponent(itemId), { method: 'DELETE' });
+      this.items = this.items.filter(i => i.id !== itemId);
+    },
+
+    openDetail(item) {
+      this.selectedItem = {
+        ...item,
+        bucket: +item.bucket,
+        todos: item.todos ? [...item.todos] : [],
+        _okrTagStr: item.okr_tag ? JSON.stringify({ obj_idx: 0, ...item.okr_tag }) : '',
+      };
+      this.newTodoText = '';
+      if (!this.okrPillars.length) this.loadOkr();
+    },
+
+    addManual() {
+      this.newItem = { title: '', bucket: 1, due_date: '', source_url: '', notes: '', okr_tag: null, okr_tag_str: '' };
+      this.addModalError = '';
+      this.addModalSubmitting = false;
+      if (!this.okrPillars.length) this.loadOkr();
+      this.showAddModal = true;
+    },
+
+    async submitManual() {
+      if (!this.newItem.title.trim()) { this.addModalError = 'Title is required.'; return; }
+      this.addModalError = '';
+      this.addModalSubmitting = true;
+      try {
+        const item = {
+          id: 'manual:' + Date.now(),
+          title: this.newItem.title,
+          source: 'manual',
+          source_url: this.newItem.source_url || null,
+          bucket: this.newItem.bucket,
+          status_flag: this.flagsByBucket[this.newItem.bucket]?.[0] || 'soon',
+          due_date: this.newItem.due_date || null,
+          notes: this.newItem.notes,
+          human_confirmed: true,
+          context: '',
+          tags: [],
+          last_signal: new Date().toISOString(),
+          owner: 'me',
+          okr_tag: this.newItem.okr_tag || null,
+        };
+        const resp = await fetch('/api/items/quick-add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
+        if (!resp.ok) { this.addModalError = `Server error ${resp.status}`; return; }
+        const saved = await resp.json();
+        this.items.push(saved);
+        this.showAddModal = false;
+        this.$nextTick(() => this.initSortable());
+      } catch (e) {
+        this.addModalError = 'Could not reach server. Is it running?';
+      } finally {
+        this.addModalSubmitting = false;
+      }
+    },
+
+    // Styling helpers
+    cardBorderClass(item) {
+      if (item.status_flag === 'overdue') return 'border-l-4 border-l-red-400';
+      if (item.status_flag === 'at-risk') return 'border-l-4 border-l-yellow-400';
+      if (item.status_flag === 'blocked') return 'border-l-4 border-l-orange-400';
+      if (!item.human_confirmed) return 'border-l-4 border-l-yellow-200';
+      return 'border-l-4 border-l-transparent';
+    },
+
+    flagClass(flag) {
+      const map = {
+        'overdue':          'bg-red-100 text-red-700',
+        'at-risk':          'bg-yellow-100 text-yellow-700',
+        'blocked':          'bg-orange-100 text-orange-700',
+        'on-track':         'bg-green-100 text-green-700',
+        'soon':             'bg-blue-100 text-blue-700',
+        'this-week':        'bg-blue-50 text-blue-600',
+        'waiting-response': 'bg-purple-100 text-purple-700',
+        'waiting-info':     'bg-purple-50 text-purple-600',
+        'no-update':        'bg-gray-100 text-gray-600',
+        'done':             'bg-green-50 text-green-600',
+        'revisit-date':     'bg-gray-100 text-gray-500',
+        'watching':         'bg-teal-100 text-teal-700',
+        'pending-review':   'bg-orange-100 text-orange-700',
+        'changes-requested':'bg-red-50 text-red-600',
+        'approved':         'bg-green-100 text-green-700',
+        'revisit-date':     'bg-gray-100 text-gray-500',
+      };
+      return map[flag] || 'bg-gray-100 text-gray-500';
+    },
+
+    sourceBadgeClass(source) {
+      const map = {
+        'jira':   'bg-blue-50 text-blue-700',
+        'slack':  'bg-purple-50 text-purple-700',
+        'gdrive': 'bg-green-50 text-green-700',
+        'gmail':  'bg-red-50 text-red-600',
+        'manual': 'bg-gray-100 text-gray-500',
+      };
+      return map[source] || 'bg-gray-100 text-gray-500';
+    },
+
+    formatTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    },
+
+    formatRelativeTime(iso) {
+      if (!iso) return '';
+      const diffMs = Date.now() - new Date(iso).getTime();
+      const m = Math.floor(diffMs / 60000);
+      if (m < 1)  return 'just now';
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `${h}h ago`;
+      const d = Math.floor(h / 24);
+      if (d < 7)  return `${d}d ago`;
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    },
+
+    renderBullets(text) {
+      if (!text) return '';
+      return text.split('\n')
+        .filter(l => l.trim())
+        .map(l => {
+          const content = l
+            .replace(/^[•\-\*]\s*/, '')
+            // [HH:MM AM/PM] timestamp prefix → styled dim label
+            .replace(/^\[(\d{1,2}:\d{2}\s*[AP]M)\]\s*/i,
+              '<span class="text-gray-300 text-xs font-mono mr-1.5 shrink-0">$1</span>')
+            // http/https links → clickable
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
+              '<a href="$2" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-800 hover:underline font-medium">$1↗</a>')
+            // non-http links (local paths) → just show the label, drop the path
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            // malformed/incomplete markdown links e.g. [link]( or [link](  → strip entirely
+            .replace(/\[([^\]]+)\]\([^)]*$/g, '$1')
+            .replace(/\[([^\]]*)\]$/g, '$1')
+            // **bold** → strong
+            .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-indigo-700 font-semibold">$1</strong>');
+          return `<li class="text-sm text-gray-700 flex items-start gap-1.5 break-words min-w-0"><span class="text-indigo-300 mt-0.5 shrink-0">•</span><span class="min-w-0 break-words">${content}</span></li>`;
+        })
+        .join('');
+    },
+
+    async loadCalendar() {
+      if (this.calendarEvents.length > 0) return; // already loaded
+      this.calendarLoading = true;
+      this.calendarError = '';
+      try {
+        const resp = await fetch('/api/calendar');
+        const data = await resp.json();
+        if (data.error) { this.calendarError = data.error; }
+        else { this.calendarEvents = data.events || []; }
+      } catch(e) {
+        this.calendarError = e.message;
+      } finally {
+        this.calendarLoading = false;
+      }
+    },
+
+    calendarGroups() {
+      const groups = {};
+      const today = new Date().toDateString();
+      for (const event of this.calendarEvents) {
+        const d = new Date(event.start);
+        const key = d.toDateString();
+        if (!groups[key]) {
+          groups[key] = {
+            date: key,
+            dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            dayNum: d.getDate(),
+            isToday: key === today,
+            events: [],
+          };
+        }
+        groups[key].events.push(event);
+      }
+      return Object.values(groups).sort((a, b) => new Date(a.date) - new Date(b.date));
+    },
+
+    async addPrepTodo(event) {
+      if (this.prepTodos[event.id] !== undefined) return;
+      // Show input immediately with empty array while AI loads
+      this.prepTodos[event.id] = [];
+      const resp = await fetch('/api/prep-suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event }),
+      });
+      const data = await resp.json();
+      this.prepTodos[event.id] = data.suggestions || [];
+    },
+
+    async addTodoFromPrep(todoTitle, event) {
+      const startDt = new Date(event.start);
+      const dueDate = startDt.toISOString().split('T')[0];
+      const item = {
+        id: 'manual:' + Date.now(),
+        title: `[${event.title}] ${todoTitle}`,
+        source: 'calendar',
+        source_url: event.link || null,
+        bucket: 1,
+        status_flag: 'soon',
+        due_date: dueDate,
+        notes: `Prep for: ${event.title}`,
+        human_confirmed: true,
+        context: `Meeting prep for ${event.title} on ${startDt.toLocaleDateString()}`,
+        tags: ['meeting', 'prep'],
+        last_signal: new Date().toISOString(),
+        owner: 'me',
+      };
+      await fetch('/api/items/' + encodeURIComponent(item.id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+      this.items.push(item);
+      this.$nextTick(() => this.initSortable());
+      // Switch to kanban to show the new item
+      this.activeTab = 'kanban';
+    },
+
+    get docsByCategory() {
+      const grouped = {};
+      for (const cat of this.docCategories) grouped[cat] = [];
+      for (const doc of this.pinnedDocs) {
+        const cat = this.docCategories.includes(doc.category) ? doc.category : 'Other';
+        grouped[cat].push(doc);
+      }
+      return grouped;
+    },
+
+    get filteredDocsByCategory() {
+      const q = this.docSearch.trim().toLowerCase();
+      const grouped = {};
+      for (const cat of this.docCategories) grouped[cat] = [];
+      for (const doc of this.pinnedDocs) {
+        if (q && !doc.title.toLowerCase().includes(q) && !(doc.notes || '').toLowerCase().includes(q) && !(doc.category || '').toLowerCase().includes(q)) continue;
+        const cat = this.docCategories.includes(doc.category) ? doc.category : 'Other';
+        grouped[cat].push(doc);
+      }
+      return grouped;
+    },
+
+    driveTypeIcon(mimeType) {
+      if (!mimeType) return '📄';
+      if (mimeType.includes('spreadsheet')) return '📊';
+      if (mimeType.includes('presentation')) return '📑';
+      if (mimeType.includes('document')) return '📄';
+      return '📄';
+    },
+
+    async deepScanSlack() {
+      this.slackScanning = true;
+      try {
+        const resp = await fetch('/api/slack/deep-scan', { method: 'POST' });
+        const data = await resp.json();
+        if (data.error) {
+          alert('Slack scan failed: ' + data.error);
+        } else {
+          alert(data.message || `Added ${data.added} item(s) to kanban.`);
+          if (data.added > 0) {
+            const r = await fetch('/api/items');
+            const d = await r.json();
+            this.items = d.items || [];
+          }
+        }
+      } catch (e) {
+        alert('Slack scan error: ' + e.message);
+      } finally {
+        this.slackScanning = false;
+      }
+    },
+
+    async loadDocs() {
+      const resp = await fetch('/api/docs');
+      const data = await resp.json();
+      this.pinnedDocs = data.docs || [];
+    },
+
+    // ── OKR ────────────────────────────────────────────────────────────────
+    async loadOkr() {
+      if (this.okrPillars.length) return; // already loaded
+      const resp = await fetch('/api/okr');
+      const data = await resp.json();
+      this.okrPillars = (data.pillars || []).map(p => {
+        let objectives;
+        if (p.objectives) {
+          objectives = p.objectives.map(o => ({
+            text: o.text || '',
+            key_results: o.key_results || [],
+            kr_completed: (o.key_results || []).map((_, i) => (o.kr_completed || [])[i] ?? false),
+          }));
+        } else {
+          const krs = p.key_results || [];
+          const done = p.kr_completed || [];
+          objectives = [{ text: p.objective || '', key_results: krs, kr_completed: krs.map((_, i) => done[i] ?? false) }];
+        }
+        return {
+          ...p,
+          objectives,
+          _drafting: false,
+          _draftError: '',
+          _saveStatus: '',
+          _saveTimer: null,
+        };
+      });
+    },
+
+    async saveOkrPillar(pillar) {
+      pillar._saveStatus = 'saving';
+      try {
+        await fetch(`/api/okr/${pillar.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objectives: pillar.objectives,
+            notes: pillar.notes,
+          }),
+        });
+        pillar._saveStatus = 'saved';
+        setTimeout(() => { if (pillar._saveStatus === 'saved') pillar._saveStatus = ''; }, 2000);
+      } catch (e) {
+        pillar._saveStatus = 'error';
+      }
+    },
+
+    async draftOkrPillar(pillar, hint = '') {
+      pillar._drafting = true;
+      pillar._draftError = '';
+      try {
+        const resp = await fetch('/api/okr/draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pillar_id: pillar.id,
+            pillar_title: pillar.title,
+            context_hint: hint,
+          }),
+        });
+        const data = await resp.json();
+        if (!data.ok) { pillar._draftError = data.error || 'Draft failed'; return; }
+        pillar.objectives = [{
+          text: data.objective || '',
+          key_results: data.key_results || [],
+          kr_completed: (data.key_results || []).map(() => false),
+        }];
+        pillar.notes = data.notes || pillar.notes;
+        pillar.draft_status = 'ai-drafted';
+        await this.saveOkrPillar(pillar);
+      } catch (e) {
+        pillar._draftError = 'Could not reach server';
+      } finally {
+        pillar._drafting = false;
+      }
+    },
+
+    async draftAllOkr() {
+      this.okrDraftingAll = true;
+      for (const pillar of this.okrPillars) {
+        await this.draftOkrPillar(pillar);
+      }
+      this.okrDraftingAll = false;
+    },
+
+    // ── OKR helpers ────────────────────────────────────────────────────────
+    toggleKrComplete(pillar, obj_idx, kr_idx) {
+      const obj = pillar.objectives[obj_idx];
+      if (!obj) return;
+      if (!obj.kr_completed) obj.kr_completed = obj.key_results.map(() => false);
+      obj.kr_completed[kr_idx] = !obj.kr_completed[kr_idx];
+      this.saveOkrPillar(pillar);
+    },
+
+    itemsForOkrTag(pillar_id, obj_idx, kr_idx) {
+      return this.items.filter(item => {
+        if (!item.okr_tag) return false;
+        if (item.okr_tag.pillar_id !== pillar_id) return false;
+        const itemObjIdx = item.okr_tag.obj_idx ?? 0;
+        if (obj_idx !== null && obj_idx !== undefined && itemObjIdx !== obj_idx) return false;
+        if (kr_idx !== null && kr_idx !== undefined)
+          return item.okr_tag.kr_idx === kr_idx;
+        return item.okr_tag.kr_idx === null || item.okr_tag.kr_idx === undefined;
+      });
+    },
+
+    okrTagLabel(tag) {
+      if (!tag) return '';
+      const pillar = this.okrPillars.find(p => p.id === tag.pillar_id);
+      if (!pillar) return tag.pillar_id;
+      const objIdx = tag.obj_idx ?? 0;
+      const objLabel = pillar.objectives && pillar.objectives.length > 1 ? `O${objIdx + 1}` : 'O';
+      if (tag.kr_idx === null || tag.kr_idx === undefined)
+        return `${pillar.icon} ${objLabel}`;
+      return `${pillar.icon} ${objLabel} KR${tag.kr_idx + 1}`;
+    },
+
+    okrTagColorClass(tag) {
+      if (!tag) return '';
+      const c = this.okrPillarColors[tag.pillar_id] || { bg: 'bg-gray-100', text: 'text-gray-600' };
+      return `${c.bg} ${c.text}`;
+    },
+
+    async setItemOkrTag(item, tag) {
+      const resp = await fetch(`/api/items/${encodeURIComponent(item.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ okr_tag: tag }),
+      });
+      if (resp.ok) {
+        item.okr_tag = tag;
+        // Sync back to the live items array so the kanban badge updates
+        const orig = this.items.find(i => i.id === item.id);
+        if (orig) orig.okr_tag = tag;
+      }
+    },
+
+    bucketLabel(bucket) {
+      const col = this.columns.find(c => c.id === bucket);
+      return col ? `${col.icon} ${col.name}` : '';
+    },
+
+    // ── Gmail ──────────────────────────────────────────────────────────────
+    async loadGmail() {
+      if (this.gmailLoading) return;
+      this.gmailLoading = true;
+      this.gmailError = '';
+      try {
+        const resp = await fetch('/api/gmail/inbox');
+        const data = await resp.json();
+        if (data.error) { this.gmailError = data.error; return; }
+        this.gmailCategories = data.categories || {};
+        // Merge with existing to preserve _read / _expanded / summary state
+        const existing = Object.fromEntries(this.gmailEmails.map(e => [e.id, e]));
+        this.gmailEmails = (data.emails || []).map(e => ({
+          ...e,
+          _expanded: existing[e.id]?._expanded || false,
+          _summaryLoading: false,
+          _summaryError: '',
+          summary: existing[e.id]?.summary || null,
+          urls: existing[e.id]?.urls || [],
+          _read: existing[e.id]?._read || false,
+        }));
+      } catch (e) {
+        this.gmailError = 'Could not load Gmail: ' + e.message;
+      } finally {
+        this.gmailLoading = false;
+      }
+    },
+
+    async toggleGmailExpand(email) {
+      email._expanded = !email._expanded;
+      if (email._expanded && !email.summary && !email._summaryLoading) {
+        email._summaryLoading = true;
+        try {
+          const resp = await fetch('/api/gmail/summarize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message_id: email.id,
+              subject: email.subject,
+              sender: email.sender_display,
+              snippet: email.snippet,
+              category: email.category,
+            }),
+          });
+          const data = await resp.json();
+          email.summary = data.summary || null;
+          email.urls = data.urls || [];
+          email._summaryError = data.error || '';
+        } catch (e) {
+          email._summaryError = 'Summarization failed';
+        } finally {
+          email._summaryLoading = false;
+        }
+      }
+    },
+
+    async markGmailEmailRead(email) {
+      email._read = true;
+      try {
+        await fetch(`/api/gmail/mark-read/${email.id}`, { method: 'POST' });
+      } catch (e) {
+        email._read = false;
+      }
+    },
+
+    formatGmailSummary(text) {
+      if (!text) return '';
+      // Convert bullet lines starting with • or - or * to <li> items
+      const lines = text.split('\n').filter(l => l.trim());
+      const items = lines.map(l => {
+        const clean = l.replace(/^[•\-\*]\s*/, '').trim();
+        return `<li class="flex gap-1.5"><span class="text-indigo-400 shrink-0 mt-0.5">•</span><span>${clean}</span></li>`;
+      });
+      return `<ul class="space-y-1">${items.join('')}</ul>`;
+    },
+
+    async submitDoc() {
+      if (!this.newDoc.title.trim() || !this.newDoc.url.trim()) return;
+      const resp = await fetch('/api/docs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.newDoc),
+      });
+      const doc = await resp.json();
+      this.pinnedDocs.push(doc);
+      this.newDoc = { title: '', url: '', category: 'Meeting Agenda', notes: '' };
+      this.showAddDocModal = false;
+    },
+
+    async saveDocEdit() {
+      if (!this.editingDoc) return;
+      await fetch(`/api/docs/${this.editingDoc.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: this.editingDoc.title,
+          url: this.editingDoc.url,
+          category: this.editingDoc.category,
+          notes: this.editingDoc.notes,
+        }),
+      });
+      this.showEditDocModal = false;
+      this.editingDoc = null;
+    },
+
+    async removeDoc(docId) {
+      await fetch(`/api/docs/${docId}`, { method: 'DELETE' });
+      this.pinnedDocs = this.pinnedDocs.filter(d => d.id !== docId);
+    },
+
+    async addDocToKanban(doc) {
+      const item = {
+        id: 'doc-kanban:' + doc.id,
+        title: doc.title,
+        source: 'manual',
+        source_url: doc.url,
+        bucket: 1,
+        status_flag: 'soon',
+        due_date: null,
+        notes: doc.notes || '',
+        context: `From Docs tab — ${doc.category}`,
+        tags: ['doc', doc.category.toLowerCase().replace(/\s+/g, '-')],
+        human_confirmed: true,
+      };
+      const resp = await fetch('/api/items/quick-add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+      const saved = await resp.json();
+      // Only add to local list if not already there
+      if (!this.items.find(i => i.id === saved.id)) {
+        this.items.push(saved);
+        this.$nextTick(() => this.initSortable());
+      }
+      // Brief visual feedback by switching to kanban
+      this.activeTab = 'kanban';
+    },
+
+    async scanCalendarDocs() {
+      this.docScanLoading = true;
+      this.docScanError = '';
+      this.docCandidates = [];
+      this.docCandidateSelected = {};
+      try {
+        const resp = await fetch('/api/docs/scan-calendar', { method: 'POST' });
+        const data = await resp.json();
+        if (data.error) {
+          this.docScanError = data.error;
+          return;
+        }
+        this.docCandidates = data.candidates || [];
+        if (this.docCandidates.length === 0) this.docScanError = 'No new doc links found. Try adding docs manually with "+ Add Doc".';
+      } catch (e) {
+        this.docScanError = 'Scan failed: ' + e.message;
+      } finally {
+        this.docScanLoading = false;
+      }
+    },
+
+    async addSelectedCandidates() {
+      const selected = this.docCandidates.filter(c => this.docCandidateSelected[c.url]);
+      for (const c of selected) {
+        const resp = await fetch('/api/docs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: c.suggested_title || c.event_title,
+            url: c.url,
+            category: c.category || 'Meeting Agenda',
+            notes: `From: ${c.event_title} (${c.event_date})`,
+          }),
+        });
+        const doc = await resp.json();
+        this.pinnedDocs.push(doc);
+      }
+      this.docCandidates = [];
+      this.docCandidateSelected = {};
+    },
+
+    formatEventTime(start, end, isAllday) {
+      if (isAllday) return 'All day';
+      const s = new Date(start);
+      const fmt = t => t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      if (!end) return fmt(s);
+      const e = new Date(end);
+      if (isNaN(e.getTime())) return fmt(s);
+      return `${fmt(s)} – ${fmt(e)}`;
+    },
+
+    itemsWithDueDates() {
+      return this.items
+        .filter(i => i.due_date && i.status_flag !== 'done')
+        .sort((a, b) => a.due_date.localeCompare(b.due_date));
+    },
+
+    itemsWithDueDatesByBucket(bucketId) {
+      return this.items
+        .filter(i => i.due_date && i.status_flag !== 'done' && +i.bucket === +bucketId)
+        .sort((a, b) => a.due_date.localeCompare(b.due_date));
+    },
+
+    get gmailUnreadCount() {
+      return this.gmailEmails.filter(e => !e._read).length;
+    },
+
+    get gmailEmailsInWindow() {
+      if (!this.gmailDayFilter) return this.gmailEmails;
+      const cutoff = new Date(Date.now() - this.gmailDayFilter * 86400000);
+      return this.gmailEmails.filter(e => new Date(e.date) >= cutoff);
+    },
+
+    get gmailEmailsFiltered() {
+      const base = this.gmailEmailsInWindow;
+      return this.gmailCatFilter
+        ? base.filter(e => e.category === this.gmailCatFilter)
+        : base;
+    },
+
+    daysUntil(dateStr) {
+      if (!dateStr) return '';
+      const diff = Math.ceil((new Date(dateStr + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 86400000);
+      if (diff < 0) return `${Math.abs(diff)}d overdue`;
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Tomorrow';
+      return `in ${diff}d`;
+    },
+
+    formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + 'T00:00:00');
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    },
+  };
+}
+</script>
+</body>
+</html>

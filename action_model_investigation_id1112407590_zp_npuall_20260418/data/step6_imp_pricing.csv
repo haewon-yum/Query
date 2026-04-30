@@ -1,0 +1,11 @@
+date,pricing_function,type,tf_model_name,prediction_type,normalizer,imp_count
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION_LAT,ACTION_LAT,action_consol_v2_lat_cont,UNIFIED_D7,0.33550392803538964,133240
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION_LAT,I2I_TF_JOINT,install_consol_v1,,,423170
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION_LAT,I2I_TF_JOINT,install_instl_v1_581,,,10286
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION_LAT,ACTION_LAT,action_consol_v2_lat_cpu_cont,UNIFIED_D7,0.33550392803538964,528111
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION,ACTION,action_consol_v2_ifa_cont,UNIFIED_D7,0.33550392803538964,159294
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION,I2I_TF_JOINT,install_consol_v1,,,508419
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION,I2I_TF_JOINT,install_consol_v1_quant,,,276946
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION,I2I_TF_JOINT,install_instl_v1_581,,,9830
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION_LAT,I2I_TF_JOINT,install_consol_v1_quant,,,227895
+2026-04-17,ua_install_with_action:UA_INSTALL_AND_ACTION,ACTION,action_consol_v2_ifa_cpu_cont,UNIFIED_D7,0.33550392803538964,635901

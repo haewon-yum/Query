@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dossier — Planning Doc</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #1a1a2e; background: #f8f9fa; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
+    background: #0f172a; color: #94a3b8; overflow-y: auto;
+    padding: 24px 0; z-index: 100;
+  }
+  .sidebar-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: #64748b;
+    padding: 0 20px 16px; border-bottom: 1px solid #1e293b; margin-bottom: 12px;
+  }
+  .sidebar a {
+    display: block; padding: 7px 20px; font-size: 12.5px; color: #94a3b8;
+    text-decoration: none; line-height: 1.4; transition: color 0.15s;
+  }
+  .sidebar a:hover { color: #e2e8f0; background: #1e293b; }
+  .sidebar .section-group { margin-bottom: 4px; }
+  .sidebar .group-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #475569; padding: 10px 20px 4px;
+  }
+
+  /* Main */
+  .main { margin-left: 220px; padding: 0 40px 60px; max-width: 1000px; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1e40af 100%);
+    color: white; padding: 48px 40px 36px; margin-left: -40px;
+    margin-right: -40px; margin-bottom: 36px;
+  }
+  .header-badge {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    color: #93c5fd; font-size: 10px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 14px;
+  }
+  .report-header h1 {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.5px;
+    margin-bottom: 8px; color: white;
+  }
+  .report-header .subtitle {
+    font-size: 15px; color: #93c5fd; font-weight: 400; margin-bottom: 24px;
+  }
+  .meta-row {
+    display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px;
+    padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .meta-item { }
+  .meta-item .label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; }
+  .meta-item .value { font-size: 13px; color: #e2e8f0; font-weight: 600; margin-top: 2px; }
+
+  /* Section */
+  section { margin-bottom: 40px; padding-top: 8px; }
+  .section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #6366f1; margin-bottom: 6px;
+  }
+  section h2 {
+    font-size: 18px; font-weight: 700; color: #0f172a;
+    border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 18px;
+  }
+  section h3 {
+    font-size: 14px; font-weight: 700; color: #1e3a5f;
+    margin: 20px 0 10px;
+  }
+  section h4 {
+    font-size: 13px; font-weight: 700; color: #334155; margin: 14px 0 6px;
+  }
+  p { font-size: 13.5px; color: #334155; line-height: 1.75; margin-bottom: 10px; }
+  ul, ol { font-size: 13.5px; color: #334155; line-height: 1.8; margin: 8px 0 12px 20px; }
+  li { margin-bottom: 3px; }
+  code {
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    padding: 1px 5px; border-radius: 3px; font-family: 'SF Mono', monospace;
+    font-size: 12px; color: #0f172a;
+  }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0; }
+  .card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 16px; border-top: 3px solid #6366f1;
+  }
+  .card.green { border-top-color: #10b981; }
+  .card.blue { border-top-color: #3b82f6; }
+  .card.orange { border-top-color: #f59e0b; }
+  .card.purple { border-top-color: #8b5cf6; }
+  .card.pink { border-top-color: #ec4899; }
+  .card-icon { font-size: 20px; margin-bottom: 8px; }
+  .card-title { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+  /* Timeline */
+  .timeline { position: relative; margin: 16px 0 24px 12px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
+    width: 2px; background: #e2e8f0;
+  }
+  .tl-item { display: flex; gap: 16px; margin-bottom: 18px; position: relative; }
+  .tl-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: #6366f1;
+    border: 2px solid white; box-shadow: 0 0 0 2px #6366f1;
+    flex-shrink: 0; margin-top: 3px; position: relative; left: -4px;
+  }
+  .tl-dot.green { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
+  .tl-dot.orange { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+  .tl-content { flex: 1; }
+  .tl-phase { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #6366f1; }
+  .tl-phase.green { color: #10b981; }
+  .tl-phase.orange { color: #f59e0b; }
+  .tl-title { font-size: 13.5px; font-weight: 700; color: #0f172a; margin: 2px 0 4px; }
+  .tl-desc { font-size: 12.5px; color: #475569; line-height: 1.6; }
+  .tl-tag {
+    display: inline-block; font-size: 10px; background: #f1f5f9;
+    color: #64748b; border-radius: 3px; padding: 1px 6px; margin-right: 4px; margin-top: 4px;
+  }
+
+  /* Architecture diagram */
+  .arch-box {
+    background: white; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 20px; margin: 14px 0;
+  }
+  .arch-row { display: flex; gap: 10px; align-items: stretch; margin-bottom: 10px; flex-wrap: wrap; }
+  .arch-node {
+    flex: 1; min-width: 120px; background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; padding: 10px 12px; text-align: center;
+  }
+  .arch-node.source { border-color: #3b82f6; background: #eff6ff; }
+  .arch-node.pipeline { border-color: #8b5cf6; background: #f5f3ff; }
+  .arch-node.store { border-color: #10b981; background: #ecfdf5; }
+  .arch-node.frontend { border-color: #f59e0b; background: #fffbeb; }
+  .arch-node-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; margin-bottom: 4px; }
+  .arch-node-title { font-size: 12.5px; font-weight: 700; color: #0f172a; }
+  .arch-node-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .arch-arrow { color: #94a3b8; font-size: 18px; display: flex; align-items: center; padding: 0 4px; }
+
+  /* Feature table */
+  .feature-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .feature-table th {
+    background: #f1f5f9; font-weight: 700; color: #334155;
+    padding: 9px 12px; text-align: left; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .feature-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .feature-table tr:last-child td { border-bottom: none; }
+  .feature-table tr:hover td { background: #fafafa; }
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge-p1 { background: #fee2e2; color: #991b1b; }
+  .badge-p2 { background: #fef3c7; color: #92400e; }
+  .badge-p3 { background: #e0e7ff; color: #3730a3; }
+  .badge-phase1 { background: #dcfce7; color: #166534; }
+  .badge-phase2 { background: #dbeafe; color: #1e40af; }
+  .badge-phase3 { background: #f3e8ff; color: #6b21a8; }
+
+  /* Insight / Note boxes */
+  .insight {
+    background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b;
+    border-radius: 6px; padding: 12px 16px; margin: 14px 0;
+  }
+  .insight-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #b45309; margin-bottom: 5px; }
+  .note {
+    background: #f0f9ff; border: 1px solid #bae6fd; border-left: 4px solid #0ea5e9;
+    border-radius: 6px; padding: 12px 16px; margin: 14px 0;
+    font-size: 13px; color: #0c4a6e; line-height: 1.7;
+  }
+  .oq-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+  .oq-badge {
+    width: 24px; height: 24px; border-radius: 50%; background: #6366f1;
+    color: white; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+  .oq-content h4 { font-size: 13.5px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .oq-content p { font-size: 13px; color: #475569; margin: 0; }
+
+  .footer {
+    margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0;
+    font-size: 11.5px; color: #94a3b8; text-align: center;
+  }
+
+  /* ── Comment system ── */
+  .comment-highlight {
+    background: #fef9c3 !important;
+    border-bottom: 2px solid #f59e0b !important;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .comment-highlight:hover { background: #fde68a !important; }
+  .comment-highlight.resolved-highlight { background: transparent !important; border-bottom: 2px dashed #cbd5e1 !important; }
+
+  #selection-btn {
+    position: absolute;
+    z-index: 999;
+    display: none;
+    align-items: center;
+    gap: 5px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(99,102,241,0.45);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    white-space: nowrap;
+  }
+  #selection-btn:hover { background: #4f46e5; }
+
+  .comment-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.35);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .comment-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .comment-modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  #comment-selected-preview {
+    font-size: 12px;
+    color: #475569;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #6366f1;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  #comment-input {
+    width: 100%;
+    height: 90px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    resize: vertical;
+    outline: none;
+    color: #0f172a;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+  #comment-input:focus { border-color: #6366f1; }
+  .comment-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 14px;
+  }
+  .btn-cancel {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-submit {
+    padding: 8px 18px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-submit:hover { background: #4f46e5; }
+
+  .comment-popover {
+    position: fixed;
+    z-index: 1500;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    width: 280px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  }
+
+  #comments-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 600;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+    transition: background 0.15s;
+  }
+  #comments-toggle:hover { background: #4f46e5; }
+
+  #comments-panel {
+    position: fixed;
+    top: 0;
+    right: -360px;
+    width: 340px;
+    height: 100vh;
+    background: white;
+    border-left: 1px solid #e2e8f0;
+    z-index: 500;
+    transition: right 0.25s ease;
+    overflow-y: auto;
+    padding: 24px 20px;
+  }
+  #comments-panel.open { right: 0; }
+
+  .comment-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .comment-item:hover { border-color: #6366f1; }
+  .comment-item.resolved { opacity: 0.5; cursor: default; }
+  .comment-item.resolved:hover { border-color: #e2e8f0; }
+  .comment-action-btn {
+    font-size: 11px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-title">Dossier</div>
+  <div class="section-group">
+    <div class="group-label">Overview</div>
+    <a href="#problem">Problem Statement</a>
+    <a href="#vision">Vision & Users</a>
+    <a href="#name">Why Dossier</a>
+  </div>
+  <div class="section-group">
+    <div class="group-label">Design</div>
+    <a href="#sources">Data Sources</a>
+    <a href="#features">Feature Spec</a>
+    <a href="#architecture">Architecture</a>
+  </div>
+  <div class="section-group">
+    <div class="group-label">Execution</div>
+    <a href="#pilot">Pilot — Netmarble</a>
+    <a href="#signal-landscape">Signal Landscape</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#openq">Open Questions</a>
+  </div>
+</nav>
+
+<div class="main">
+
+  <div class="report-header">
+    <div class="header-badge">Planning Doc · v0.1 · 2026-04-30</div>
+    <h1>Dossier</h1>
+    <div class="subtitle">Account business context digestion — Slack × Gong × Docs, visualized on a timeline</div>
+    <div class="meta-row">
+      <div class="meta-item"><div class="label">Author</div><div class="value">Haewon Yum · KOR GDS</div></div>
+      <div class="meta-item"><div class="label">Audience</div><div class="value">GDS + GM</div></div>
+      <div class="meta-item"><div class="label">Pilot Account</div><div class="value">Netmarble</div></div>
+      <div class="meta-item"><div class="label">Deployment Target</div><div class="value">Google Cloud Run</div></div>
+      <div class="meta-item"><div class="label">Status</div><div class="value">Planning</div></div>
+    </div>
+  </div>
+
+  <!-- Problem Statement -->
+  <section id="problem">
+    <div class="section-label">Section 1</div>
+    <h2>Problem Statement</h2>
+    <p>Business context for a key account is scattered across at least three systems — Slack threads, Gong call recordings, and reference docs (Confluence, Notion, Google Drive). No single place gives a GDS or a Growth Manager a coherent picture of what has happened with an account over time.</p>
+    <p>The consequence is repetitive context-gathering before every meeting or analysis. A GDS preparing for a Netmarble review must manually piece together: what was discussed last week in <code>#ads-netmarble</code>, what commitments were made on the last Gong call, and what the current account strategy doc says. This work is high-effort, low-leverage, and largely invisible.</p>
+
+    <h3>Specific pain points</h3>
+    <ul>
+      <li><strong>Pre-meeting prep is manual and fragmented</strong> — GMs and GDS each independently re-read Slack history before calls</li>
+      <li><strong>No timeline of key events</strong> — it's hard to recall whether a performance issue was raised 2 weeks or 2 months ago, and what the resolution was</li>
+      <li><strong>Meeting recordings are underutilized</strong> — Gong calls contain valuable client sentiment and commitments, but are rarely revisited after the fact</li>
+      <li><strong>Onboarding is slow</strong> — a new GDS joining the Netmarble account has no structured way to absorb 6 months of account context quickly</li>
+      <li><strong>No account-level memory</strong> — decisions made in Slack threads get buried; institutional knowledge leaks out over time</li>
+    </ul>
+  </section>
+
+  <!-- Vision -->
+  <section id="vision">
+    <div class="section-label">Section 2</div>
+    <h2>Vision & Target Users</h2>
+    <p><strong>Dossier</strong> is a Google Cloud Run web service that compiles account business context from Slack, Gong, and reference docs into a single, timeline-first view. It is not a dashboard — it is a living briefing document that grows as the account relationship evolves.</p>
+
+    <div class="card-grid">
+      <div class="card blue">
+        <div class="card-icon">📋</div>
+        <div class="card-title">GDS Analyst</div>
+        <div class="card-desc">Needs operational depth: what was decided, what was escalated, what analysis was run. Uses Dossier to link account events to their own work.</div>
+      </div>
+      <div class="card green">
+        <div class="card-icon">🤝</div>
+        <div class="card-title">Growth Manager</div>
+        <div class="card-desc">Needs rapid context before client calls. Opens Dossier 10 min before a meeting to see recent Slack threads, last Gong call summary, and key open items.</div>
+      </div>
+      <div class="card orange">
+        <div class="card-icon">🆕</div>
+        <div class="card-title">Anyone Getting Up to Speed</div>
+        <div class="card-desc">Not just new joiners — anyone who needs to understand the account quickly: a new GDS joining mid-engagement, an APAC GDS manager reviewing the account, or a cross-functional partner preparing for a strategic discussion. Dossier provides the structured narrative that Slack history cannot.</div>
+      </div>
+    </div>
+
+    <h3>Design principles</h3>
+    <ul>
+      <li><strong>Timeline-first</strong> — every piece of information is anchored to a date; the primary UX is scrolling backward through account history</li>
+      <li><strong>Signal, not noise</strong> — summaries over raw transcripts; linked to source for depth</li>
+      <li><strong>Zero manual curation</strong> — ingestion is automated; no one should need to "update" Dossier manually</li>
+      <li><strong>Account-scoped</strong> — one URL per account; shareable with anyone with a <code>@moloco.com</code> Google account</li>
+    </ul>
+  </section>
+
+  <!-- Name -->
+  <section id="name">
+    <div class="section-label">Section 3</div>
+    <h2>Why "Dossier"</h2>
+    <p>A dossier is a file — a complete, organized record on a subject. The name captures the purpose better than alternatives like "Business Watch" (monitoring/alerting connotation) or "Pulse" (health connotation). Dossier implies depth, history, and intelligence — which is exactly what GDS and GMs need before a strategic conversation.</p>
+    <div class="note">
+      <strong>Naming convention for accounts:</strong> Each account gets its own Dossier instance at a stable URL — e.g., <code>/netmarble</code>, <code>/nexon</code>. The service root (<code>/</code>) lists available accounts for the authenticated user.
+    </div>
+  </section>
+
+  <!-- Data Sources -->
+  <section id="sources">
+    <div class="section-label">Section 4</div>
+    <h2>Data Sources</h2>
+
+    <table class="feature-table">
+      <thead>
+        <tr><th>Source</th><th>What we pull</th><th>Key fields</th><th>Ingestion method</th><th>Phase</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Slack</strong><br><code>#ads-netmarble</code></td>
+          <td>Client-specific updates, campaign decisions, performance threads shared by GMs and GDS</td>
+          <td>timestamp, author, text, thread_ts, permalink</td>
+          <td>Slack Web API (<code>conversations.history</code> + <code>conversations.replies</code>)</td>
+          <td><span class="badge badge-phase1">Phase 1</span></td>
+        </tr>
+        <tr>
+          <td><strong>Slack</strong><br><code>#kor-premium-support-team</code></td>
+          <td>Internal high-level discussions across KOR GDS and Growth Managers on IAP gaming premium accounts including Netmarble — strategic context, cross-account patterns, escalations</td>
+          <td>timestamp, author, text, thread_ts, permalink</td>
+          <td>Slack Web API (<code>conversations.history</code> + <code>conversations.replies</code>)</td>
+          <td><span class="badge badge-phase1">Phase 1</span></td>
+        </tr>
+        <tr>
+          <td><strong>Gong</strong><br>Call recordings</td>
+          <td>Call metadata, AI-generated summary, key moments, speakers, action items</td>
+          <td>call_id, date, participants, duration, summary, transcript excerpts</td>
+          <td>Gong REST API (<code>/v2/calls</code>, <code>/v2/calls/extensive</code>)</td>
+          <td><span class="badge badge-phase1">Phase 1</span></td>
+        </tr>
+        <tr>
+          <td><strong>Google Drive / Docs</strong><br>Account strategy, QBRs</td>
+          <td>Document titles, snippets, last-modified date, owner; linked from timeline events</td>
+          <td>doc_id, title, url, modified_at, snippet</td>
+          <td>Google Drive API + Glean search fallback</td>
+          <td><span class="badge badge-phase2">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td><strong>Jira</strong><br>ODSB tickets</td>
+          <td>Tickets related to the account — investigations, escalations, product requests</td>
+          <td>ticket_id, title, status, created, assignee, labels</td>
+          <td>Jira REST API (<code>/rest/api/3/search</code> with account label filter)</td>
+          <td><span class="badge badge-phase2">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td><strong>Moloco Looker / BQ</strong><br>Performance snapshots</td>
+          <td>Weekly GAS, CPI trend, ROAS — context anchors for business discussions</td>
+          <td>date, campaign_id, spend, cpi, roas</td>
+          <td>BQ scheduled query → Cloud Storage → Dossier ingest</td>
+          <td><span class="badge badge-phase3">Phase 3</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <div class="insight-label">⚠ Auth dependency</div>
+      Slack, Gong, and Google Drive each require OAuth tokens or service account credentials scoped to Moloco's org. For Phase 1 prototype, Haewon's personal tokens via Claude Code MCP connections (<code>mcp__slack</code>, <code>mcp__gong</code>, <code>mcp__gdrive</code>) will be used for data pull. Cloud Run deployment requires these to be moved to Secret Manager.
+    </div>
+  </section>
+
+  <!-- Feature Spec -->
+  <section id="features">
+    <div class="section-label">Section 5</div>
+    <h2>Feature Specification</h2>
+
+    <h3>5.1 — Timeline View (Core)</h3>
+    <p>The primary view is a vertical chronological timeline. Each event is a card on the timeline, color-coded by source and type. Events can be expanded to show full content, collapsed to show summary only.</p>
+
+    <table class="feature-table">
+      <thead><tr><th>Event Type</th><th>Source</th><th>Card Content</th><th>Color</th></tr></thead>
+      <tbody>
+        <tr><td>📢 <strong>Escalation</strong></td><td>Slack</td><td>Thread summary + permalink + author</td><td>Red</td></tr>
+        <tr><td>🎮 <strong>Title Launch</strong></td><td>Slack / Jira</td><td>Title name, platform, launch date, UA setup summary, linked ticket</td><td>Teal</td></tr>
+        <tr><td>🚀 <strong>Campaign Launch</strong></td><td>Slack / Jira</td><td>Campaign name, geo, goal, linked ticket</td><td>Green</td></tr>
+        <tr><td>📞 <strong>Client Call</strong></td><td>Gong</td><td>Participants, AI summary, action items, recording link</td><td>Blue</td></tr>
+        <tr><td>⚠️ <strong>Performance Alert</strong></td><td>Slack</td><td>Metric flagged, resolution summary, thread link</td><td>Orange</td></tr>
+        <tr><td>📄 <strong>Document Published</strong></td><td>Google Drive</td><td>Doc title, author, link, 1-sentence description</td><td>Purple</td></tr>
+        <tr><td>🎯 <strong>Strategic Decision</strong></td><td>Slack / Gong</td><td>Decision text, participants, confidence flag</td><td>Indigo</td></tr>
+        <tr><td>🎫 <strong>Jira Ticket</strong></td><td>Jira</td><td>Ticket title, status, assignee, link</td><td>Gray</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.2 — Discussion Digest (Slack)</h3>
+    <p>For each Slack event card, the UI shows:</p>
+    <ul>
+      <li><strong>Auto-generated summary</strong> (2–3 sentences via Claude API) of the thread content</li>
+      <li><strong>Participants</strong> — avatars of who contributed to the thread</li>
+      <li><strong>Slack permalink</strong> — deep link to the original thread for full context</li>
+      <li><strong>Tags</strong> — auto-classified: <code>escalation</code> / <code>decision</code> / <code>question</code> / <code>fyi</code></li>
+    </ul>
+
+    <h3>5.3 — Meeting Summaries (Gong)</h3>
+    <p>For each Gong call card:</p>
+    <ul>
+      <li><strong>Call metadata</strong> — date, duration, Moloco participants, client participants</li>
+      <li><strong>Gong AI summary</strong> — pulled directly from Gong's generated summary field</li>
+      <li><strong>Key moments</strong> — timestamped excerpts flagged by Gong as significant</li>
+      <li><strong>Action items</strong> — extracted from Gong or Claude-parsed from transcript</li>
+      <li><strong>Recording link</strong> — direct link to Gong call</li>
+    </ul>
+
+    <h3>5.4 — Reference Docs Panel</h3>
+    <p>A persistent right-side panel (or dedicated tab) listing account reference documents:</p>
+    <ul>
+      <li>Account strategy doc (latest version)</li>
+      <li>QBR decks (by quarter)</li>
+      <li>ODSB tickets (open + recently closed)</li>
+      <li>Analysis reports produced by GDS (auto-detected from Drive by account tag)</li>
+    </ul>
+
+    <h3>5.5 — Filters & Search</h3>
+    <ul>
+      <li>Filter by event type, source, date range, participant</li>
+      <li>Free-text search across all summaries and titles</li>
+      <li>Bookmark / pin key events (stored per-user in browser localStorage for v1)</li>
+    </ul>
+
+    <table class="feature-table" style="margin-top:16px;">
+      <thead><tr><th>Feature</th><th>Priority</th><th>Phase</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Timeline view (Slack + Gong)</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-phase1">Phase 1</span></td><td>Core MVP</td></tr>
+        <tr><td>Slack thread summaries (Claude API)</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-phase1">Phase 1</span></td><td>Key differentiator</td></tr>
+        <tr><td>Gong call cards with AI summary</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-phase1">Phase 1</span></td><td>Pull from Gong directly</td></tr>
+        <tr><td>Reference docs panel</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-phase2">Phase 2</span></td><td>Google Drive API</td></tr>
+        <tr><td>Jira ticket linking</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-phase2">Phase 2</span></td><td>Auto-tag by account label</td></tr>
+        <tr><td>Filter + search</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-phase2">Phase 2</span></td><td>Client-side JS for v1</td></tr>
+        <tr><td>Performance KPI overlay</td><td><span class="badge badge-p3">P3</span></td><td><span class="badge badge-phase3">Phase 3</span></td><td>BQ integration</td></tr>
+        <tr><td>Multi-account selector (root view)</td><td><span class="badge badge-p3">P3</span></td><td><span class="badge badge-phase3">Phase 3</span></td><td>Scale beyond Netmarble</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Architecture -->
+  <section id="architecture">
+    <div class="section-label">Section 6</div>
+    <h2>Architecture</h2>
+
+    <div class="arch-box">
+      <h4 style="margin-top:0; margin-bottom:16px; color:#334155;">Data flow overview</h4>
+
+      <div class="arch-row">
+        <div class="arch-node source">
+          <div class="arch-node-label">Sources</div>
+          <div class="arch-node-title">Slack API</div>
+          <div class="arch-node-sub">#ads-netmarble history + threads</div>
+        </div>
+        <div class="arch-node source">
+          <div class="arch-node-label">Sources</div>
+          <div class="arch-node-title">Gong API</div>
+          <div class="arch-node-sub">Calls · summaries · transcripts</div>
+        </div>
+        <div class="arch-node source">
+          <div class="arch-node-label">Sources</div>
+          <div class="arch-node-title">Google Drive</div>
+          <div class="arch-node-sub">Docs · QBRs · strategy files</div>
+        </div>
+        <div class="arch-node source">
+          <div class="arch-node-label">Sources</div>
+          <div class="arch-node-title">Jira</div>
+          <div class="arch-node-sub">ODSB tickets by account</div>
+        </div>
+      </div>
+
+      <div style="text-align:center; color:#94a3b8; margin:6px 0; font-size:20px;">↓</div>
+
+      <div class="arch-row">
+        <div class="arch-node pipeline" style="flex:2;">
+          <div class="arch-node-label">Ingestion + Enrichment</div>
+          <div class="arch-node-title">Python Ingest Service</div>
+          <div class="arch-node-sub">Pull APIs → normalize events → Claude API summarization → tag classification → store as JSON</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node store">
+          <div class="arch-node-label">Storage</div>
+          <div class="arch-node-title">Cloud Storage (GCS)</div>
+          <div class="arch-node-sub">One JSON file per account · versioned · refreshed on schedule</div>
+        </div>
+      </div>
+
+      <div style="text-align:center; color:#94a3b8; margin:6px 0; font-size:20px;">↓</div>
+
+      <div class="arch-row">
+        <div class="arch-node frontend" style="flex:1;">
+          <div class="arch-node-label">Frontend</div>
+          <div class="arch-node-title">Cloud Run Web App</div>
+          <div class="arch-node-sub">Python (FastAPI) + Jinja2 or static HTML · serves account Dossier pages · auth via Google IAP (@moloco.com)</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Tech stack</h3>
+    <table class="feature-table">
+      <thead><tr><th>Component</th><th>Technology</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>Web framework</td><td>Python / FastAPI + Jinja2</td><td>Lightweight, easy to iterate; Haewon's primary language</td></tr>
+        <tr><td>Hosting</td><td>Google Cloud Run</td><td>Serverless, scales to zero, easy to share via IAP</td></tr>
+        <tr><td>Auth</td><td>Google Identity-Aware Proxy (IAP)</td><td>Restricts to @moloco.com without custom auth code</td></tr>
+        <tr><td>Storage</td><td>Google Cloud Storage (GCS)</td><td>JSON event store per account; cheap, fast reads</td></tr>
+        <tr><td>Summarization</td><td>Claude API (claude-sonnet-4-6)</td><td>Slack thread → 2-sentence digest; Gong transcript → action items</td></tr>
+        <tr><td>Scheduling</td><td>Cloud Scheduler → Cloud Run job</td><td>Nightly refresh of Slack + Gong data</td></tr>
+        <tr><td>Secrets</td><td>Google Secret Manager</td><td>Slack token, Gong token, Anthropic API key</td></tr>
+        <tr><td>Frontend</td><td>Vanilla HTML/CSS/JS (no framework)</td><td>Portable, no build step, easy to iterate</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Data model (event schema)</h3>
+    <p>All events are normalized into a shared schema stored as JSON in GCS:</p>
+    <div class="arch-box" style="font-family: 'SF Mono', monospace; font-size: 12px; color: #334155; line-height: 1.7;">
+<pre>{
+  "event_id":    "slack_C0XXXXXXX_1745000000.123456",
+  "account":     "netmarble",
+  "source":      "slack" | "gong" | "drive" | "jira",
+  "type":        "escalation" | "launch" | "call" | "alert" | "doc" | "decision" | "ticket",
+  "timestamp":   "2026-04-15T09:32:00Z",
+  "title":       "Short descriptive title",
+  "summary":     "2–3 sentence AI-generated digest",
+  "participants": ["haewon.yum@moloco.com", "john.doe@netmarble.com"],
+  "source_url":  "https://moloco.slack.com/archives/.../p...",
+  "tags":        ["escalation", "spend_drop"],
+  "raw":         { ... }   // original API response, not rendered
+}</pre>
+    </div>
+  </section>
+
+  <!-- Pilot -->
+  <section id="pilot">
+    <div class="section-label">Section 7</div>
+    <h2>Pilot — Netmarble</h2>
+    <p>Netmarble is the right pilot account: active Slack channel (<code>#ads-netmarble</code>), multiple Gong calls on record, several GDS analyses already completed, and a known account team (GDS + Growth Manager) who can give immediate feedback on usefulness.</p>
+
+    <h3>Pilot scope</h3>
+    <ul>
+      <li><strong>Channels:</strong> <code>#ads-netmarble</code> (client-specific) + <code>#kor-premium-support-team</code> (KOR GDS × Growth Manager internal discussions) — last 90 days of history</li>
+      <li><strong>Gong:</strong> All calls tagged with Netmarble in the last 6 months</li>
+      <li><strong>Docs:</strong> GDS analysis reports for 7DS: Origin, Stonekey; account strategy doc if available</li>
+      <li><strong>Jira:</strong> ODSB tickets with <code>netmarble</code> label — last 6 months</li>
+    </ul>
+
+    <h3>Pilot success criteria</h3>
+    <ul>
+      <li>Growth Manager can open Dossier 10 min before a Netmarble call and feel prepared without opening Slack</li>
+      <li>GDS can navigate to the context behind any analysis report without asking teammates</li>
+      <li>Timeline covers at least 90 days of events with no manual curation required</li>
+      <li>Slack summaries are accurate enough that GDS validates them as useful (not misleading)</li>
+    </ul>
+
+    <div class="insight">
+      <div class="insight-label">⚠ Pilot constraint</div>
+      Gong API access requires Moloco IT to enable API credentials for the service account. Slack bot token requires approval if not already available via MCP setup. Confirm both before starting Phase 1 implementation.
+    </div>
+  </section>
+
+  <!-- Signal Landscape -->
+  <section id="signal-landscape">
+    <div class="section-label">Section 8</div>
+    <h2>Signal Landscape — Netmarble (Validated)</h2>
+    <p>Based on a scan of <code>#ads-netmarble</code> and <code>#kor-premium-support-team</code> Slack history and Gong call transcripts, the following signal categories are present and can be ingested by Dossier. This validates the feature design and informs event taxonomy for the tagging model.</p>
+
+    <h3>Slack signal categories</h3>
+    <table class="feature-table">
+      <thead><tr><th>Category</th><th>Description</th><th>Frequency</th><th>Event type</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Campaign Launch Coordination</strong></td>
+          <td>Title-specific threads: launch timing, day-1 budget, goal type (CPI/ROAS/CPA), geo. Active titles: 7DS Origin, Stonekey, Game of Thrones, 몬길, hybrid casual</td>
+          <td>Most frequent</td>
+          <td><span class="badge badge-p1">Launch</span></td>
+        </tr>
+        <tr>
+          <td><strong>Performance Diagnosis</strong></td>
+          <td>KPI misses on D1 ROAS, nCPI, login CPA; client pushback when ROAS targets not met; game-side vs. UA performance conflation</td>
+          <td>Near-constant</td>
+          <td><span class="badge badge-p1">Alert</span></td>
+        </tr>
+        <tr>
+          <td><strong>iOS Measurement / SKAN / PA</strong></td>
+          <td>iOS on/off decisions, SKAN install and revenue validation, PA activation tracking, before-after ROAS, device-level breakdowns. Ongoing 2-year PA enablement initiative.</td>
+          <td>Strongly recurring</td>
+          <td><span class="badge badge-p2">Decision</span></td>
+        </tr>
+        <tr>
+          <td><strong>Budget Escalations &amp; Reductions</strong></td>
+          <td>Spend drops are a visible stress signal (e.g. 몬길: 80K→10K, account-wide UA: 90K→19K). Internal risk discussion follows. Not always filed as Jira tickets.</td>
+          <td>Recurring</td>
+          <td><span class="badge badge-p1">Alert</span></td>
+        </tr>
+        <tr>
+          <td><strong>Geo / Budget Allocation</strong></td>
+          <td>Per-title country-level decisions. T2/T3 testing, WW consolidation vs. Korea-first, geo expansion proposals.</td>
+          <td>Moderate</td>
+          <td><span class="badge badge-p2">Decision</span></td>
+        </tr>
+        <tr>
+          <td><strong>Inventory / Supply Quality</strong></td>
+          <td>Moloco SDK vs. Kakao performance; blocklist candidates; CTV perception management; client comparing Moloco vs. Google.</td>
+          <td>Moderate</td>
+          <td><span class="badge badge-p3">Context</span></td>
+        </tr>
+        <tr>
+          <td><strong>Measurement Stack &amp; Integration</strong></td>
+          <td>Structural issues: Gamesight (PC/console) vs. Appsflyer (mobile) causing cross-platform measurement gaps. Tool architecture conflicts — not postback errors.</td>
+          <td>Low</td>
+          <td><span class="badge badge-p2">Decision</span></td>
+        </tr>
+        <tr>
+          <td><strong>Market Intel &amp; Client Org Context</strong></td>
+          <td>Netmarble pulling up launch schedules for quarterly revenue targets; "mild monetization" design conflicting with D1 ROAS KPIs; competitive title tracking.</td>
+          <td>Low</td>
+          <td><span class="badge badge-p3">Context</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Key Gong calls on record</h3>
+    <table class="feature-table">
+      <thead><tr><th>Call</th><th>Date</th><th>Signal value for Dossier</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Yuta's Netmarble briefing</strong></td>
+          <td>2026-04-21</td>
+          <td>Deep account briefing: no install campaigns for new titles, simultaneous RE + ROAS, bi-weekly sync cadence, SKAN-only history, 2-year PA enablement effort. <strong>Highest signal call on record.</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Pitch &amp; Strategy session</strong></td>
+          <td>2026-04-01</td>
+          <td>Internal pitch coaching using Netmarble CTV creatives as cross-platform game launch examples</td>
+        </tr>
+        <tr>
+          <td><strong>Septeni agency session</strong></td>
+          <td>2026-04-03</td>
+          <td>Game of Thrones creative used as CTV example; indirect Netmarble creative signal</td>
+        </tr>
+        <tr>
+          <td><strong>VNG benchmark reference</strong></td>
+          <td>2025-11-20</td>
+          <td>Netmarble cited as benchmark (~66% D7 ROAS); confirms external perception of account performance bar</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Reference document inventory</h3>
+    <p>The following documents are available in Google Drive / Notion and can be surfaced by Dossier's Phase 2 reference panel. Priority: <strong>QBR/Strategy docs</strong> for the timeline anchor; experiment docs for the "active tests" view.</p>
+
+    <table class="feature-table">
+      <thead><tr><th>Category</th><th>Document</th></tr></thead>
+      <tbody>
+        <tr><td>QBR / Account Reviews</td><td>Netmarble QBR · Customer Account Audit · [202512] QBR folder</td></tr>
+        <tr><td>Strategy / Account Plans</td><td>[NETMARBLE] 2026 Moloco Partnership deck · 2026 KOR Premium Account Strategy · Q1/Q2 Support plan · Bi-weekly sync notes (Notion series)</td></tr>
+        <tr><td>Performance Analysis</td><td>Netmarble Core Game Performance · Action/Revenue Model Issues · VT ratio vs SKAN · iOS VT impact on organic · User Churn Analysis for RE targeting · Solo Leveling WW Campaign Analysis</td></tr>
+        <tr><td>Experiments / Proposals</td><td>D28 CPA Beta opportunity sizing (Colab) · RE A/B Testing Proposal · HVP Test Preview · PA Enablement Experiment Preview</td></tr>
+        <tr><td>Operational Trackers</td><td>iOS performance tracker (US + JP) · D28 Opportunity Sizing · 2026 KR Premium Account Support tracker</td></tr>
+        <tr><td>Notion Account Hub</td><td>NETMARBLE main page · SKIA page · Non-SKIA page · Bi-weekly meeting notes series</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Architecture implications</h3>
+    <p>The signal landscape validates the event taxonomy and surfaces two design decisions:</p>
+    <ul>
+      <li><strong>Budget change detection requires a numeric delta signal</strong> — keyword rules alone won't catch spend drops. The ingest layer should parse spend numbers from Slack messages and flag changes above a threshold (e.g., &gt;30% drop in budget mentions).</li>
+      <li><strong>Gong call matching by participant domain</strong> — Netmarble calls can be matched by participant email domain (<code>netmarble.com</code> attendees) as the primary signal, with title keyword fallback. The April 21 briefing call confirms this approach is sufficient for high-signal calls.</li>
+      <li><strong>Experiment lifecycle is a first-class event type</strong> — D28 CPA, ROAS, PA enablement, and RE A/B tests are active simultaneously. Dossier should surface experiment start/end/result as distinct timeline entries, not just doc references.</li>
+      <li><strong>Measurement stack signals are structural, not one-off</strong> — Gamesight vs. Appsflyer and iOS PA conflicts are ongoing architectural issues. These warrant a persistent "account context" section (not just a timeline event) to avoid being buried under weekly operational noise.</li>
+    </ul>
+  </section>
+
+  <!-- Roadmap -->
+  <section id="roadmap">
+    <div class="section-label">Section 9</div>
+    <h2>Roadmap</h2>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-phase">Phase 1 — Prototype</div>
+          <div class="tl-title">Netmarble Dossier MVP</div>
+          <div class="tl-desc">Ingest Slack + Gong for Netmarble. Build timeline HTML. Claude API for Slack thread summaries. Deploy to Cloud Run with Google IAP. Share with Growth Manager + GDS for feedback.</div>
+          <span class="tl-tag">Slack ingest</span><span class="tl-tag">Gong ingest</span><span class="tl-tag">Claude summarization</span><span class="tl-tag">Cloud Run deploy</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot orange"></div>
+        <div class="tl-content">
+          <div class="tl-phase orange">Phase 2 — Enrichment</div>
+          <div class="tl-title">Docs + Jira + Filters</div>
+          <div class="tl-desc">Add Google Drive doc references and Jira ticket linking. Build filter/search UI. Add nightly Cloud Scheduler refresh. Incorporate feedback from Phase 1 pilot.</div>
+          <span class="tl-tag">Drive API</span><span class="tl-tag">Jira API</span><span class="tl-tag">Filters</span><span class="tl-tag">Scheduler</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot green"></div>
+        <div class="tl-content">
+          <div class="tl-phase green">Phase 3 — Scale</div>
+          <div class="tl-title">Multi-account + Performance overlay</div>
+          <div class="tl-desc">Extend to Nexon and other KOR GDS accounts. Add account selector root view. Overlay BQ performance KPIs (GAS, CPI, ROAS) as context anchors on the timeline.</div>
+          <span class="tl-tag">Multi-account</span><span class="tl-tag">BQ integration</span><span class="tl-tag">KPI overlay</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open Questions -->
+  <section id="openq">
+    <div class="section-label">Section 10</div>
+    <h2>Open Questions</h2>
+
+    <div class="oq-item">
+      <div class="oq-badge">1</div>
+      <div class="oq-content">
+        <h4>Gong API access — is a service account token available?</h4>
+        <p>The prototype will use Haewon's personal Gong MCP token. For Cloud Run deployment, a service account with Gong API access is required. Confirm with IT/Ops whether this can be provisioned, or whether Gong data must be pulled manually and cached.</p>
+      </div>
+    </div>
+    <div class="oq-item">
+      <div class="oq-badge">2</div>
+      <div class="oq-content">
+        <h4>Slack bot token scope — read-only access to #ads-netmarble?</h4>
+        <p>A Slack bot with <code>channels:history</code> and <code>channels:read</code> scopes is required. Confirm whether the existing Moloco Slack workspace has a bot that can be used, or whether a new one needs to be created and approved.</p>
+      </div>
+    </div>
+    <div class="oq-item">
+      <div class="oq-badge">3</div>
+      <div class="oq-content">
+        <h4>Event classification — rules-based or LLM?</h4>
+        <p>Auto-tagging Slack messages as "escalation", "launch", "decision" etc. can be done with keyword rules (fast, cheap) or LLM classification (accurate, slower). For Phase 1 a hybrid makes sense: keyword rules with LLM fallback for ambiguous messages.</p>
+      </div>
+    </div>
+    <div class="oq-item">
+      <div class="oq-badge">4</div>
+      <div class="oq-content">
+        <h4>Gong call → Netmarble matching: how do we identify relevant calls?</h4>
+        <p>Gong calls are not automatically tagged by advertiser. Need a matching strategy: (1) participant email domain matching (netmarble.com attendees), (2) call title keyword matching, or (3) manual tagging in Gong. Confirm which signals are available via the Gong API.</p>
+      </div>
+    </div>
+    <div class="oq-item">
+      <div class="oq-badge">5</div>
+      <div class="oq-content">
+        <h4>Refresh cadence and staleness tolerance?</h4>
+        <p>Nightly refresh is the default plan. For escalation-type events, a 24-hour lag may be too slow. Consider a lightweight webhook trigger from Slack (new message in #ads-netmarble → refresh) for near-real-time updates in Phase 2.</p>
+      </div>
+    </div>
+    <div class="oq-item" style="border-bottom:none;">
+      <div class="oq-badge">6</div>
+      <div class="oq-content">
+        <h4>What accounts come after Netmarble in Phase 3?</h4>
+        <p>The multi-account design assumes each account has a dedicated Slack channel and Gong tagging convention. Nexon is the natural second account (also KOR GDS). Confirm whether other KOR accounts have sufficient Slack + Gong signal to justify onboarding.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Dossier — Planning Doc v0.1 · 2026-04-30 · Haewon Yum, KOR GDS · Not for external distribution
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── Comment: floating action button on selection ── -->
+<button id="selection-btn" onclick="openCommentModal()">💬 Comment</button>
+
+<!-- ── Comment modal ── -->
+<div class="comment-modal-overlay" id="comment-modal-overlay">
+  <div class="comment-modal">
+    <h3>Add Comment</h3>
+    <div id="comment-selected-preview"></div>
+    <textarea id="comment-input" placeholder="Write your comment…"></textarea>
+    <div class="comment-modal-actions">
+      <button class="btn-cancel" onclick="closeCommentModal()">Cancel</button>
+      <button class="btn-submit" onclick="submitComment()">Add Comment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Export comments button (temp) ── -->
+<button id="export-comments-btn" onclick="exportComments()" style="position:fixed;bottom:28px;right:170px;background:#0f172a;color:white;border:none;border-radius:50px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;z-index:600;box-shadow:0 4px 14px rgba(0,0,0,0.3);">📋 Copy Comments</button>
+
+<!-- ── Comments toggle button ── -->
+<button id="comments-toggle" onclick="toggleCommentsPanel()">💬 Comments</button>
+
+<!-- ── Comments panel ── -->
+<div id="comments-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <span style="font-size:15px;font-weight:700">Comments</span>
+    <button onclick="toggleCommentsPanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:20px;line-height:1">×</button>
+  </div>
+  <div id="comments-list"></div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'dossier-planning-comments-v1';
+  let comments = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  let pendingSelection = null;
+
+  function saveComments() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  // ── Selection detection ──
+  document.addEventListener('mouseup', function(e) {
+    if (e.target.closest('#comment-modal-overlay') || e.target.closest('#comments-panel') || e.target.closest('#selection-btn') || e.target.closest('.comment-highlight')) return;
+    setTimeout(() => {
+      const sel = window.getSelection();
+      const text = sel ? sel.toString().trim() : '';
+      const btn = document.getElementById('selection-btn');
+      if (text.length > 2 && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        btn.style.display = 'flex';
+        btn.style.top  = (rect.top  + window.scrollY - 42) + 'px';
+        btn.style.left = (rect.left + rect.width / 2 - 58) + 'px';
+        pendingSelection = { text, range: range.cloneRange() };
+      } else {
+        btn.style.display = 'none';
+      }
+    }, 10);
+  });
+
+  document.addEventListener('mousedown', function(e) {
+    if (!e.target.closest('#selection-btn') && !e.target.closest('#comment-modal-overlay')) {
+      document.getElementById('selection-btn').style.display = 'none';
+    }
+  });
+
+  // ── Modal ──
+  function openCommentModal() {
+    document.getElementById('selection-btn').style.display = 'none';
+    if (!pendingSelection) return;
+    const preview = pendingSelection.text.length > 120
+      ? pendingSelection.text.slice(0, 120) + '…'
+      : pendingSelection.text;
+    document.getElementById('comment-selected-preview').textContent = '"' + preview + '"';
+    document.getElementById('comment-input').value = '';
+    document.getElementById('comment-modal-overlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('comment-input').focus(), 50);
+  }
+
+  function closeCommentModal() {
+    document.getElementById('comment-modal-overlay').style.display = 'none';
+    pendingSelection = null;
+  }
+
+  // Submit on Cmd/Ctrl+Enter
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      if (document.getElementById('comment-modal-overlay').style.display === 'flex') {
+        submitComment();
+      }
+    }
+    if (e.key === 'Escape') closeCommentModal();
+  });
+
+  function submitComment() {
+    const text = document.getElementById('comment-input').value.trim();
+    if (!text || !pendingSelection) return;
+    const id = uid();
+
+    const mark = createMark(id);
+    applyHighlight(pendingSelection.range, mark);
+
+    comments.push({
+      id,
+      selectedText: pendingSelection.text,
+      comment: text,
+      author: 'Haewon',
+      ts: new Date().toISOString(),
+      resolved: false
+    });
+
+    saveComments();
+    renderPanel();
+    updateToggle();
+    closeCommentModal();
+  }
+
+  function createMark(id) {
+    const mark = document.createElement('mark');
+    mark.className = 'comment-highlight';
+    mark.dataset.commentId = id;
+    mark.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showPopover(id, mark);
+    });
+    return mark;
+  }
+
+  function applyHighlight(range, mark) {
+    try {
+      range.surroundContents(mark);
+    } catch(e) {
+      mark.appendChild(range.extractContents());
+      range.insertNode(mark);
+    }
+  }
+
+  function findTextRange(root, searchText) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.parentElement.closest('.comment-highlight')) continue;
+      nodes.push(node);
+    }
+
+    let flat = '', offsets = [];
+    nodes.forEach(n => { offsets.push(flat.length); flat += n.textContent; });
+
+    const idx = flat.indexOf(searchText);
+    if (idx === -1) return null;
+
+    const endIdx = idx + searchText.length;
+    let startNode, startOff, endNode, endOff;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const s = offsets[i], e = s + nodes[i].textContent.length;
+      if (!startNode && e > idx)    { startNode = nodes[i]; startOff = idx   - s; }
+      if (!endNode   && e >= endIdx) { endNode   = nodes[i]; endOff   = endIdx - s; }
+      if (startNode && endNode) break;
+    }
+
+    if (!startNode || !endNode) return null;
+    const r = document.createRange();
+    r.setStart(startNode, startOff);
+    r.setEnd(endNode, endOff);
+    return r;
+  }
+
+  // ── Popover ──
+  function showPopover(id, anchor) {
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    const c = comments.find(x => x.id === id);
+    if (!c) return;
+
+    const rect = anchor.getBoundingClientRect();
+    const pop = document.createElement('div');
+    pop.className = 'comment-popover';
+    pop.style.top  = (rect.bottom + 8) + 'px';
+    pop.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+    pop.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:#6366f1">${c.author}</span>
+        <span style="font-size:11px;color:#94a3b8">${new Date(c.ts).toLocaleDateString()}</span>
+      </div>
+      <div id="popover-view-${id}">
+        <p style="font-size:13px;color:#0f172a;margin-bottom:12px;line-height:1.5">${escHtml(c.comment)}</p>
+        <div style="display:flex;gap:12px">
+          <button class="comment-action-btn" style="color:#6366f1" onclick="startEditComment('${id}')">✎ Edit</button>
+          <button class="comment-action-btn" style="color:#10b981" onclick="resolveComment('${id}')">✓ Resolve</button>
+          <button class="comment-action-btn" style="color:#ef4444" onclick="deleteComment('${id}')">Delete</button>
+        </div>
+      </div>
+      <div id="popover-edit-${id}" style="display:none">
+        <textarea id="edit-input-${id}" style="width:100%;height:72px;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;font-size:13px;resize:vertical;outline:none;box-sizing:border-box;font-family:inherit">${escHtml(c.comment)}</textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+          <button class="comment-action-btn" style="color:#64748b;font-size:12px" onclick="cancelEditComment('${id}')">Cancel</button>
+          <button class="comment-action-btn" style="color:#6366f1;font-size:12px;font-weight:700" onclick="saveEditComment('${id}')">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(pop);
+
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        if (!e.target.closest('.comment-popover') && !e.target.closest('.comment-highlight')) {
+          pop.remove();
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 200);
+  }
+
+  // ── Actions ──
+  function resolveComment(id) {
+    comments = comments.map(c => c.id === id ? { ...c, resolved: true } : c);
+    saveComments();
+    removeHighlight(id);
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    renderPanel();
+    updateToggle();
+  }
+
+  function deleteComment(id) {
+    comments = comments.filter(c => c.id !== id);
+    saveComments();
+    removeHighlight(id);
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    renderPanel();
+    updateToggle();
+  }
+
+  function removeHighlight(id) {
+    const mark = document.querySelector(`mark[data-comment-id="${id}"]`);
+    if (!mark) return;
+    const parent = mark.parentNode;
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+  }
+
+  // ── Panel ──
+  function toggleCommentsPanel() {
+    const panel = document.getElementById('comments-panel');
+    panel.classList.toggle('open');
+    document.querySelector('.main').style.marginRight =
+      panel.classList.contains('open') ? '340px' : '';
+  }
+
+  function renderPanel() {
+    const active   = comments.filter(c => !c.resolved);
+    const resolved = comments.filter(c =>  c.resolved);
+    const list = document.getElementById('comments-list');
+
+    if (!active.length && !resolved.length) {
+      list.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:13px;padding:24px 0">No comments yet.<br/>Select any text to add one.</p>';
+      return;
+    }
+
+    let html = '';
+    if (active.length) {
+      html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:10px">Open · ${active.length}</div>`;
+      active.forEach(c => {
+        html += `
+          <div class="comment-item" onclick="scrollToComment('${c.id}')">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:700;color:#6366f1">${c.author}</span>
+              <span style="font-size:11px;color:#94a3b8">${new Date(c.ts).toLocaleDateString()}</span>
+            </div>
+            <div style="font-size:11px;color:#64748b;font-style:italic;margin-bottom:6px">"${escHtml(c.selectedText.slice(0,80))}${c.selectedText.length>80?'…':''}"</div>
+            <div style="font-size:13px;color:#0f172a;margin-bottom:10px;line-height:1.5">${escHtml(c.comment)}</div>
+            <div style="display:flex;gap:12px">
+              <button class="comment-action-btn" style="color:#6366f1" onclick="event.stopPropagation();scrollToComment('${c.id}');setTimeout(()=>startEditComment('${c.id}'),300)">✎ Edit</button>
+              <button class="comment-action-btn" style="color:#10b981" onclick="event.stopPropagation();resolveComment('${c.id}')">✓ Resolve</button>
+              <button class="comment-action-btn" style="color:#ef4444" onclick="event.stopPropagation();deleteComment('${c.id}')">Delete</button>
+            </div>
+          </div>`;
+      });
+    }
+    if (resolved.length) {
+      html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin:20px 0 10px">Resolved · ${resolved.length}</div>`;
+      resolved.forEach(c => {
+        html += `
+          <div class="comment-item resolved">
+            <div style="font-size:11px;color:#94a3b8;font-style:italic;margin-bottom:4px">"${escHtml(c.selectedText.slice(0,80))}${c.selectedText.length>80?'…':''}"</div>
+            <div style="font-size:12px;color:#94a3b8">${escHtml(c.comment)}</div>
+          </div>`;
+      });
+    }
+    list.innerHTML = html;
+  }
+
+  function scrollToComment(id) {
+    const mark = document.querySelector(`mark[data-comment-id="${id}"]`);
+    if (!mark) return;
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    mark.style.outline = '2px solid #6366f1';
+    mark.style.outlineOffset = '2px';
+    setTimeout(() => { mark.style.outline = ''; mark.style.outlineOffset = ''; }, 1500);
+  }
+
+  function updateToggle() {
+    const n = comments.filter(c => !c.resolved).length;
+    document.getElementById('comments-toggle').textContent = n > 0 ? `💬 Comments (${n})` : '💬 Comments';
+  }
+
+  // ── Export ──
+  function exportComments() {
+    const text = comments.map((c, i) =>
+      `[${i+1}] Selected: "${c.selectedText}"\nComment: ${c.comment}\nStatus: ${c.resolved ? 'resolved' : 'open'}`
+    ).join('\n\n');
+    navigator.clipboard.writeText(text || 'No comments yet.').then(() => {
+      const btn = document.getElementById('export-comments-btn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy Comments', 2000);
+    });
+  }
+
+  // ── Edit ──
+  function startEditComment(id) {
+    document.getElementById('popover-view-' + id).style.display = 'none';
+    const editEl = document.getElementById('popover-edit-' + id);
+    editEl.style.display = 'block';
+    const ta = document.getElementById('edit-input-' + id);
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
+
+  function cancelEditComment(id) {
+    document.getElementById('popover-edit-' + id).style.display = 'none';
+    document.getElementById('popover-view-' + id).style.display = 'block';
+  }
+
+  function saveEditComment(id) {
+    const newText = document.getElementById('edit-input-' + id).value.trim();
+    if (!newText) return;
+    comments = comments.map(c => c.id === id ? { ...c, comment: newText } : c);
+    saveComments();
+    renderPanel();
+    // refresh the popover in-place
+    const mark = document.querySelector(`mark[data-comment-id="${id}"]`);
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    if (mark) showPopover(id, mark);
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Re-apply highlights on load ──
+  function reapplyHighlights() {
+    const root = document.querySelector('.main');
+    comments.filter(c => !c.resolved).forEach(c => {
+      const range = findTextRange(root, c.selectedText);
+      if (!range) return;
+      applyHighlight(range, createMark(c.id));
+    });
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', () => {
+    reapplyHighlights();
+    renderPanel();
+    updateToggle();
+  });
+</script>
+</body>
+</html>

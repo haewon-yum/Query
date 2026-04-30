@@ -1,0 +1,9 @@
+{
+  "step": 3,
+  "event": "af_purchase",
+  "verdict": "FAIL",
+  "most_recent_date": null,
+  "total_examples_14d": 0,
+  "campaigns_seen": [],
+  "note": "Zero training examples in last 14 days. Same cause as af_ad_revenue — no Moloco impressions while campaigns were paused."
+}

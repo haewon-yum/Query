@@ -25,7 +25,7 @@ CROSS JOIN
   UNNEST(p.pricing.candidates) AS cand
 WHERE
   DATE(timestamp) between DATE(START_DATE) and DATE(END_DATE)
-  AND cand.campaign_id = camp_id
+  AND cand.campaign_id = 'iyH1zVvUZpViudzo'
 GROUP BY
   1, 2, 3, 4
 order by 4, 2, 1

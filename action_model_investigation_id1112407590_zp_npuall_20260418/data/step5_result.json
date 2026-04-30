@@ -1,0 +1,90 @@
+{
+  "step": 5,
+  "verdict": "FAIL",
+  "models": [
+    {
+      "model": "action_consol_v2_ifa_cont",
+      "timestamp": 1776430037,
+      "deployed_utc": "2026-04-17 12:47 UTC",
+      "entries": [
+        {
+          "kpi_event": "zp_npuall",
+          "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7",
+          "normalizer": 0.35868492334253504,
+          "normalizer_data_source": "FALLBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": null,
+          "pb_eval_empty": true,
+          "bid_eval_empty": true,
+          "pricing_metadata_type": "TYPE_ACTION"
+        }
+      ]
+    },
+    {
+      "model": "action_consol_v2_ifa_cpu_cont",
+      "timestamp": 1776429961,
+      "deployed_utc": "2026-04-17 12:46 UTC",
+      "entries": [
+        {
+          "kpi_event": "zp_npuall",
+          "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7",
+          "normalizer": 0.35868492334253504,
+          "normalizer_data_source": "FALLBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": null,
+          "pb_eval_empty": true,
+          "bid_eval_empty": true,
+          "pricing_metadata_type": "TYPE_ACTION"
+        }
+      ]
+    },
+    {
+      "model": "action_consol_v2_lat_cont",
+      "timestamp": 1776429513,
+      "deployed_utc": "2026-04-17 12:38 UTC",
+      "entries": [
+        {
+          "kpi_event": "zp_npuall",
+          "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7",
+          "normalizer": 0.3138210680232054,
+          "normalizer_data_source": "FALLBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": null,
+          "pb_eval_empty": true,
+          "bid_eval_empty": true,
+          "pricing_metadata_type": "TYPE_ACTION_LAT"
+        }
+      ]
+    },
+    {
+      "model": "action_consol_v2_lat_cpu_cont",
+      "timestamp": 1776429515,
+      "deployed_utc": "2026-04-17 12:38 UTC",
+      "entries": [
+        {
+          "kpi_event": "zp_npuall",
+          "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7",
+          "normalizer": 0.3138210680232054,
+          "normalizer_data_source": "FALLBACK",
+          "normalizer_fallback_level": null,
+          "num_examples_for_normalizer": null,
+          "pb_eval_empty": true,
+          "bid_eval_empty": true,
+          "pricing_metadata_type": "TYPE_ACTION_LAT"
+        }
+      ]
+    },
+    {
+      "model": "ctv_action_v1a",
+      "timestamp": 1776438265,
+      "deployed_utc": "2026-04-17 15:04 UTC",
+      "entries": []
+    },
+    {
+      "model": "re_action_v8",
+      "timestamp": 1776411691,
+      "deployed_utc": "2026-04-17 07:41 UTC",
+      "entries": []
+    }
+  ]
+}

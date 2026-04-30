@@ -1,0 +1,28 @@
+{
+  "step": 6,
+  "verdict": "OK",
+  "campaign_id": "RGPQHVtHfPNlSXcU",
+  "control_plane": {
+    "source": "mems_prod.api_log",
+    "entries": [
+      {"date": "2026-04-16", "pricing_metadata_type": "TYPE_ACTION", "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7", "normalizer": 0.35868492334253504, "request_count": 4},
+      {"date": "2026-04-16", "pricing_metadata_type": "TYPE_ACTION_LAT", "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7", "normalizer": 0.3138210680232054, "request_count": 3},
+      {"date": "2026-04-15", "pricing_metadata_type": "TYPE_ACTION_LAT", "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7", "normalizer": 0.3076426311862697, "request_count": 3},
+      {"date": "2026-04-15", "pricing_metadata_type": "TYPE_ACTION_LAT", "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7", "normalizer": 0.279613625071938, "request_count": 2},
+      {"date": "2026-04-15", "pricing_metadata_type": "TYPE_I2I_TFSERVING", "prediction_type": null, "normalizer": null, "request_count": 1},
+      {"date": "2026-04-15", "pricing_metadata_type": "TYPE_ACTION", "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7", "normalizer": 0.33721166061192126, "request_count": 2},
+      {"date": "2026-04-15", "pricing_metadata_type": "TYPE_ACTION", "prediction_type": "TFSERVING_PREDICTION_TYPE_UNIFIED_D7", "normalizer": 0.32738839748002, "request_count": 2}
+    ]
+  },
+  "impression_plane": {
+    "source": "prod_stream_view.imp",
+    "date": "2026-04-17",
+    "entries": [
+      {"pricing_function": "ua_install_with_action:UA_INSTALL_AND_ACTION_LAT", "tf_model_name": "action_consol_v2_lat_cont", "prediction_type": "UNIFIED_D7", "normalizer": 0.33550392803538964, "imp_count": 133240},
+      {"pricing_function": "ua_install_with_action:UA_INSTALL_AND_ACTION_LAT", "tf_model_name": "action_consol_v2_lat_cpu_cont", "prediction_type": "UNIFIED_D7", "normalizer": 0.33550392803538964, "imp_count": 528111},
+      {"pricing_function": "ua_install_with_action:UA_INSTALL_AND_ACTION", "tf_model_name": "action_consol_v2_ifa_cont", "prediction_type": "UNIFIED_D7", "normalizer": 0.33550392803538964, "imp_count": 159294},
+      {"pricing_function": "ua_install_with_action:UA_INSTALL_AND_ACTION", "tf_model_name": "action_consol_v2_ifa_cpu_cont", "prediction_type": "UNIFIED_D7", "normalizer": 0.33550392803538964, "imp_count": 635901}
+    ]
+  },
+  "note": "Action model IS applied — both TYPE_ACTION (IFA) and TYPE_ACTION_LAT (LAT) are active. Normalizer 0.33550 used at impressions (from MEMS). All 4 consol_v2 models serving this campaign."
+}

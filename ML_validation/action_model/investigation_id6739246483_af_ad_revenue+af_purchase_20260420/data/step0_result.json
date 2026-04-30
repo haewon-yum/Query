@@ -1,0 +1,20 @@
+{
+  "step": 0,
+  "verdict": "WARN",
+  "campaigns": [
+    {
+      "campaign_id": "SqHUbqoeXYnCj6Ow",
+      "kpi_event": "af_ad_revenue,af_purchase",
+      "state": "ACTIVE",
+      "inactive_since": null,
+      "note": "Just reactivated 2026-04-20 04:31 UTC after being paused since 2026-04-14. Was paused for ~6 days. No bid traffic accumulated yet."
+    },
+    {
+      "campaign_id": "IV7TA5O07K4JNsjn",
+      "kpi_event": "af_ad_revenue,af_purchase",
+      "state": "PAUSED",
+      "inactive_since": "2025-12-18T02:44:28Z",
+      "note": "Inactive for 4+ months. Provided campaign_id. Entity history shows all PAUSED states in last 30d. No impressions in prod_stream_view.imp."
+    }
+  ]
+}

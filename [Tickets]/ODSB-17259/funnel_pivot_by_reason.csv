@@ -1,0 +1,19 @@
+reason_order,reason,KR_req_mil,WW_req_mil,US_req_mil,KR_pct,WW_pct,US_pct
+120,campaign limiter,2188.6,37261.98,29210.7,54.07,56.76,63.06
+305,"filter(bidfloor,pricing_model,threshold,pmp)",483.4,18697.54,9491.7,11.94,28.48,20.49
+310,priced,8.6,4675.3,2717.5,0.21,7.12,5.87
+014,throttled by extended loss based throttler,0.0,921.7,5.8,0.0,1.4,0.01
+236,avoided pricing (per cr_format) with limits,29.1,811.0,1313.3,0.72,1.24,2.84
+040,category_blocked,234.9,666.0,1271.9,5.8,1.01,2.75
+100,imp/bid capper,62.7,619.6,752.6,1.55,0.94,1.62
+055,(campaign) Req,11.5,526.4,453.8,0.28,0.8,0.98
+045,blocked advertiser or app,87.1,512.0,898.3,2.15,0.78,1.94
+030,capping stats capper,0.2,301.1,2.9,0.0,0.46,0.01
+300,no creative candidates,3.0,281.7,54.8,0.07,0.43,0.12
+002,no available deal between bidrequest and campaign,6.7,173.0,0.3,0.17,0.26,0.0
+060,no compatible creatives,929.17,161.9,130.5,22.96,0.25,0.28
+225,no compatible cr formats,0.0,31.9,11.0,0.0,0.05,0.02
+045,blocked by content rating,0.3,4.7,3.5,0.01,0.01,0.01
+218,(ad_group) Req,0.7,0.5,1.0,0.02,0.0,0.0
+110,(campaign) Ctx,1.5,0.3,0.4,0.04,0.0,0.0
+025,not test campaign,0.0,0.0,0.0,0.0,0.0,0.0

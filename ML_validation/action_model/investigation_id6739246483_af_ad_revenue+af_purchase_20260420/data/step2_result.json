@@ -1,0 +1,26 @@
+{
+  "step": 2,
+  "verdict": "WARN",
+  "metadata_file": "gs://tfexample-action/metadata_versions/meta_data_042014.pbtxt",
+  "bundle_registered": true,
+  "events": [
+    {
+      "event": "af_ad_revenue",
+      "action_event_type": "ACTION_EVENT_KPI",
+      "revenue_event_type": "REV_EVENT_KPI",
+      "b_mcp_event_type": "in_app_advertising",
+      "is_live_campaign_goal": true,
+      "backfill_start_millis": null,
+      "note": "Primary KPI. is_live_campaign_goal=true reflects SqHUbqoeXYnCj6Ow active today."
+    },
+    {
+      "event": "af_purchase",
+      "action_event_type": "ACTION_EVENT_KPI",
+      "revenue_event_type": "REV_EVENT_KPI",
+      "b_mcp_event_type": "in_app_purchase",
+      "is_live_campaign_goal": false,
+      "backfill_start_millis": null,
+      "note": "No is_live_campaign_goal despite active campaign — likely secondary KPI only (TYPE_SEC_KPI in pbtxt confirms this). Metadata updates is_live_campaign_goal for primary KPI only."
+    }
+  ]
+}

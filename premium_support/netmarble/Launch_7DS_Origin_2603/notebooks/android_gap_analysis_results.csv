@@ -1,0 +1,10 @@
+app_name,bundle_id,os,release_date,install_users,login_users,first_login_rate_pct,has_gap_events,gap_event_types,median_install_to_login_min,p75_install_to_login_min,p90_install_to_login_min,gap_journey_user_count
+Refantasia,com.marsru.refantasia.android,ANDROID,2025-06-06,7024,6801,96.8,True,"Complete-tutorials, Create a role, click, session",92,531,867,243
+Hex & Honey,com.wishhex.honey,ANDROID,2025-06-07,8224,8008,97.4,False,,2,17,383,450
+손가락 나갔다: 던전팡팡,com.dungeonbattle2.android,ANDROID,2025-07-03,2284,2249,98.5,True,"click, registration",2,22,210,93
+Stellar Sanctuary,com.pergame.starlitedenru,ANDROID,2025-08-07,16689,16382,98.2,True,"ClickBtnRadar, FortNotCanSelect, Level_1..Level_6, ManifestNotMatch, ResourceDownloadFailed, ResourceDownloadStart, SSOConnect*",2,8,197,1755
+Tokyo Ghoul: Break The Chains,com.funcat.tgbtcru,ANDROID,2025-06-11,19829,19111,96.4,True,"character, click, launch app, session",1,5,241,3563
+오피스 퀸 키우기,com.gf.wafh5krkr.hwyad.google,ANDROID,2025-05-06,6851,6082,88.8,True,"af_app_opened, createrole, register, sdk_installs",1,2,45,1796
+Lootborn Warriors (RU),com.global.lootru,ANDROID,2025-06-04,17513,16585,94.7,True,"af_app_opened, enter_server, purchase_value, rejected_install",1,13,243,2504
+Lootborn Warriors,com.global.loot,ANDROID,2025-06-04,14717,14292,97.1,True,"af_app_opened, enter_server",1,6,92,1959
+용칼이 키우기,com.kingkongsoft.sh4.g,ANDROID,2025-07-01,15334,6975,45.5,True,"Daily point_50, Stage_5..Stage_55, af_purchase, af_tutorial_completion, app_role, app_start, tier_01..tier_04, tutorial_start",1,7,223,580

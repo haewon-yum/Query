@@ -1,0 +1,29 @@
+name: Daily Weekly Summary
+
+on:
+  schedule:
+    # 10:00 AM KST = 01:00 AM UTC
+    - cron: "0 1 * * *"
+  workflow_dispatch:  # allow manual trigger from GitHub UI
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install anthropic requests python-dotenv
+
+      - name: Run daily summary
+        env:
+          GLEAN_API_TOKEN: ${{ secrets.GLEAN_API_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: python utils/daily_summary.py

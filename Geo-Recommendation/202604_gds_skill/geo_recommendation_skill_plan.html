@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gds-core:geo-recommendation — Skill Design Plan</title>
+  <style>
+    :root {
+      --moloco-blue: #1a73e8;
+      --moloco-dark: #1e293b;
+      --moloco-mid: #475569;
+      --moloco-light: #f8fafc;
+      --moloco-border: #e2e8f0;
+      --moloco-green: #16a34a;
+      --moloco-orange: #ea580c;
+      --moloco-purple: #7c3aed;
+      --moloco-red: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--moloco-dark);
+      background: #fff;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    /* .page sizing now defined in layout block below */
+
+    /* Header */
+    .doc-header {
+      border-bottom: 3px solid var(--moloco-blue);
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+    }
+    .doc-header .badge {
+      display: inline-block;
+      background: var(--moloco-blue);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .doc-header h1 { font-size: 28px; font-weight: 700; color: var(--moloco-dark); }
+    .doc-header .subtitle { color: var(--moloco-mid); margin-top: 6px; font-size: 14px; }
+    .meta { display: flex; gap: 24px; margin-top: 14px; font-size: 12px; color: var(--moloco-mid); }
+    .meta span { display: flex; align-items: center; gap: 5px; }
+
+    /* TOC */
+    .toc {
+      background: var(--moloco-light);
+      border: 1px solid var(--moloco-border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 36px;
+    }
+    .toc h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--moloco-mid); margin-bottom: 12px; }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+    .toc a { color: var(--moloco-blue); text-decoration: none; font-size: 13px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Sections */
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--moloco-dark);
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--moloco-border);
+      scroll-margin-top: 20px;
+    }
+    h3 { font-size: 15px; font-weight: 600; color: var(--moloco-dark); margin: 24px 0 10px; }
+    h4 { font-size: 13px; font-weight: 600; color: var(--moloco-mid); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    p { margin-bottom: 12px; color: var(--moloco-mid); }
+
+    /* Cards */
+    .card {
+      border: 1px solid var(--moloco-border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      background: #fff;
+    }
+    .card.blue { border-left: 4px solid var(--moloco-blue); }
+    .card.green { border-left: 4px solid var(--moloco-green); }
+    .card.orange { border-left: 4px solid var(--moloco-orange); }
+    .card.purple { border-left: 4px solid var(--moloco-purple); }
+    .card.red { border-left: 4px solid var(--moloco-red); }
+
+    /* Architecture flow */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 140px;
+      background: var(--moloco-light);
+      border: 1px solid var(--moloco-border);
+      border-radius: 8px;
+      padding: 16px 12px;
+      text-align: center;
+      position: relative;
+    }
+    .flow-step + .flow-step { margin-left: 8px; }
+    .flow-step .step-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--moloco-blue);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .flow-step .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--moloco-dark);
+      margin-bottom: 6px;
+    }
+    .flow-step .step-desc {
+      font-size: 11px;
+      color: var(--moloco-mid);
+      line-height: 1.4;
+    }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      color: var(--moloco-border);
+      padding: 0 2px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    th {
+      background: var(--moloco-light);
+      color: var(--moloco-mid);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 2px solid var(--moloco-border);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--moloco-border);
+      vertical-align: top;
+      color: var(--moloco-mid);
+    }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--moloco-dark); }
+    tr:hover td { background: var(--moloco-light); }
+
+    /* Code */
+    code {
+      background: #f1f5f9;
+      border: 1px solid var(--moloco-border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--moloco-purple);
+    }
+    pre {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    pre code {
+      background: none;
+      border: none;
+      color: #e2e8f0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* Scoring bar */
+    .score-bars { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .score-bar { display: flex; align-items: center; gap: 12px; }
+    .score-label { width: 120px; font-size: 13px; font-weight: 600; color: var(--moloco-dark); }
+    .score-track {
+      flex: 1;
+      background: var(--moloco-border);
+      border-radius: 4px;
+      height: 20px;
+      overflow: hidden;
+    }
+    .score-fill {
+      height: 100%;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .score-fill.spend  { width: 40%; background: var(--moloco-blue); }
+    .score-fill.roas   { width: 30%; background: var(--moloco-green); }
+    .score-fill.i2p    { width: 20%; background: var(--moloco-orange); }
+    .score-fill.arppu  { width: 10%; background: var(--moloco-purple); }
+
+    /* Spend distribution chart */
+    .dist-chart { margin: 16px 0; }
+    .dist-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .dist-bucket { width: 130px; font-size: 12px; color: var(--moloco-mid); text-align: right; }
+    .dist-bar-wrap { flex: 1; background: var(--moloco-border); border-radius: 4px; height: 22px; }
+    .dist-bar {
+      height: 100%;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--moloco-blue);
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    .dist-bar:hover { opacity: 1; }
+    .dist-count { width: 80px; font-size: 12px; color: var(--moloco-mid); }
+
+    /* Slack preview */
+    .slack-preview {
+      background: #fff;
+      border: 1px solid var(--moloco-border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+    .slack-header {
+      background: #4a154b;
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .slack-msg {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--moloco-border);
+      font-size: 13px;
+    }
+    .slack-msg:last-child { border-bottom: none; }
+    .slack-bot { font-weight: 700; color: var(--moloco-dark); margin-bottom: 4px; font-size: 12px; }
+    .slack-bot span { background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; }
+    .slack-text { color: var(--moloco-mid); line-height: 1.5; }
+
+    /* Sheet tabs */
+    .sheet-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+    .tab {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid;
+    }
+    .tab.input  { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+    .tab.data   { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+    .tab.output { background: #fdf4ff; border-color: #e9d5ff; color: #6b21a8; }
+    .tab.meta   { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+
+    /* Open questions */
+    .question {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--moloco-border);
+    }
+    .question:last-child { border-bottom: none; }
+    .q-num {
+      width: 28px;
+      height: 28px;
+      background: var(--moloco-orange);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .q-body h4 { margin: 0 0 4px; color: var(--moloco-dark); font-size: 13px; text-transform: none; letter-spacing: 0; }
+    .q-body p { margin: 0; font-size: 12px; }
+
+    /* Next steps */
+    .steps { counter-reset: step-counter; }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .step-item .s-num {
+      width: 32px;
+      height: 32px;
+      background: var(--moloco-blue);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .step-item .s-body h4 { margin: 4px 0 4px; color: var(--moloco-dark); font-size: 13px; text-transform: none; letter-spacing: 0; }
+    .step-item .s-body p { font-size: 12px; margin: 0; }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--moloco-border);
+      font-size: 12px;
+      color: var(--moloco-mid);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      background: var(--moloco-light);
+      border: 1px solid var(--moloco-border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--moloco-mid);
+      margin: 2px;
+    }
+
+    /* Status badge */
+    .status {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status.todo { background: #fef9c3; color: #854d0e; }
+    .status.inprog { background: #dbeafe; color: #1e40af; }
+    .status.done { background: #dcfce7; color: #166534; }
+    .status.blocked { background: #fee2e2; color: #991b1b; }
+
+    /* Layout: sidebar + content */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--moloco-light);
+      border-right: 1px solid var(--moloco-border);
+      padding: 24px 0 24px;
+      box-sizing: border-box;
+    }
+    .sidebar-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--moloco-mid);
+      padding: 0 16px 12px;
+      border-bottom: 1px solid var(--moloco-border);
+      margin-bottom: 8px;
+    }
+    .sidebar nav a {
+      display: block;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: var(--moloco-mid);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .sidebar nav a:hover {
+      color: var(--moloco-blue);
+      background: #e8f0fe;
+    }
+    .sidebar nav a.active {
+      color: var(--moloco-blue);
+      border-left-color: var(--moloco-blue);
+      background: #e8f0fe;
+      font-weight: 600;
+    }
+    .sidebar nav .nav-section {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      padding: 10px 16px 3px;
+    }
+    .page { max-width: 960px; padding: 40px 36px; flex: 1; min-width: 0; }
+
+    @media (max-width: 768px) {
+      .flow { flex-direction: column; }
+      .flow-step + .flow-step { margin-left: 0; margin-top: 8px; }
+      .flow-arrow { transform: rotate(90deg); }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar Navigator -->
+  <aside class="sidebar">
+    <div class="sidebar-title">geo-recommendation</div>
+    <nav>
+      <div class="nav-section">Setup</div>
+      <a href="#prerequisites">Prerequisites &amp; MCPs</a>
+      <div class="nav-section">Design</div>
+      <a href="#overview">Overview</a>
+      <a href="#architecture">Architecture &amp; Flow</a>
+      <a href="#inputs">Input Collection</a>
+      <a href="#benchmarking">BM Bundle Auto-Suggest</a>
+      <a href="#data">Data Pull (BQ Agent)</a>
+      <a href="#scoring">Scoring Logic</a>
+      <a href="#synthesis">LLM Synthesis</a>
+      <a href="#output">Output Format</a>
+      <a href="#extensibility">Use Case Extensibility</a>
+      <div class="nav-section">Reference</div>
+      <a href="#gotchas">Gotchas &amp; Errors</a>
+      <a href="#open">Open Questions</a>
+      <a href="#reference">File Structure &amp; Reference</a>
+      <a href="#nextsteps">Next Steps</a>
+    </nav>
+  </aside>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="badge">SKILL DESIGN PLAN · v0.1 · DRAFT</div>
+    <h1>gds-core:geo-recommendation</h1>
+    <div class="subtitle">Find top geo markets for a client app using unattributed signals + benchmark scoring + Claude synthesis</div>
+    <div class="meta">
+      <span>📅 2026-04-15</span>
+      <span>👤 Haewon Yum · KOR GDS Lead</span>
+      <span>📦 Plugin: <code>gds-core</code></span>
+      <span>🔖 v1 use case: HVP acquisition</span>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#overview">Overview &amp; What It Replaces</a></li>
+      <li><a href="#prerequisites">Prerequisites &amp; MCP Tools</a></li>
+      <li><a href="#architecture">Architecture &amp; Flow</a></li>
+      <li><a href="#inputs">Input Collection</a></li>
+      <li><a href="#benchmarking">Benchmarking Bundle Auto-Suggest</a></li>
+      <li><a href="#data">Data Pull (BQ Agent)</a></li>
+      <li><a href="#scoring">Scoring Logic</a></li>
+      <li><a href="#synthesis">LLM Synthesis (Claude)</a></li>
+      <li><a href="#output">Output Format</a></li>
+      <li><a href="#extensibility">Use Case Extensibility</a></li>
+      <li><a href="#gotchas">Gotchas &amp; Error Handling</a></li>
+      <li><a href="#open">Open Questions &amp; Decisions</a></li>
+      <li><a href="#reference">File Structure &amp; Reference</a></li>
+      <li><a href="#nextsteps">Next Steps</a></li>
+    </ol>
+  </div>
+
+  <!-- Prerequisites -->
+  <h2 id="prerequisites">2. Prerequisites &amp; MCP Tools</h2>
+
+  <div class="card blue">
+    <strong>On Load — mandatory first action:</strong> Before asking any questions or taking any other steps, call <code>report_skill_usage</code> with <code>skill_name: "gds-core:geo-recommendation"</code>. This is required by the Speedboat MCP connector and must be the very first tool call when the skill loads.
+  </div>
+
+  <h3>Required MCPs</h3>
+  <table>
+    <thead><tr><th>MCP</th><th>Tools used</th><th>Purpose in this skill</th><th>Setup</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Speedboat MCP</strong><br><span style="font-size:11px;color:var(--moloco-mid);">Required</span></td>
+        <td style="font-size:12px;">
+          <code>report_skill_usage</code><br>
+          <code>report_feedback</code><br>
+          <code>sensortower_search_apps</code><br>
+          <code>sensortower_get_ad_network_analysis</code><br>
+          <code>resolve_moloco_entity</code><br>
+          <code>get_campaign_setting</code>
+        </td>
+        <td style="font-size:12px;">
+          <code>report_skill_usage</code> — on load (mandatory)<br>
+          <code>report_feedback</code> — post-run feedback<br>
+          <code>sensortower_*</code> — benchmark bundle auto-suggest: find same-genre titles by SensorTower genre, filter by D90 spend threshold<br>
+          <code>resolve_moloco_entity</code> — resolve input bundle ID → advertiser name, tracking entity, office<br>
+          <code>get_campaign_setting</code> — optionally check existing campaign geos for the bundle (pre-populate exclude list)
+        </td>
+        <td style="font-size:12px;">Claude Code CLI: install <code>plugin-general</code> plugin (auto-registers Speedboat). Must be on allowlist.</td>
+      </tr>
+      <tr>
+        <td><strong>BQ Agent</strong><br><span style="font-size:11px;color:var(--moloco-mid);">Required</span></td>
+        <td style="font-size:12px;"><em>Subagent — all SQL execution</em></td>
+        <td style="font-size:12px;">All BigQuery queries (target pull, benchmark pull, purchase event discovery, BM bundle threshold check). Pre-built SQL scripts in <code>scripts/</code> passed directly — BQ Agent does not write queries from scratch.</td>
+        <td style="font-size:12px;">Setup: claude-bq-agent repo README</td>
+      </tr>
+      <tr>
+        <td><strong>Slack MCP</strong><br><span style="font-size:11px;color:var(--moloco-mid);">Required</span></td>
+        <td style="font-size:12px;"><code>slack_post_message</code><br><code>slack_reply_to_thread</code></td>
+        <td style="font-size:12px;">3-stage Slack notifications (target done, BM done, final ready). Posts via the existing <code>geo_recommendation_app</code> bot identity. Bot token stored as env var.</td>
+        <td style="font-size:12px;">Slack MCP server configured with bot token</td>
+      </tr>
+      <tr>
+        <td><strong>Google Drive MCP</strong><br><span style="font-size:11px;color:var(--moloco-mid);">Required</span></td>
+        <td style="font-size:12px;"><code>mcp__gdrive</code> file create/upload</td>
+        <td style="font-size:12px;">Upload generated HTML 1-pager to the shared geo-rec Drive folder. Extract file link for Slack notification.</td>
+        <td style="font-size:12px;">gdrive MCP configured with Moloco workspace credentials</td>
+      </tr>
+      <tr>
+        <td><strong>Google Sheets / Drive</strong><br><span style="font-size:11px;color:var(--moloco-mid);">Required</span></td>
+        <td style="font-size:12px;">Sheets API via REST or MCP</td>
+        <td style="font-size:12px;">Copy template sheet per run, write Target_all / BM_output / Final_Recommendation tabs, append to execution log.</td>
+        <td style="font-size:12px;">Auth via <code>gcloud auth print-access-token</code> or Drive MCP</td>
+      </tr>
+      <tr>
+        <td><strong>Glean MCP</strong><br><span style="font-size:11px;color:var(--moloco-mid);">Optional</span></td>
+        <td style="font-size:12px;"><code>mcp__glean_default__chat</code></td>
+        <td style="font-size:12px;">Resolve unknown app names/genres when SensorTower returns no match. Secondary fallback only.</td>
+        <td style="font-size:12px;">Glean MCP connector</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:20px;">SKILL.md frontmatter (required fields)</h3>
+  <pre><code>---
+name: geo-recommendation
+description: Recommends top geo markets for a client app using unattributed demand signals (I2P, ARPPU, install volume) + benchmark scoring from similar-genre titles on Moloco. Replaces the n8n + Apps Script + GPT-5 pipeline. Outputs to Google Sheet + HTML 1-pager + Slack notifications.
+last_verified: [date]
+owner: Haewon Yum (KOR GDS)
+---</code></pre>
+
+  <!-- 1. Overview -->
+  <h2 id="overview">1. Overview &amp; What It Replaces</h2>
+  <p>
+    The geo-recommendation skill replaces a 4-component pipeline (PSO portal UI + n8n orchestration + Google Apps Script + GPT-5) with a single Claude Code skill that handles everything interactively.
+  </p>
+
+  <table>
+    <thead><tr><th>Component</th><th>Current</th><th>New (Skill)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>User input</strong></td><td>PSO portal web UI (pso-portal-2-...run.app)</td><td>Interactive Claude Code conversation</td></tr>
+      <tr><td><strong>Orchestration</strong></td><td>n8n workflow (hl8n8.app.n8n.cloud)</td><td>Skill step sequencing</td></tr>
+      <tr><td><strong>Data pull</strong></td><td>Google Apps Script → BigQuery</td><td>BQ Agent (pre-built SQL scripts)</td></tr>
+      <tr><td><strong>LLM synthesis</strong></td><td>GPT-5 via n8n API node</td><td>Claude (same model running the skill)</td></tr>
+      <tr><td><strong>Progress notifications</strong></td><td>Slack bot (geo_recommendation_test APP)</td><td><code>mcp__slack__slack_post_message</code></td></tr>
+      <tr><td><strong>Output storage</strong></td><td>Google Sheet (copied from template)</td><td>Google Sheet (same structure) + optional HTML report</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card blue">
+    <strong>Core goal:</strong> Given a target app bundle, identify the top 3 geo markets per OS where high-value payers are most likely to be acquired, using a blend of the target app's unattributed user signals and benchmark competitor apps' attributed performance data.
+  </div>
+
+  <!-- 2. Architecture -->
+  <h2 id="architecture">2. Architecture &amp; Flow</h2>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">Phase 1</div>
+      <div class="step-title">Use Case &amp; Inputs</div>
+      <div class="step-desc">Select use case, collect target bundle, dates, exclusions</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Phase 2</div>
+      <div class="step-title">Bundle Suggest</div>
+      <div class="step-desc">Auto-suggest benchmarking bundles via SensorTower + BQ spend filter</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Phase 3</div>
+      <div class="step-title">Target Data Pull</div>
+      <div class="step-desc">Unattributed installs, I2P, ARPPU per country/OS → shortlist top 10</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Phase 4</div>
+      <div class="step-title">Benchmark Data Pull</div>
+      <div class="step-desc">Attributed spend, D28 ROAS, I2P, ARPPU for shortlist countries</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Phase 5</div>
+      <div class="step-title">Scoring</div>
+      <div class="step-desc">Normalize + weighted avg per title → avg across titles by OS × country</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Phase 6</div>
+      <div class="step-title">Claude Synthesis</div>
+      <div class="step-desc">Integrate signals → top 3 per OS + Strategic Profile + Tactical Tip</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Phase 7</div>
+      <div class="step-title">Output</div>
+      <div class="step-desc">Google Sheet + 1-pager slides + Slack notifications (3 stages)</div>
+    </div>
+  </div>
+
+  <p>Slack notifications fire after Phase 3 (target done), Phase 4 (benchmark done), and Phase 6 (final ready) — mirroring the current n8n behavior.</p>
+
+  <!-- 3. Inputs -->
+  <h2 id="inputs">3. Input Collection</h2>
+  <p>The skill collects all inputs interactively in conversation, replacing the PSO portal web form.</p>
+
+  <table>
+    <thead><tr><th>Input</th><th>Collection method</th><th>Default / auto-logic</th><th>User action</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>use_case</strong></td>
+        <td>Ask user (menu)</td>
+        <td><code>hvp-acquisition</code></td>
+        <td>Select or accept default</td>
+      </tr>
+      <tr>
+        <td><strong>target_bundle</strong></td>
+        <td>Ask user</td>
+        <td>—</td>
+        <td>Type bundle ID or app name</td>
+      </tr>
+      <tr>
+        <td><strong>start_date / end_date</strong></td>
+        <td>Ask user</td>
+        <td>Last 30 days</td>
+        <td>Confirm or override</td>
+      </tr>
+      <tr>
+        <td><strong>purchase_events</strong></td>
+        <td>Auto-discovered from pb table</td>
+        <td>Query pb for <code>event.revenue_usd.amount &gt; 0</code> in date range → ranked by total revenue</td>
+        <td>User selects one or more from numbered list</td>
+      </tr>
+      <tr>
+        <td><strong>exclude_countries</strong></td>
+        <td>Auto-pulled from campaign history for target bundle</td>
+        <td>Countries with active campaigns (spend &gt; 0 in last 30d)</td>
+        <td>Review + add/remove</td>
+      </tr>
+      <tr>
+        <td><strong>benchmarking_bundles</strong></td>
+        <td>Auto-suggested (see Phase 2)</td>
+        <td>Same genre + spend ≥ $50K D90 + ≥ 3 active countries (default, user-adjustable)</td>
+        <td>Interactive review (remove/add)</td>
+      </tr>
+      <tr>
+        <td><strong>user_email</strong></td>
+        <td>Ask user (or infer from Slack profile)</td>
+        <td>Current user's @moloco.com</td>
+        <td>Confirm or type another</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card blue">
+    <strong>Purchase event discovery (updated):</strong> The skill queries the pb table for all distinct events with <code>revenue &gt; 0</code> in the analysis period for the target bundle, ranked by total revenue. User selects one or more. Multiple events are supported (target query uses <code>event_name IN UNNEST(purchase_events)</code>). BM analysis is unaffected — it uses <code>revenue &gt; 0</code> with no event name filter regardless of this selection.
+  </div>
+
+  <h4>Purchase event discovery — interaction pattern</h4>
+  <pre><code>Revenue events found for [bundle] (Apr 8 – May 8):
+
+  1. In-App Purchase   12,483 occurrences   $234,521 total revenue
+  2. af_purchase        3,201 occurrences    $67,890 total revenue
+  3. purchase             441 occurrences     $9,102 total revenue
+
+Select events to include (e.g. "1", "1 2", or "all"):</code></pre>
+
+  <div class="card orange">
+    <strong>Confirmed from Apps Script:</strong> Target analysis currently processes purchase_events as comma-separated (code splits and converts to SQL array), so multiple events have always been technically supported — but in practice passed as a single event. The skill makes this capability explicit and user-driven. BM analysis purchase_events logic is fully commented out — it uses <code>revenue &gt; 0 AND revenue &lt; 10000</code> only.
+  </div>
+
+  <!-- 4. Benchmarking Bundles -->
+  <h2 id="benchmarking">4. Benchmarking Bundle Auto-Suggest</h2>
+
+  <h3>Threshold decision: D90 spend distribution</h3>
+  <p>BQ query over 10,766 active bundles in the last 90 days:</p>
+
+  <div class="dist-chart">
+    <div class="dist-row">
+      <div class="dist-bucket">&lt;$10K</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:68%">7,328</div></div>
+      <div class="dist-count">68% — noise</div>
+    </div>
+    <div class="dist-row">
+      <div class="dist-bucket">$10K–$50K</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:17%">1,783</div></div>
+      <div class="dist-count">17% — low maturity</div>
+    </div>
+    <div class="dist-row">
+      <div class="dist-bucket" style="font-weight:700;color:#1a73e8">$50K–$100K ★</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:6%;background:#16a34a">602</div></div>
+      <div class="dist-count" style="color:#16a34a">threshold</div>
+    </div>
+    <div class="dist-row">
+      <div class="dist-bucket">$100K–$500K</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:7%">794</div></div>
+      <div class="dist-count"></div>
+    </div>
+    <div class="dist-row">
+      <div class="dist-bucket">$500K–$1M</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:1.2%">134</div></div>
+      <div class="dist-count"></div>
+    </div>
+    <div class="dist-row">
+      <div class="dist-bucket">&gt;$1M</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:1.2%">125</div></div>
+      <div class="dist-count"></div>
+    </div>
+  </div>
+
+  <p><strong>Recommended threshold: spend ≥ $50K D90</strong> → 1,655 candidate bundles. Tight alternative: $100K (1,053 bundles). Both are large enough for genre-level filtering.</p>
+
+  <div class="card red">
+    <strong>⚠️ Gotcha — country coverage:</strong> The BQ query showed <code>avg_country_count ≈ 1.0</code> across all spend buckets when using <code>advertiser.office</code>. This is because <code>advertiser.office</code> is a single value per advertiser, not a geo dimension. For multi-country coverage check, use <code>COUNT(DISTINCT country)</code> from <code>fact_dsp_core</code> where <code>gross_spend_usd &gt; 0</code>.
+  </div>
+
+  <h3>Auto-suggest logic</h3>
+  <ol style="padding-left:20px; color: var(--moloco-mid); margin-bottom: 16px;">
+    <li>Get target bundle genre via <strong>SensorTower</strong> (<code>sensortower_search_apps</code> → category/sub-genre)</li>
+    <li>Query <code>fact_dsp_core</code>: same genre, D90 spend ≥ $50K, active in ≥ 3 countries, exclude target_bundle</li>
+    <li>Sort by D90 spend descending → present top 10–15 candidates</li>
+    <li>User interaction (interactive review):</li>
+  </ol>
+
+  <pre><code>Here are 12 suggested benchmarking bundles for genre "Puzzle" (D90 spend ≥ $50K, ≥ 3 countries):
+
+  1. com.example.puzzlegame    $2.1M  |  15 countries  |  GOLD
+  2. com.another.match3        $890K  |   9 countries  |  PLATINUM
+  3. com.third.jigsawapp       $430K  |   6 countries  |  SILVER
+  ...
+
+Type numbers to REMOVE (e.g. "3 7"), paste bundle IDs to ADD, or say "use all" to proceed.</code></pre>
+
+  <p>After confirmation, the final list + spend metadata is written to <code>BM_input</code> sheet tab.</p>
+
+  <!-- 5. Data Pull -->
+  <h2 id="data">5. Data Pull (BQ Agent)</h2>
+  <p>Two sequential BQ queries, each triggering a Slack notification on completion.</p>
+
+  <h3>Query A — Target bundle analysis</h3>
+  <div class="card green">
+    <strong>Table (confirmed from Apps Script):</strong> <code>focal-elf-631.prod_stream_view.pb</code> — raw postback events including unattributed installs<br>
+    <strong>Bundle mapping:</strong> <code>focal-elf-631.standard_digest.product_digest</code> maps <code>app_store_bundle</code> → <code>tracking_bundle</code> for pb queries<br>
+    <strong>Project:</strong> <code>focal-elf-631</code>
+  </div>
+
+  <table>
+    <thead><tr><th>Output field</th><th>Description</th><th>Logic</th></tr></thead>
+    <tbody>
+      <tr><td><code>bundle</code></td><td>Target app bundle ID</td><td><code>app.bundle</code> from pb</td></tr>
+      <tr><td><code>os</code></td><td>iOS / Android</td><td><code>device.os</code></td></tr>
+      <tr><td><code>country</code></td><td>ISO country code</td><td><code>device.country</code></td></tr>
+      <tr><td><code>attributed_installs</code></td><td>Moloco-attributed installs</td><td>DISTINCT user_id where <code>is_attributed=TRUE</code>, event='install'</td></tr>
+      <tr><td><code>unattributed_installs</code></td><td>Organic / non-Moloco installs</td><td>DISTINCT user_id where <code>is_attributed=FALSE</code>, event='install'</td></tr>
+      <tr><td><code>moloco_share_of_installs</code></td><td>Moloco attribution share</td><td>attributed / (attributed + unattributed) × 100</td></tr>
+      <tr><td><code>install_users</code></td><td>Total distinct install users</td><td>All DISTINCT user_id with install event</td></tr>
+      <tr><td><code>purchase_users</code></td><td>Payers</td><td>DISTINCT user_id with event IN purchase_events</td></tr>
+      <tr><td><code>i2p_percentage</code></td><td>Install-to-purchase rate</td><td>purchase_users / install_users × 100</td></tr>
+      <tr><td><code>arppu</code></td><td>Avg revenue per paying user</td><td>AVG(SUM(revenue)) per user, <strong>D7 window</strong> from install_at</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card orange">
+    <strong>user_id construction:</strong> CASE-WHEN priority (first match wins) —
+    <ol style="margin:6px 0 0 16px; line-height:2;">
+      <li><code>'ifv:' || device.ifv</code> — used if IFV is truly available (iOS IDFV, always present)</li>
+      <li><code>'ifa:' || device.ifa</code> — used only if IFV is null/unavailable (iOS IDFA, requires ATT consent)</li>
+      <li><code>'device:' || mmp.device_id</code> — fallback</li>
+      <li><code>NULL</code> — excluded from all counts</li>
+    </ol>
+    If a user has <strong>both IFV and IFA</strong>, they are assigned <strong>IFV</strong> (not IFA). IFV takes precedence.
+  </div>
+
+  <p><strong>Shortlisting:</strong> Top 10 countries by <code>unattributed_installs</code>, after excluding <code>exclude_countries</code>. Written as <code>focus_countries</code> to <code>BM_input!B4</code> automatically.</p>
+
+  <h3>Query B — Benchmark bundle analysis</h3>
+  <div class="card green">
+    <strong>Tables (confirmed from Apps Script):</strong><br>
+    • <code>focal-elf-631.prod_stream_view.cv</code> — attributed CV events for install/purchase/revenue<br>
+    • <code>moloco-ae-view.athena.fact_dsp_core</code> — campaign spend (<code>gross_spend_usd</code>) by <code>product.app_market_bundle</code> + <code>campaign.country</code><br>
+    • <code>moloco-ae-view.athena.dim1_app</code> — app metadata (<code>unified_app_id</code>, <code>app_name</code>, <code>unified_app_name</code>)
+  </div>
+
+  <table>
+    <thead><tr><th>Output field</th><th>Description</th><th>Logic</th></tr></thead>
+    <tbody>
+      <tr><td><code>unified_app_id / name</code></td><td>Benchmark app identifier</td><td>From <code>dim1_app</code> lookup</td></tr>
+      <tr><td><code>bundle</code></td><td>Benchmark bundle (store_id)</td><td><code>api.product.app.store_id</code> from cv</td></tr>
+      <tr><td><code>os</code></td><td>iOS / Android</td><td><code>req.device.os</code></td></tr>
+      <tr><td><code>country</code></td><td>Shortlisted countries only</td><td><code>req.device.geo.country</code></td></tr>
+      <tr><td><code>spend</code></td><td>Campaign spend</td><td><code>SUM(gross_spend_usd)</code> from fact_dsp_core</td></tr>
+      <tr><td><code>d28_roas</code></td><td>28-day ROAS ✅ confirmed D28</td><td>SUM(revenue where day_diff ≤ 28) / spend</td></tr>
+      <tr><td><code>i2p_percentage</code></td><td>Install-to-purchase rate</td><td>purchase_users / install_users × 100</td></tr>
+      <tr><td><code>arppu</code></td><td>Avg revenue per purchase event</td><td>AVG(revenue) from revenue_events (not per user)</td></tr>
+      <tr><td><code>d1/d7/d14/d21_roas</code></td><td>Cohort ROAS at other windows</td><td>dX_rev / spend — available but not used in scoring</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card orange">
+    <strong>Revenue filter:</strong> <code>revenue &gt; 0 AND revenue &lt; 10000</code> (outlier cap). Install date must be within <code>[start_date, end_date]</code>; revenue window extends to <code>end_date + 28 days</code>.
+  </div>
+
+  <h3>Additional data for 1-pager</h3>
+  <p>After scoring, two more queries populate the 1-pager tabs for the top 3 recommended geos:</p>
+  <ul style="padding-left:20px; color:var(--moloco-mid); margin-bottom:12px;">
+    <li><strong>OnePager_TopPublishers:</strong> top publisher bundles by spend in each geo (from <code>fact_dsp_core</code> publisher dimension)</li>
+    <li><strong>OnePager_CreativeMix:</strong> creative format spend/impression breakdown per geo</li>
+  </ul>
+
+  <!-- 6. Scoring -->
+  <h2 id="scoring">6. Scoring Logic</h2>
+  <p>Confirmed from <code>BM_output</code> sheet (weights tab + Weighted Score column):</p>
+
+  <div class="score-bars">
+    <div class="score-bar">
+      <div class="score-label">Spend</div>
+      <div class="score-track"><div class="score-fill spend">0.40</div></div>
+    </div>
+    <div class="score-bar">
+      <div class="score-label">D28 ROAS</div>
+      <div class="score-track"><div class="score-fill roas">0.30</div></div>
+    </div>
+    <div class="score-bar">
+      <div class="score-label">I2P</div>
+      <div class="score-track"><div class="score-fill i2p">0.20</div></div>
+    </div>
+    <div class="score-bar">
+      <div class="score-label">ARPPU</div>
+      <div class="score-track"><div class="score-fill arppu">0.10</div></div>
+    </div>
+  </div>
+
+  <p><em>Rationale (from design doc): Spend weighted highest as it most directly reflects investment intensity and real-world performance validation. Weights are intuition-based, not data-derived — a candidate for future calibration.</em></p>
+
+  <h3>Scoring steps</h3>
+  <ol style="padding-left:20px; color:var(--moloco-mid); margin-bottom:16px; line-height:2;">
+    <li><strong>Normalize</strong> each metric (Spend, D28 ROAS, I2P, ARPPU) to [0,1] within each benchmark title using min-max scaling per OS</li>
+    <li><strong>Weighted score</strong> per title × OS × country: <code>0.4×norm_spend + 0.3×norm_roas + 0.2×norm_i2p + 0.1×norm_arppu</code></li>
+    <li><strong>Average</strong> weighted scores across all benchmark titles → one score per OS × country</li>
+    <li><strong>Rank</strong> by avg score within each OS → tag top 3 as <code>🌟 Top 3</code></li>
+  </ol>
+
+  <div class="card purple">
+    <strong>Example output (from BM_output sheet):</strong><br>
+    iOS NLD: 0.642 🌟 | iOS PHL: 0.635 🌟 | iOS ARG: 0.632 🌟 | iOS ITA: 0.541 | iOS COL: 0.341 | ...
+  </div>
+
+  <!-- 7. Claude Synthesis -->
+  <h2 id="synthesis">7. LLM Synthesis (Claude)</h2>
+  <p>Claude receives both data blocks and generates the final recommendation narrative, replacing GPT-5.</p>
+
+  <h3>How it works (confirmed from Apps Script)</h3>
+  <p>The current script uses GPT-5. The skill replaces this with Claude — no external API calls needed, same model running the skill.</p>
+
+  <div class="card blue">
+    <strong>10-run frequency aggregation:</strong> GPT-5 is prompted to run the geo selection logic 10 times independently, then aggregate results by country appearance frequency across runs. This stabilises recommendations against LLM non-determinism. Claude should do the same — run ranking 10 times with chain-of-thought, count frequency, finalize top 3.
+  </div>
+
+  <h3>Inputs to Claude synthesis prompt</h3>
+  <ul style="padding-left:20px; color:var(--moloco-mid); margin-bottom:12px; line-height:2;">
+    <li><strong>Data A (target unattributed):</strong> top 10 countries per OS by unattributed_installs — Country, OS, I2P%, ARPPU, unattributed_installs. <em>Heavier weight.</em></li>
+    <li><strong>Data B (benchmark scores):</strong> OS × Country avg score + priority tag from BM_output</li>
+    <li>Use case context: HVP acquisition for a DSP gaming/consumer advertiser</li>
+    <li>Exclude countries list</li>
+    <li>Which OS values are present in target data (drives iOS/Android output sections)</li>
+  </ul>
+
+  <div class="card orange">
+    <strong>Key prompt rule (from Apps Script):</strong> "Give greater weight to Data A when making your decision." Numbers in Data A must be copied exactly — no approximation or cross-OS mixing. Enforced via structured JSON output schema.
+  </div>
+
+  <h3>Output 1 — Structured JSON → Google Sheet (Final_Recommendation tab)</h3>
+  <p style="color:var(--moloco-mid); margin-bottom:10px;">
+    Claude returns a <strong>structured JSON object</strong> as its synthesis output. The skill parses this JSON and writes it to the <code>Final_Recommendation</code> sheet tab in <strong>plain language</strong> — one row per recommended country per OS, formatted for readability by AMs and PSO. The raw JSON is also stored in the <code>OnePager_JSON</code> tab for downstream processing.
+  </p>
+
+  <h4 style="margin-bottom:6px; color:var(--moloco-dark);">JSON schema</h4>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>method</code></td><td>object</td><td>weighting_a, weighting_b, runs (10), shortlist_source</td></tr>
+      <tr><td><code>recommendation</code></td><td>object</td><td>ios / android → array of {country, score} top 3</td></tr>
+      <tr><td><code>frequency</code></td><td>object</td><td>ios / android → [{country, count, of:10}] — how often each country appeared across 10 runs</td></tr>
+      <tr><td><code>data_a_signals</code></td><td>array</td><td>Verbatim copy of top-10 unattributed signals per OS</td></tr>
+      <tr><td><code>data_b_top3</code></td><td>object</td><td>ios / android top 3 from benchmark scores (when BM available)</td></tr>
+      <tr><td><code>rationale</code></td><td>array</td><td>Per country/OS: why selected (max 200 chars each)</td></tr>
+      <tr><td><code>insights</code></td><td>array</td><td>Additional market insights per country/OS</td></tr>
+      <tr><td><code>one_pager</code></td><td>object</td><td>Title, subtitle, top3 headline line, why_bullets, insights_bullets, footnote — feeds Output 2</td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top:14px; margin-bottom:6px; color:var(--moloco-dark);">Sheet layout (Final_Recommendation tab) — per OS section</h4>
+  <table>
+    <thead><tr><th>Column</th><th>Description</th><th>Example (NLD iOS)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Country</strong></td><td>ISO code</td><td>NLD</td></tr>
+      <tr><td><strong>Strategic Profile</strong></td><td>1-3 word label</td><td>"Elite Quality Player"</td></tr>
+      <tr><td><strong>Key Model Strength</strong></td><td>Target unattributed signal summary</td><td>"NLD iOS shows strong I2P (3.21%), high ARPPU ($30.31), and solid unattributed scale (13,426)."</td></tr>
+      <tr><td><strong>Market Intelligence</strong></td><td>Benchmark rank + score</td><td>"Benchmark rank #1 with a 0.642 score 🏆."</td></tr>
+      <tr><td><strong>Tactical Tip</strong></td><td>Publisher + creative format actionable guidance</td><td>"Lean into puzzle/tabletop placements (Block Blast!, Vita Mahjong) and expand image-heavy units (ib, ni, nl)..."</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:8px; color:var(--moloco-mid);">Also writes: <strong>Alternates (near-tie)</strong> — countries that nearly made top 3, with their strategic profile label.</p>
+
+  <h3 style="margin-top:24px;">Output 2 — 1-Pager HTML Interactive Doc (Google Drive)</h3>
+  <p style="color:var(--moloco-mid); margin-bottom:10px;">
+    An interactive HTML document is generated from the <code>one_pager</code> field in the JSON above and uploaded to the shared Google Drive folder as a <code>.html</code> file. It serves as a client-ready visual summary for AMs — richer than a static slide and shareable via Drive link in the final Slack notification.
+  </p>
+
+  <div class="card blue">
+    <strong>Generation approach — Claude-native:</strong> Claude already has the full JSON in context and generates the HTML directly — no external API call, no Slides REST complexity. Claude writes polished, styled HTML from the <code>one_pager</code> fields, then the skill uploads the file to the shared Drive folder via the <strong>Google Drive API</strong> (<code>files.create</code> with <code>mimeType: text/html</code>). Shareable link is extracted from the upload response and sent in Slack.
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--moloco-green); background:#f0fdf4;">
+    <strong style="color:var(--moloco-green);">Shared Drive folder (v1 target):</strong>
+    <code>16wHOr7SDh5_ez_Denqw73opbdQ86loYA</code> — existing shared folder used for geo-recommendation outputs. File naming convention: <code>{bundle_id}_{date}_geo_rec.html</code>
+  </div>
+
+  <h4 style="margin-top:14px; margin-bottom:6px; color:var(--moloco-dark);">HTML doc structure</h4>
+  <ul style="padding-left:20px; color:var(--moloco-mid); line-height:2;">
+    <li><strong>Header:</strong> Bundle identifier, date, use case label</li>
+    <li><strong>Per OS tab/section:</strong> Top 3 countries — Country | Strategic Profile | Key Model Strength (I2P, ARPPU, unattributed scale) | Market Intelligence (BM rank + score) | Tactical Tip</li>
+    <li><strong>Signal detail panel:</strong> Full top-10 unattributed country table with color-coded I2P and ARPPU bars</li>
+    <li><strong>Frequency chart:</strong> 10-run stability — how often each country appeared across runs</li>
+    <li><strong>Alternates:</strong> Near-tie countries with profile labels</li>
+    <li><strong>Footer:</strong> Analysis window, BM bundle list, methodology note</li>
+  </ul>
+
+  <div class="card" style="border-left: 4px solid var(--moloco-purple); background: #f5f3ff;">
+    <strong style="color:var(--moloco-purple);">Scope note — HVP Acquisition only (v1)</strong>
+    <p style="margin-top:8px; color:var(--moloco-mid);">
+      The current combining and scoring logic is designed specifically for the <strong>HVP acquisition</strong> use case (DSP gaming/consumer apps optimizing for payers). For other use cases, the signal set and weighting logic will differ. Example:
+    </p>
+    <ul style="padding-left:20px; margin-top:8px; color:var(--moloco-mid); line-height:2;">
+      <li><strong>IAA (In-App Advertising):</strong> Only unattributed data is used — no benchmark ROAS scoring (IAA apps typically do not have payer events to anchor BM analysis). Additional signals to include:
+        <ul style="padding-left:20px;">
+          <li><strong>SDK SOV</strong> — the target bundle's share of voice <em>as a publisher</em> on Moloco supply, broken down by OS and geo. A high SOV market indicates strong existing inventory presence and lower incremental acquisition risk.</li>
+          <li><strong>Total Moloco supply spend</strong> per OS × geo — indicates supply depth and competition in each market.</li>
+          <li>I2P and ARPPU remain relevant but serve as engagement proxies rather than monetization signals.</li>
+        </ul>
+      </li>
+    </ul>
+    <p style="margin-top:8px; color:var(--moloco-mid);">Future skill versions should parameterize use case type at the start of the conversation and branch synthesis logic accordingly.</p>
+  </div>
+
+  <!-- 8. Output -->
+  <h2 id="output">8. Output Format</h2>
+
+  <h3>Google Sheet (copy of template)</h3>
+  <p>Template: <code>1hLplTiN2lWwx5FCaIgQxpnn5QpD8kcdFJquc49eXxqE</code>. The skill copies the template and populates all tabs.</p>
+
+  <div class="sheet-tabs">
+    <span class="tab input">Target_input</span>
+    <span class="tab input">BM_input</span>
+    <span class="tab data">Target_all</span>
+    <span class="tab data">Target_output</span>
+    <span class="tab data">BM_output</span>
+    <span class="tab data">BMTitlesIndex</span>
+    <span class="tab data">[per-title tabs]</span>
+    <span class="tab output">Final_Recommendation</span>
+    <span class="tab output">OnePager_JSON</span>
+    <span class="tab output">OnePager_TopPublishers</span>
+    <span class="tab output">OnePager_CreativeMix</span>
+    <span class="tab meta">Status</span>
+  </div>
+
+  <p>Legend: <span class="tab input">input params</span> <span class="tab data">intermediate data</span> <span class="tab output">final outputs</span> <span class="tab meta">process log</span></p>
+
+  <h3>Status tab (progress log)</h3>
+  <p>Written incrementally during execution: <code>timestamp | stage | message</code></p>
+  <pre><code>2026-04-09 23:10:21 | Target Analysis        | Target Analysis started
+2026-04-09 23:10:23 | [Target Analysis] 1/2  | Querying BigQuery & writing results…
+2026-04-09 23:10:24 | [Target Analysis] BQ   | Submitting BigQuery job (attempt 1/3)…</code></pre>
+
+  <h3>Slack notifications (3 stages)</h3>
+  <div class="slack-preview">
+    <div class="slack-header"># [channel or DM to user_email]</div>
+    <div class="slack-msg">
+      <div class="slack-bot">geo_recommendation_app <span>APP</span></div>
+      <div class="slack-text">
+        ✅ Target Bundle Analysis is Done! You can find the result in the 'Target_output' sheet.<br>
+        📊 Spreadsheet: [link]<br>
+        ⚠️ Final recommendations have not been made yet. You'll receive a notification once the benchmark analysis and final recommendations are ready.
+      </div>
+    </div>
+    <div class="slack-msg">
+      <div class="slack-bot">geo_recommendation_app <span>APP</span></div>
+      <div class="slack-text">
+        ✅ BM Bundle Analysis is Done! You can find the result in the 'BM_output' sheet.<br>
+        ⚠️ Final Recommendations have not been made yet. You'll receive a notification once ready.
+      </div>
+    </div>
+    <div class="slack-msg">
+      <div class="slack-bot">geo_recommendation_app <span>APP</span></div>
+      <div class="slack-text">
+        ✅ BM Bundle Analysis is Done.<br>
+        🏁 Final Recommendations are now ready!<br>
+        📊 Spreadsheet: [link] — see 'Final_Recommendations' sheet.<br>
+        🌐 1-pager: [Drive HTML link]<br>
+        <em>Automated with gds-core:geo-recommendation skill</em>
+      </div>
+    </div>
+  </div>
+
+  <h3>HTML 1-pager (replacing Google Slides)</h3>
+  <p>Claude generates a self-contained interactive HTML file (Chart.js inlined, no CDN). File naming: <code>{bundle_id}_{YYYYMMDD}_geo_rec.html</code>. Uploaded to the shared geo-recommendation Drive folder; link sent in final Slack notification.</p>
+  <div class="card" style="border-left:4px solid var(--moloco-green); background:#f0fdf4;">
+    <strong style="color:var(--moloco-green);">Why HTML over Slides:</strong> Claude generates HTML natively — no Slides REST API, no cell-by-cell positioning. Charts from the original Apps Script (Google Sheets charts) are replicated inline using Chart.js. Google Sheet remains the archival source of truth; the HTML doc is the richer, shareable artifact.
+  </div>
+
+  <h4 style="margin-top:14px; margin-bottom:6px;">HTML doc sections &amp; charts</h4>
+  <table>
+    <thead><tr><th>Section</th><th>Content</th><th>Chart type</th><th>Source data</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Header</strong></td>
+        <td>Bundle, advertiser name, date range, use case label</td>
+        <td>—</td>
+        <td>Input params + resolve_moloco_entity</td>
+      </tr>
+      <tr>
+        <td><strong>Per OS tab — Top 3 table</strong></td>
+        <td>Country | Strategic Profile | Key Model Strength | Market Intelligence | Tactical Tip</td>
+        <td>—</td>
+        <td>Final_Recommendation / synthesis JSON</td>
+      </tr>
+      <tr>
+        <td><strong>T-1 — Unattributed Installs</strong></td>
+        <td>Top N countries per OS ranked by install volume</td>
+        <td>Horizontal bar (Chart.js)</td>
+        <td>Target_output: <code>unattributed_installs</code></td>
+      </tr>
+      <tr>
+        <td><strong>T-2 — I2P vs ARPPU</strong></td>
+        <td>Payer density vs monetisation quality scatter per OS</td>
+        <td>Bubble chart — x: I2P(%), y: ARPPU, r: ∛(unattributed_installs)</td>
+        <td>Target_output: <code>i2p_percentage</code>, <code>arppu</code>, <code>unattributed_installs</code></td>
+      </tr>
+      <tr>
+        <td><strong>Signal detail panel</strong></td>
+        <td>Full top-N table with color-coded metric columns</td>
+        <td>CSS gradient bars (green: I2P, blue: ARPPU)</td>
+        <td>data_a_signals from synthesis JSON</td>
+      </tr>
+      <tr>
+        <td><strong>B-1 — Spend vs D28 ROAS</strong> (per BM title × OS)</td>
+        <td>Benchmark competitive landscape — market depth vs efficiency</td>
+        <td>Bubble chart — x: spend, y: d28_roas, r: fixed</td>
+        <td>BM_output detail rows</td>
+      </tr>
+      <tr>
+        <td><strong>B-2 — I2P vs ARPPU (BM)</strong> (per BM title × OS)</td>
+        <td>Cross-title payer quality comparison</td>
+        <td>Bubble chart — x: i2p_percentage, y: arppu, r: fixed</td>
+        <td>BM_output detail rows</td>
+      </tr>
+      <tr>
+        <td><strong>Frequency chart</strong></td>
+        <td>10-run stability — how often each country appeared</td>
+        <td>Horizontal bar — x: count (0–10), y: country; green=top3, grey=others</td>
+        <td>frequency field from synthesis JSON</td>
+      </tr>
+      <tr>
+        <td><strong>Alternates</strong></td>
+        <td>Near-tie countries (appeared in 3–4 of 10 runs)</td>
+        <td>—</td>
+        <td>frequency field</td>
+      </tr>
+      <tr>
+        <td><strong>Footer</strong></td>
+        <td>Methodology, BM titles used, weights, data sources, user_id note</td>
+        <td>—</td>
+        <td>one_pager.footnote</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:8px; color:var(--moloco-mid); font-size:12px;">B-1 and B-2 charts are grouped by BM title (section header) then by OS. Only shown when BM data is available. Charts T-1, T-2, and Frequency are one chart per OS present in target data.</p>
+
+  <!-- 9. Extensibility -->
+  <h2 id="extensibility">9. Use Case Extensibility</h2>
+  <p>The skill uses a <strong>plug-in config</strong> approach — each use case is defined as a combination of signal building blocks (data source types + specific metrics) and scoring weights, like assembling lego blocks. Adding a new use case means writing a new config, not changing skill code.</p>
+
+  <h3>Signal Building Blocks</h3>
+  <p style="color:var(--moloco-mid); margin-bottom:10px;">Two data source types are available. Each use case selects which sources and which metrics to activate. Columns confirmed from Apps Script source code.</p>
+  <table>
+    <thead><tr><th>Source type</th><th>Raw BQ output columns</th><th>Scoring-eligible metrics</th><th>BQ tables</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Target Data Pull</strong><br><span style="font-size:11px;color:var(--moloco-mid);">(unattributed demand signal)</span></td>
+        <td style="font-size:12px;">
+          <code>bundle</code>, <code>os</code>, <code>country</code><br>
+          <code>attributed_installs</code>, <code>unattributed_installs</code><br>
+          <code>moloco_share_of_installs</code> (attributed ÷ total)<br>
+          <code>install_users</code>, <code>purchase_users</code><br>
+          <code>i2p_percentage</code> (purchase ÷ install × 100)<br>
+          <code>avg_purchase</code>, <code>arppu</code>
+        </td>
+        <td style="font-size:12px;">
+          <code>unattributed_installs</code> — shortlist signal<br>
+          <code>i2p_percentage</code> — payer density<br>
+          <code>arppu</code> — monetisation quality<br>
+          <code>sdk_sov</code>* — publisher SOV (IAA use case)<br>
+          <em>*Not in current script; requires supply-side join</em>
+        </td>
+        <td><code>prod_stream_view.pb</code><br><code>standard_digest.product_digest</code></td>
+      </tr>
+      <tr>
+        <td><strong>Benchmark Data Pull</strong><br><span style="font-size:11px;color:var(--moloco-mid);">(attributed performance signal)</span></td>
+        <td style="font-size:12px;">
+          <code>unified_app_id</code>, <code>unified_app_name</code>, <code>app_name</code><br>
+          <code>bundle</code>, <code>country</code>, <code>os</code><br>
+          <code>install_users</code>, <code>purchase_users</code><br>
+          <code>i2p_percentage</code>, <code>avg_purchase</code>, <code>arppu</code><br>
+          <code>spend</code><br>
+          <code>d1_roas</code>, <code>d7_roas</code>, <code>d14_roas</code>, <code>d21_roas</code>, <code>d28_roas</code>
+        </td>
+        <td style="font-size:12px;">
+          <code>spend</code> — market depth proxy<br>
+          <code>d28_roas</code> — monetisation efficiency<br>
+          <code>i2p_percentage</code> — cross-title payer rate<br>
+          <code>arppu</code> — cross-title spend quality<br>
+          <em>Scoring: min-max normalised per OS, then weighted sum → BM_output</em>
+        </td>
+        <td><code>prod_stream_view.cv</code><br><code>fact_dsp_core</code><br><code>dim1_app</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="card orange" style="margin-top:10px;">
+    <strong>SDK SOV (IAA use case — not in v1):</strong> SDK SOV = target bundle's spend as a <em>publisher</em> on Moloco supply ÷ total Moloco spend on the same OS × geo × 100. The denominator is total DSP spend on that OS–geo combination (all advertisers), making it a true share-of-voice metric. Requires a supply-side join not present in the current Apps Script.
+  </div>
+
+  <h3 style="margin-top:20px;">Use Case Config Structure</h3>
+  <p style="color:var(--moloco-mid); margin-bottom:10px;">Each use case is a config object specifying which blocks to use, which metrics to score on, and how to weight them. SKILL.md holds the registry; SQL scripts in <code>scripts/</code> are swapped per data source combination.</p>
+  <pre><code># Example config structure (pseudo-code)
+use_case: hvp-acquisition
+data_sources:
+  target: [unattributed_installs, i2p_percentage, arppu]
+  benchmark: [spend, d28_roas]
+shortlist_by: unattributed_installs   # top-N countries for shortlist
+scoring_weights:
+  spend:     0.4
+  D28_ROAS:  0.3
+  sI2P:      0.2
+  ARPPU:     0.1
+synthesis_prompt_context: "HVP acquisition — weight payer density signals"</code></pre>
+
+  <div class="card orange">
+    <strong>Note on weight variants:</strong> Simple weight adjustments (e.g., upweighting ROAS vs spend for a specific client) are handled by editing the config, not by creating a new named use case. A new use case is warranted only when the <em>data source type</em> or <em>metric set</em> differs — not just the weights.
+  </div>
+
+  <h3 style="margin-top:20px;">Planned Use Cases</h3>
+  <table>
+    <thead><tr><th>Use case</th><th>Status</th><th>Data sources</th><th>Active metrics</th><th>Key difference from hvp-acquisition</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>hvp-acquisition</strong></td>
+        <td><span class="status done">v1</span></td>
+        <td>Target + Benchmark</td>
+        <td>unattributed_installs, sI2P, ARPPU, spend, D28_ROAS</td>
+        <td>—  baseline</td>
+      </tr>
+      <tr>
+        <td><strong>iaa</strong><br><span style="font-size:11px;color:var(--moloco-mid);">In-App Advertising</span></td>
+        <td><span class="status todo">planned</span></td>
+        <td>Target only (no BM)</td>
+        <td>unattributed_installs, i2p_percentage, arppu, <strong>sdk_sov</strong> (target bundle publisher SOV = target spend as publisher ÷ total Moloco spend on OS × geo)</td>
+        <td>No payer ROAS anchor — IAA apps monetize via ad revenue, not purchases. SDK SOV replaces benchmark scoring as the supply-side signal. BM data pull step is skipped entirely. SDK SOV requires a supply-side join (not in current script).</td>
+      </tr>
+      <tr>
+        <td><strong>retention-geo</strong></td>
+        <td><span class="status todo">planned</span></td>
+        <td>Target (attributed) + Benchmark</td>
+        <td>attributed_installs (active base), D7_ROAS, D1_retention, sI2P</td>
+        <td>Shortlists by existing attributed user base rather than unattributed installs — finds geos where the app already has quality users, not new market expansion.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:20px;">Adding a new use case</h3>
+  <ol style="padding-left:20px; color:var(--moloco-mid); line-height:2;">
+    <li>Define the config block in SKILL.md (data_sources, metrics, weights, shortlist_by, prompt context)</li>
+    <li>Add or reuse a SQL script in <code>scripts/</code> for any new data source combination</li>
+    <li>Update the input collection step to surface the new use case as a selectable option</li>
+    <li>Add a row to the use case table above and document the key difference</li>
+  </ol>
+
+  <!-- Gotchas -->
+  <h2 id="gotchas">11. Gotchas &amp; Error Handling</h2>
+
+  <h3>Known failure patterns</h3>
+  <table>
+    <thead><tr><th>Failure</th><th>How to handle</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>BQ target query returns 0 rows</strong></td>
+        <td>Do NOT produce a partial recommendation. State that no unattributed install signal was found for the bundle in the given date range. Ask the user to verify the bundle ID, expand the date range, or check if the app is live on Moloco.</td>
+      </tr>
+      <tr>
+        <td><strong>BQ BM query returns 0 rows</strong></td>
+        <td>Skip BM step entirely. Proceed to synthesis using Target data only. Note absence of benchmark signal in recommendation output and HTML 1-pager.</td>
+      </tr>
+      <tr>
+        <td><strong>No purchase events with revenue &gt; 0 found in pb</strong></td>
+        <td>Flag to user — app may be IAA or event pipeline not set up. Offer to proceed with install/I2P only (no ARPPU). Do not default to a hardcoded event name.</td>
+      </tr>
+      <tr>
+        <td><strong>SensorTower returns no genre match for the bundle</strong></td>
+        <td>Ask user to provide genre manually, or fall back to Glean search. Do not auto-select benchmark bundles without genre confirmation.</td>
+      </tr>
+      <tr>
+        <td><strong>BM bundle auto-suggest returns &lt; 3 titles</strong></td>
+        <td>Inform the user of the low count. Lower the spend threshold (default $50K D90) and re-run, or allow manual bundle entry.</td>
+      </tr>
+      <tr>
+        <td><strong>Slack notification fails</strong></td>
+        <td>Log the failure but do not block the pipeline. Complete remaining steps and surface the Sheets + HTML links directly in the Claude conversation.</td>
+      </tr>
+      <tr>
+        <td><strong>Drive HTML upload fails</strong></td>
+        <td>Write the HTML to a local file and offer to retry. Do not block Slack notification — post the Sheets link instead, note HTML unavailable.</td>
+      </tr>
+      <tr>
+        <td><strong>All 10 countries are in exclude_countries</strong></td>
+        <td>Surface a warning before synthesis. Ask user to reduce the exclusion list or expand the shortlist beyond top 10.</td>
+      </tr>
+      <tr>
+        <td><strong>bundle ID resolves to multiple tracking entities</strong></td>
+        <td>Use <code>resolve_moloco_entity</code> to disambiguate. If still ambiguous, ask user to confirm which advertiser/entity to use.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:16px;">Do not fabricate</h3>
+  <ul style="padding-left:20px; color:var(--moloco-mid); line-height:2;">
+    <li>Never approximate numbers from Data A in the synthesis prompt — copy verbatim.</li>
+    <li>Never claim a geo is "recommended" if it appeared in fewer than 5 of 10 synthesis runs — surface it as an Alternate only.</li>
+    <li>Never infer genre from app name — always verify via SensorTower or user input.</li>
+    <li>Never hardcode purchase event names — always discover from pb data.</li>
+  </ul>
+
+  <!-- 10. Open Questions -->
+  <h2 id="open">12. Open Questions &amp; Decisions</h2>
+
+
+  <div class="card">
+    <div class="question">
+      <div class="q-num">1</div>
+      <div class="q-body">
+        <h4>Exact BQ tables for target and benchmark data pulls</h4>
+        <p><strong>✅ Resolved</strong> — Apps Script cloned via clasp and fully read. Target uses pb events table; benchmark uses cv events table joined with fact_dsp_core for spend and dim1_app for metadata. Glean's inference was incorrect. <span class="status done">resolved</span></p>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-num">2</div>
+      <div class="q-body">
+        <h4>D28 vs D30 ROAS column name</h4>
+        <p><strong>✅ Resolved:</strong> Confirmed D28. BM query computes revenue within 28 days of install directly from cv events — not from a pre-aggregated Athena cohort column. <span class="status done">resolved</span></p>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-num">3</div>
+      <div class="q-body">
+        <h4>Benchmarking bundle country coverage filter</h4>
+        <p><strong>✅ Decided:</strong> Default ≥ 3 active countries (spend &gt; 0 in D90). User-adjustable at input time. <span class="status done">resolved</span></p>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-num">4</div>
+      <div class="q-body">
+        <h4>Output: sheet per client vs master sheet with tabs</h4>
+        <p><strong>✅ Decided:</strong> New sheet per run (copied from template) — same as current behavior. For the execution log/registry, the existing n8n <strong>Executions Log</strong> Google Sheet is reused. The skill appends one row per run to this sheet after each execution completes (success or failure), matching the logging behavior of the n8n logging node. Sheet tab: <code>execution_log</code>. Schema confirmed by reading the live sheet — 5 columns:</p>
+        <table style="margin-top:8px;">
+          <thead><tr><th>Col</th><th>Field</th><th>Format</th></tr></thead>
+          <tbody>
+            <tr><td>A</td><td><code>date</code></td><td>ISO 8601 date, KST midnight — e.g. <code>2025-11-22T00:00:00.000+09:00</code></td></tr>
+            <tr><td>B</td><td><code>timestamp</code></td><td>ISO 8601 full datetime, KST — e.g. <code>2025-11-22T22:19:18.437+09:00</code></td></tr>
+            <tr><td>C</td><td><code>user</code></td><td>Requester Moloco email</td></tr>
+            <tr><td>D</td><td><code>target bundle</code></td><td>Single Android bundle, single iOS numeric ID, or comma-separated mix — e.g. <code>com.bundle.id,1234567890</code></td></tr>
+            <tr><td>E</td><td><code>result sheet</code></td><td>Full Google Sheets URL of the output report for this run</td></tr>
+          </tbody>
+        </table>
+        <span class="status done" style="display:inline-block;margin-top:8px;">resolved</span>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-num">5</div>
+      <div class="q-body">
+        <h4>Slack bot identity</h4>
+        <p><strong>✅ Decided:</strong> Use the existing <code>geo_recommendation_test APP</code> Slack bot. Skill will post via the bot's webhook URL or token (stored as env var <code>GEO_REC_SLACK_BOT_TOKEN</code>). Requires confirming the bot token/webhook URL location. <span class="status done">resolved</span></p>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-num">6</div>
+      <div class="q-body">
+        <h4>Scoring weight calibration</h4>
+        <p>Current weights (Spend 0.4 / ROAS 0.3 / I2P 0.2 / ARPPU 0.1) are intuition-based. Consider a future v2 that data-derives weights from historical geo performance outcomes. Out of scope for v1. <span class="status todo">future</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Next Steps -->
+  <!-- Reference Folder -->
+  <h2 id="reference">13. Skill File Structure &amp; Reference Folder</h2>
+  <p style="color:var(--moloco-mid); margin-bottom:12px;">The skill folder follows the standard <code>gds-core</code> convention. Reference files contain stable, rarely-changing knowledge that would bloat SKILL.md if inlined — loaded on demand, not pre-loaded every conversation.</p>
+
+  <h3>Folder layout</h3>
+  <pre><code>gds-core/skills/geo-recommendation/
+├── SKILL.md                        ← skill definition (steps, inputs, prerequisites)
+├── scripts/
+│   ├── purchase_event_discovery.sql   ← Step 0: find revenue events from pb
+│   ├── target_query.sql               ← Step 2: full target data pull (pb)
+│   ├── bm_bundle_suggest.sql          ← Step 1: D90 spend filter for BM candidates
+│   └── bm_query.sql                   ← Step 3: full benchmark data pull (cv + fact_dsp_core)
+└── reference/
+    ├── scoring_logic.md               ← scoring formula, weight defaults, BM_output structure
+    ├── output_schema.md               ← JSON synthesis schema + Final_Recommendation tab layout
+    ├── html_template.md               ← HTML 1-pager section spec + field mappings
+    └── gotchas.md                     ← full failure pattern list + do-not-fabricate rules</code></pre>
+
+  <h3 style="margin-top:16px;">Reference file contents</h3>
+  <table>
+    <thead><tr><th>File</th><th>Contents</th><th>Used when</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>reference/scoring_logic.md</code></td>
+        <td>Min-max normalisation formula per OS group; default weights (Spend 0.4 / D28 ROAS 0.3 / I2P 0.2 / ARPPU 0.1); how BM_output detail rows and country priority summary are structured; how Avg Score is computed across BM titles</td>
+        <td>Step 3 scoring; any question about how scores are derived</td>
+      </tr>
+      <tr>
+        <td><code>reference/output_schema.md</code></td>
+        <td>Full JSON synthesis schema (all fields, types, constraints); Final_Recommendation tab column spec (Country, Strategic Profile, Key Model Strength, Market Intelligence, Tactical Tip); Alternates format</td>
+        <td>Step 4 synthesis; writing to Final_Recommendation tab</td>
+      </tr>
+      <tr>
+        <td><code>reference/html_template.md</code></td>
+        <td>HTML 1-pager section-by-section spec: header block, per-OS top-3 table, signal detail panel (I2P/ARPPU bars), 10-run frequency chart, alternates, methodology footnote; field mapping from <code>one_pager</code> JSON → HTML elements; Drive upload procedure</td>
+        <td>Step 5 HTML generation and upload</td>
+      </tr>
+      <tr>
+        <td><code>reference/gotchas.md</code></td>
+        <td>Full failure pattern table (9 cases from testing); do-not-fabricate rules; known data quirks (tracking_bundle vs app_store_bundle, IFV-first user_id, revenue filter bounds, D28 from cv events not Athena cohort)</td>
+        <td>Any time a query returns unexpected results or synthesis behaviour is unclear</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card blue" style="margin-top:12px;">
+    <strong>SQL scripts vs reference files:</strong> SQL scripts in <code>scripts/</code> are executed directly by BQ Agent — they are passed as literal SQL, not loaded into Claude's context. Reference files in <code>reference/</code> are read by Claude on demand when the relevant step is reached or when the user asks a question that requires that knowledge. This keeps context lean for simple runs.
+  </div>
+
+  <!-- Next Steps -->
+  <h2 id="nextsteps">14. Next Steps</h2>
+  <div class="steps">
+    <div class="step-item">
+      <div class="s-num">1</div>
+      <div class="s-body">
+        <h4>Verify Apps Script SQL (unblock Q1 + Q2)</h4>
+        <p>Share the Apps Script as plain text or grant read access. Confirm the exact BQ table for unattributed installs and whether ROAS uses d28 vs d30 cohort column.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="s-num">2</div>
+      <div class="s-body">
+        <h4>Validate BQ queries with BQ Agent</h4>
+        <p>Run draft target-bundle and benchmark SQL against a known example (e.g. bundle <code>6739554056</code>, 2026-03-04 to 2026-04-03) and compare output to the existing sheet to confirm schema and metric alignment.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="s-num">3</div>
+      <div class="s-body">
+        <h4>Write SKILL.md</h4>
+        <p>Draft the full SKILL.md with all phases, SQL scripts in <code>scripts/</code>, use case config, and output instructions. Based on this plan doc.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="s-num">4</div>
+      <div class="s-body">
+        <h4>End-to-end test run</h4>
+        <p>Run the skill against bundle <code>6739554056</code> (the existing Kingshot example) and compare output to the reference sheet. Validate scoring, Slack messages, and sheet structure.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="s-num">5</div>
+      <div class="s-body">
+        <h4>PR to gds-core</h4>
+        <p>Submit via <code>/plugin-general:share-skill</code> once test run passes validation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span>gds-core:geo-recommendation · Skill Design Plan v0.1</span>
+    <span>Haewon Yum · 2026-04-15 · Status: <span class="status inprog">In Progress</span></span>
+  </div>
+
+</div><!-- /page -->
+</div><!-- /layout -->
+
+<script>
+  // Highlight active sidebar link based on scroll position
+  const sections = document.querySelectorAll('h2[id]');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.sidebar nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

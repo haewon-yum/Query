@@ -1,0 +1,303 @@
+hour_utc,campaign_id,reason_group,req_vol
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,bid_submitted,2.448E8
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,2.1989E8
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,category_blocked,5.53E7
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,targeting filter,2300000.0
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,1800000.0
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,no available deal,1500000.0
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,campaign_cap,300000.0
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,no_data,202000.0
+2026-03-26 06:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,100000.0
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,bid_submitted,9.096E8
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,category_blocked,1.159E8
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,targeting filter,6.51E7
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,no compatible creatives,1.56E7
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,campaign_cap,3700000.0
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,inv format freq cap,2800000.0
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,no_data,2100000.0
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,600000.0
+2026-03-26 06:00:00,VveaqT1OAcxlbXSv,other,300000.0
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,bid_submitted,4.303E8
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,1.15597E8
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,category_blocked,2.62E7
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.94E7
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,3300000.0
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,targeting filter,2900000.0
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,1800000.0
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,no available deal,1700000.0
+2026-03-26 12:00:00,BhTo5PHbtcsuQwkh,other,69.0
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,bid_submitted,2.755E9
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,category_blocked,2.365E8
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,campaign_cap,1.121E8
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,targeting filter,9.12E7
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,inv format freq cap,5.15E7
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.65E7
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,7900000.0
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,no available deal,200000.0
+2026-03-26 12:00:00,VveaqT1OAcxlbXSv,other,69.0
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,bid_submitted,1.469E8
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,7.2044E7
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,category_blocked,1.59E7
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,campaign_cap,8100000.0
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,5700000.0
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,targeting filter,1400000.0
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,700000.0
+2026-03-26 18:00:00,BhTo5PHbtcsuQwkh,no available deal,200000.0
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,bid_submitted,5.3408E9
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,category_blocked,3.241E8
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,2.967E8
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,campaign_cap,1.435E8
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,targeting filter,9.97E7
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,inv format freq cap,6.58E7
+2026-03-26 18:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.97E7
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,bid_submitted,2.986E8
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,2.11523E8
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,category_blocked,5.5E7
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,1.66E7
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.38E7
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,7900000.0
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,2500000.0
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,targeting filter,2300000.0
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,no available deal,1200000.0
+2026-03-27 00:00:00,BhTo5PHbtcsuQwkh,other,4.0
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,bid_submitted,5.5011E9
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,category_blocked,2.802E8
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,campaign_cap,2.481E8
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,2.184E8
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,loss-based throttler,1.984E8
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,targeting filter,8.88E7
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,inv format freq cap,5.3E7
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.94E7
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,other,200000.0
+2026-03-27 00:00:00,VveaqT1OAcxlbXSv,no available deal,100000.0
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,bid_submitted,4.009E8
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,2.23143E8
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,category_blocked,6.07E7
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,4.22E7
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.94E7
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,3200000.0
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,targeting filter,2600000.0
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,no available deal,1400000.0
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,1100000.0
+2026-03-27 06:00:00,BhTo5PHbtcsuQwkh,other,20.0
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,bid_submitted,1.759E9
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,category_blocked,1.559E8
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,loss-based throttler,1.273E8
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,targeting filter,7.01E7
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,campaign_cap,6.81E7
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1.74E7
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,no compatible creatives,1.44E7
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,8600000.0
+2026-03-27 06:00:00,VveaqT1OAcxlbXSv,other,20.0
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,bid_submitted,2.883E8
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,budget_overspent,1.73009E8
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,9.5267E7
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,4.07E7
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,category_blocked,2.22E7
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.13E7
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,targeting filter,2100000.0
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,1300000.0
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,no available deal,1200000.0
+2026-03-27 12:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,600000.0
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,bid_submitted,3.754E9
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,budget_overspent,4.001E8
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,loss-based throttler,3.204E8
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,category_blocked,2.775E8
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,campaign_cap,1.67E8
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,targeting filter,8.26E7
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,inv format freq cap,4.45E7
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.73E7
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,2.07E7
+2026-03-27 12:00:00,VveaqT1OAcxlbXSv,no available deal,100000.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,budget_overspent,1.6154E8
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,bid_submitted,4.66E7
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,1.8009E7
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,8700048.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,campaign_cap,8200000.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,category_blocked,3400000.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,900000.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,no available deal,900000.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,targeting filter,700000.0
+2026-03-27 18:00:00,BhTo5PHbtcsuQwkh,other,13.0
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,budget_overspent,7.7788E9
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,bid_submitted,1.9919E9
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,loss-based throttler,4.599E8
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,category_blocked,1.165E8
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,campaign_cap,9.36E7
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,targeting filter,3.58E7
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,inv format freq cap,2.44E7
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,1.39E7
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,no compatible creatives,1.26E7
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,other,1000013.0
+2026-03-27 18:00:00,VveaqT1OAcxlbXSv,no available deal,200000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,budget_overspent,7.26598E8
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,3.64E7
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,6173000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,campaign_cap,3400000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,bid_submitted,1900000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,no available deal,1200000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,category_blocked,1100000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,targeting filter,300000.0
+2026-03-28 00:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,100000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,budget_overspent,1.29655E10
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,loss-based throttler,4.598E8
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,campaign_cap,6300000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,bid_submitted,5300000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,category_blocked,1900000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1100000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,targeting filter,300000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,300000.0
+2026-03-28 00:00:00,VveaqT1OAcxlbXSv,no compatible creatives,200000.0
+2026-03-28 06:00:00,BhTo5PHbtcsuQwkh,budget_overspent,8.45435E8
+2026-03-28 06:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,4.97E7
+2026-03-28 06:00:00,BhTo5PHbtcsuQwkh,no available deal,1800000.0
+2026-03-28 06:00:00,VveaqT1OAcxlbXSv,budget_overspent,4.3281E9
+2026-03-28 06:00:00,VveaqT1OAcxlbXSv,loss-based throttler,1.079E8
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,budget_overspent,4.32551E8
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,campaign_cap,5.54E7
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,4.4E7
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,4.1309E7
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,bid_submitted,2.6E7
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,category_blocked,7400000.0
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,2200000.0
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,targeting filter,1800000.0
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,no available deal,1200000.0
+2026-03-28 12:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,300000.0
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,budget_overspent,4.7001E9
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,bid_submitted,5.566E8
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,loss-based throttler,3.448E8
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,campaign_cap,2.465E8
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,category_blocked,1.541E8
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,inv format freq cap,5.63E7
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,targeting filter,4.75E7
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,no compatible creatives,1.84E7
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,1.77E7
+2026-03-28 12:00:00,VveaqT1OAcxlbXSv,no available deal,300000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,bid_submitted,8.27E7
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,campaign_cap,5.02E7
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,4.1416E7
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,9800000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,category_blocked,7000000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,4100000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,budget_overspent,3806000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,targeting filter,2200000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,800000.0
+2026-03-28 18:00:00,BhTo5PHbtcsuQwkh,no available deal,100000.0
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,bid_submitted,2.3765E9
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,campaign_cap,6.31E8
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,loss-based throttler,4.653E8
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,category_blocked,2.82E8
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1.641E8
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,targeting filter,9.45E7
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,4.4E7
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,no compatible creatives,3.02E7
+2026-03-28 18:00:00,VveaqT1OAcxlbXSv,no available deal,200000.0
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,bid_submitted,2.783E8
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,1.71975E8
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.14E8
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,category_blocked,3.88E7
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,3.58E7
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,8400000.0
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,targeting filter,3900000.0
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,no available deal,900000.0
+2026-03-29 00:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,700000.0
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,bid_submitted,3.4721E9
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,campaign_cap,4.936E8
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,loss-based throttler,4.805E8
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,category_blocked,2.28E8
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1.048E8
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,targeting filter,9.73E7
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,3.49E7
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.98E7
+2026-03-29 00:00:00,VveaqT1OAcxlbXSv,no available deal,100000.0
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,bid_submitted,4.317E8
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,1.83731E8
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.394E8
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,5.23E7
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,category_blocked,4.15E7
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,7800000.0
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,targeting filter,3600000.0
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,no available deal,1300000.0
+2026-03-29 06:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,800000.0
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,bid_submitted,1.1351E9
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,campaign_cap,1.365E8
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,loss-based throttler,1.168E8
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,category_blocked,1.129E8
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,targeting filter,6.62E7
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,inv format freq cap,3.56E7
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,no compatible creatives,1.24E7
+2026-03-29 06:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,9400000.0
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,bid_submitted,2.925E8
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,budget_overspent,1.8529E8
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,campaign_cap,9.22E7
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,8.3855E7
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,3.88E7
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,category_blocked,1.75E7
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,4900000.0
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,targeting filter,4300000.0
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,no available deal,2200000.0
+2026-03-29 12:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,800000.0
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,bid_submitted,2.4343E9
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,loss-based throttler,3.717E8
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,category_blocked,3.283E8
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,campaign_cap,2.566E8
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1.141E8
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,targeting filter,7.12E7
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.93E7
+2026-03-29 12:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,2.16E7
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,bid_submitted,1.714E8
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,7.3318E7
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,campaign_cap,5.63E7
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,category_blocked,1.48E7
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,1.07E7
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,8100000.0
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,targeting filter,1500000.0
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,800000.0
+2026-03-29 18:00:00,BhTo5PHbtcsuQwkh,no available deal,300000.0
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,bid_submitted,3.4673E9
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,loss-based throttler,4.845E8
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,campaign_cap,4.605E8
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,category_blocked,3.046E8
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1.269E8
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,targeting filter,7.78E7
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,3.66E7
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,no compatible creatives,3.12E7
+2026-03-29 18:00:00,VveaqT1OAcxlbXSv,no available deal,100000.0
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,bid_submitted,3.17700001E8
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,2.06305E8
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,campaign_cap,9.54E7
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,category_blocked,4.94E7
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,3.04E7
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,9700000.0
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,targeting filter,5200000.0
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,1000000.0
+2026-03-30 00:00:00,BhTo5PHbtcsuQwkh,no available deal,900003.0
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,bid_submitted,4.1452E9
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,campaign_cap,5.686E8
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,loss-based throttler,4.59E8
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,category_blocked,2.336E8
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,inv format freq cap,1.324E8
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,targeting filter,7.97E7
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,3.13E7
+2026-03-30 00:00:00,VveaqT1OAcxlbXSv,no compatible creatives,2.78E7
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,bid_submitted,3.859E8
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,no compatible creatives,2.0549E8
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,campaign_cap,1.156E8
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,category_blocked,5.32E7
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,loss-based throttler,3.94E7
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,inv format freq cap,9100000.0
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,targeting filter,4200000.0
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,no available deal,1300000.0
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,blocked advertiser/app,1000000.0
+2026-03-30 06:00:00,BhTo5PHbtcsuQwkh,other,31.0
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,budget_overspent,1.5218E9
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,bid_submitted,1.1327E9
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,loss-based throttler,1.003E8
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,campaign_cap,9.18E7
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,category_blocked,4.0E7
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,targeting filter,3.49E7
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,inv format freq cap,2.47E7
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,no compatible creatives,5500000.0
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,blocked advertiser/app,3500000.0
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,no available deal,100000.0
+2026-03-30 06:00:00,VveaqT1OAcxlbXSv,other,31.0

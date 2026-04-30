@@ -1,0 +1,170 @@
+}
+campaign_stats {
+  campaign: "IV7TA5O07K4JNsjn"
+  product_app_bundle: "id6739246483"
+  dev_os: IOS
+  platform: "LIHUHU"
+  product_id: "sDMiZJXvhFbrcdOy"
+  advertiser: "hGlSfm9ulyvAXwYB"
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D28
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.6935470776119398
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.6935470776119398
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_purchase"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D28
+    pricing_metadata_type: TYPE_SEC_KPI
+    normalizer: 0.004902657847339017
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.004902657847339017
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D3
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.6319711095635042
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.6319711095635042
+      num_positives: 145
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_purchase"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D3
+    pricing_metadata_type: TYPE_SEC_KPI
+    normalizer: 0.0027849259179533524
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.0027849259179533524
+      num_positives: 12
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_purchase"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    pricing_metadata_type: TYPE_SEC_KPI
+    normalizer: 0.003874408120456957
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.003874408120456957
+      num_positives: 4
+    }
+    bid_eval_info {
+    }
+---
+}
+campaign_stats {
+  campaign: "SqHUbqoeXYnCj6Ow"
+  product_app_bundle: "id6739246483"
+  dev_os: IOS
+  platform: "LIHUHU"
+  product_id: "sDMiZJXvhFbrcdOy"
+  advertiser: "hGlSfm9ulyvAXwYB"
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D3
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.6319711095635042
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.6319711095635042
+      num_positives: 145
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.6623321268065337
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.6623321268065337
+      num_positives: 79
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D14
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.6790499604956349
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.6790499604956349
+      num_positives: 7
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D1
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.581570941722331
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.581570941722331
+      num_positives: 2382
+    }
+    bid_eval_info {
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D28
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.6935470776119398
+    num_examples_for_normalizer: 3551
+    normalizer_data_source: POSTBACK
+    pb_eval_info {
+      num_examples: 3551
+      mean_prediction: 0.6935470776119398
+    }
+    bid_eval_info {
+---

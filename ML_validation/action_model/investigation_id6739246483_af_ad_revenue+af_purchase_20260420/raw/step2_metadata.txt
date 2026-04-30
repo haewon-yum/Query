@@ -1,0 +1,63 @@
+}
+bundle {
+  key: "id6739246483:ios"
+  value {
+    b_product_app_bundle: "id6739246483"
+    b_dev_os: "ios"
+    b_tracking_company: "appsflyer"
+    b_advertiser: "hGlSfm9ulyvAXwYB"
+    b_product_category: "IAB9-30"
+    rtb_bundles: "id6739246483"
+    rtb_bundles: "6739246483"
+    events {
+      key: "af_ad_revenue"
+      value {
+        is_kpi: true
+        is_live_campaign_goal: true
+        action_event_type: ACTION_EVENT_KPI
+        revenue_event_type: REV_EVENT_KPI
+        b_mcp_event_type: "in_app_advertising"
+      }
+    }
+    events {
+      key: "af_purchase"
+      value {
+        is_kpi: true
+        action_event_type: ACTION_EVENT_KPI
+        revenue_event_type: REV_EVENT_KPI
+        b_mcp_event_type: "in_app_purchase"
+      }
+    }
+    revenue_bundle_type: REV_BUNDLE_REF
+    last_roas_activity: "2025-12-18"
+    b_is_hypercasual: "true"
+    b_is_gaming: "true"
+    b_genre: "hypercasual"
+    b_sub_genre: "puzzle"
+    b_has_iap: "true"
+  }
+}
+bundle {
+  key: "id6739272855:ios"
+  value {
+    b_product_app_bundle: "id6739272855"
+    b_dev_os: "ios"
+    b_tracking_company: "appsflyer"
+    b_advertiser: "lLsazRcFgq5NyWqK"
+    b_product_category: "IAB9-7"
+    rtb_bundles: "6739272855"
+    rtb_bundles: "id6739272855"
+    events {
+      key: "af_purchase"
+      value {
+        is_kpi: true
+        blocked_periods {
+          blocked_period {
+            key: "end_millis"
+            value: 1738368000000
+          }
+          blocked_period {
+            key: "start_millis"
+            value: 1734307200000
+          }
+        }

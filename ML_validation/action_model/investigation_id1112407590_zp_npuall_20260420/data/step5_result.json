@@ -1,0 +1,16 @@
+{
+  "step": 5,
+  "verdict": "OK",
+  "models": [
+    {
+      "model": "action_consol_v2_lat_cpu_cont", "timestamp": 1776660333, "deployed_utc": "2026-04-20 04:45 UTC",
+      "entries": [
+        {"kpi_event": "zp_npuall", "prediction_type": "UNIFIED_D7", "normalizer": 0.13011876467904862, "normalizer_data_source": "BIDLOG", "num_examples_for_normalizer": 64287, "pb_eval_empty": true, "bid_eval_empty": false, "pricing_metadata_type": "TYPE_ACTION_LAT"},
+        {"kpi_event": "zp_npuall", "prediction_type": "UNIFIED_D1", "normalizer": 0.054634801211629232, "normalizer_data_source": "BIDLOG", "num_examples_for_normalizer": 64287, "pb_eval_empty": true, "bid_eval_empty": false, "pricing_metadata_type": "TYPE_ACTION_LAT"},
+        {"kpi_event": "zp_npuall", "prediction_type": "UNIFIED_D3", "normalizer": 0.10030718288585534, "normalizer_data_source": "BIDLOG", "num_examples_for_normalizer": 64287, "pb_eval_empty": true, "bid_eval_empty": false, "pricing_metadata_type": "TYPE_ACTION_LAT"},
+        {"kpi_event": "zp_npuall", "prediction_type": "UNIFIED_D14", "normalizer": 0.14580005530362267, "normalizer_data_source": "BIDLOG", "num_examples_for_normalizer": 64287, "pb_eval_empty": true, "bid_eval_empty": false, "pricing_metadata_type": "TYPE_ACTION_LAT"},
+        {"kpi_event": "zp_npuall", "prediction_type": "UNIFIED_D28", "normalizer": 0.159494052631138, "normalizer_data_source": "BIDLOG", "num_examples_for_normalizer": 64287, "pb_eval_empty": true, "bid_eval_empty": false, "pricing_metadata_type": "TYPE_ACTION_LAT"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mosaic — Architecture</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --accent: #1a73e8;
+    --accent-light: #e8f0fe;
+    --green: #34a853;
+    --yellow: #fbbc05;
+    --red: #ea4335;
+    --purple: #9c27b0;
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --border: #e0e0e0;
+    --text: #202124;
+    --text-2: #5f6368;
+    --text-3: #80868b;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.12);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  .doc-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px 28px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .doc-header h1 {
+    font-size: 22px; font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+    color: var(--accent);
+  }
+  .doc-header .meta {
+    margin-top: 6px; font-size: 13px; color: var(--text-2);
+    display: flex; gap: 20px; flex-wrap: wrap;
+  }
+  .doc-header .meta span { display: flex; align-items: center; gap: 5px; }
+
+  .toc-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex; gap: 4px; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .toc-bar::-webkit-scrollbar { display: none; }
+  .toc-bar a {
+    color: var(--text-2); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    padding: 10px 14px; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .toc-bar a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .content { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ── Sections ── */
+  .section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 20px; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ── Stack badges ── */
+  .stack-item { display: flex; align-items: flex-start; gap: 12px; }
+  .stack-badge {
+    background: var(--accent-light); color: var(--accent);
+    font-size: 11px; font-weight: 700; padding: 3px 8px;
+    border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  }
+  .stack-badge.green { background: #e6f4ea; color: #137333; }
+  .stack-badge.yellow { background: #fef9e3; color: #b06000; }
+  .stack-badge.purple { background: #f3e8fd; color: #7b1fa2; }
+  .stack-badge.gray { background: #f1f3f4; color: var(--text-2); }
+  .stack-name { font-weight: 600; font-size: 13px; }
+  .stack-desc { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f1f3f4; font-weight: 600; text-align: left; padding: 10px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-2); }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: #fafafa; }
+
+  /* method pills */
+  .method { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .method.GET { background: #e6f4ea; color: #137333; }
+  .method.POST { background: #e8f0fe; color: #1a73e8; }
+  .method.PUT { background: #fef9e3; color: #b06000; }
+  .method.DELETE { background: #fce8e6; color: #c5221f; }
+
+  /* ── Code blocks ── */
+  code { background: #f1f3f4; padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: 'SFMono-Regular', Consolas, monospace; }
+  pre {
+    background: #202124; color: #e8eaed;
+    padding: 18px 20px; border-radius: var(--radius);
+    overflow-x: auto; font-size: 12px; line-height: 1.6;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+  }
+  pre .kw { color: #a8c7fa; }
+  pre .str { color: #a8d8a8; }
+  pre .cmt { color: #9aa0a6; }
+  pre .key { color: #fdd663; }
+
+  /* ── Flow diagram ── */
+  .diagram-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); overflow-x: auto; }
+
+  /* ── Callout ── */
+  .callout {
+    border-radius: var(--radius); padding: 14px 18px;
+    font-size: 13px; margin-bottom: 16px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .callout.blue { background: #e8f0fe; border-left: 3px solid var(--accent); }
+  .callout.green { background: #e6f4ea; border-left: 3px solid #34a853; }
+  .callout.yellow { background: #fef9e3; border-left: 3px solid #fbbc05; }
+  .callout.icon { font-size: 16px; flex-shrink: 0; }
+
+  /* ── Pill labels ── */
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+  .pill.blue { background: var(--accent-light); color: var(--accent); }
+  .pill.green { background: #e6f4ea; color: #137333; }
+  .pill.gray { background: #f1f3f4; color: var(--text-2); }
+  .pill.purple { background: #f3e8fd; color: #7b1fa2; }
+
+  /* ── File tree ── */
+  .file-tree {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px; line-height: 1.8;
+    background: #202124; color: #e8eaed;
+    padding: 18px 20px; border-radius: var(--radius);
+  }
+  .file-tree .dir { color: #a8c7fa; font-weight: 600; }
+  .file-tree .file { color: #e8eaed; }
+  .file-tree .cmt { color: #9aa0a6; }
+
+  /* ── Auth flow steps ── */
+  .flow-steps { display: flex; flex-direction: column; gap: 0; }
+  .flow-step {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num {
+    width: 28px; height: 28px; background: var(--accent);
+    color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .flow-step-body { flex: 1; }
+  .flow-step-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .flow-step-desc { font-size: 12px; color: var(--text-2); }
+
+  /* ── Privacy model ── */
+  .privacy-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .privacy-row:last-child { border-bottom: none; }
+  .privacy-icon { font-size: 18px; flex-shrink: 0; width: 28px; text-align: center; }
+  .privacy-body { flex: 1; }
+  .privacy-label { font-weight: 600; font-size: 13px; }
+  .privacy-desc { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>🪟 Mosaic — Architecture Reference</h1>
+  <div class="meta">
+    <span>📅 Apr 2026</span>
+    <span>👤 Haewon Yum · KOR GDS</span>
+    <span>🚀 <a href="https://mosaic-326198683934.asia-northeast3.run.app" style="color:var(--accent)">mosaic-326198683934.asia-northeast3.run.app</a></span>
+    <span>☁️ GCP project: <code>gds-apac</code></span>
+  </div>
+</div>
+
+<div class="toc-bar">
+  <a href="#overview">Overview</a>
+  <a href="#diagram">Architecture Diagram</a>
+  <a href="#stack">Tech Stack</a>
+  <a href="#structure">File Structure</a>
+  <a href="#backend">Backend</a>
+  <a href="#frontend">Frontend</a>
+  <a href="#auth">Auth Flow</a>
+  <a href="#storage">Storage</a>
+  <a href="#privacy">Privacy Model</a>
+  <a href="#api">API Reference</a>
+  <a href="#deploy">Deployment</a>
+</div>
+
+<div class="content">
+
+<!-- ── OVERVIEW ── -->
+<div class="section" id="overview">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f0fe">📋</div>
+    Overview
+  </div>
+  <div class="callout blue">
+    <span class="callout icon">💡</span>
+    <span>Mosaic is an internal HTML report sharing platform — a single hub where any Moloco team member can publish interactive HTML reports (Plotly notebooks, Searchlight analyses, launch checklists) and share them with the team via permanent URLs, with no infrastructure knowledge required.</span>
+  </div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Problem it solves</div>
+      <ul style="padding-left:16px; font-size:13px; color:var(--text-2); line-height:2">
+        <li>No central home for analytics outputs</li>
+        <li>Sharing interactive HTML is friction-heavy</li>
+        <li>Reports get lost in Slack/Drive/email</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Core capabilities</div>
+      <ul style="padding-left:16px; font-size:13px; color:var(--text-2); line-height:2">
+        <li>Upload &amp; serve .html reports</li>
+        <li>Organize by category / sub-category</li>
+        <li>Private sub-category workspaces</li>
+        <li>Permanent shareable URLs</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Access control</div>
+      <ul style="padding-left:16px; font-size:13px; color:var(--text-2); line-height:2">
+        <li>@moloco.com Google OAuth only</li>
+        <li>Edit/delete restricted to uploader</li>
+        <li>Private sub-cats: owner-only visibility</li>
+        <li>All enforced at API layer</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ── DIAGRAM ── -->
+<div class="section" id="diagram">
+  <div class="section-title">
+    <div class="icon" style="background:#fef9e3">🗺️</div>
+    Architecture Diagram
+  </div>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 900 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;display:block;margin:0 auto">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#5f6368"/>
+        </marker>
+        <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#1a73e8"/>
+        </marker>
+      </defs>
+
+      <!-- Browser -->
+      <rect x="20" y="160" width="140" height="80" rx="10" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+      <text x="90" y="192" text-anchor="middle" font-size="13" font-weight="700" fill="#1a73e8">Browser</text>
+      <text x="90" y="210" text-anchor="middle" font-size="11" fill="#5f6368">React 18 / Vite</text>
+      <text x="90" y="226" text-anchor="middle" font-size="11" fill="#5f6368">TypeScript SPA</text>
+
+      <!-- Arrow: Browser → Cloud Run -->
+      <line x1="160" y1="200" x2="230" y2="200" stroke="#5f6368" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="195" y="193" text-anchor="middle" font-size="10" fill="#5f6368">HTTPS</text>
+
+      <!-- Cloud Run box -->
+      <rect x="232" y="60" width="230" height="280" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="347" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#5f6368" text-transform="uppercase">CLOUD RUN  ·  asia-northeast3</text>
+
+      <!-- FastAPI -->
+      <rect x="252" y="100" width="190" height="60" rx="8" fill="#e8f0fe" stroke="#1a73e8" stroke-width="1.5"/>
+      <text x="347" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#1a73e8">FastAPI backend</text>
+      <text x="347" y="143" text-anchor="middle" font-size="11" fill="#5f6368">Python 3.12  ·  uvicorn</text>
+
+      <!-- Routes -->
+      <rect x="252" y="175" width="85" height="32" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="294" y="195" text-anchor="middle" font-size="11" fill="#202124">/auth/*</text>
+      <rect x="347" y="175" width="85" height="32" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="390" y="195" text-anchor="middle" font-size="11" fill="#202124">/api/*</text>
+      <rect x="252" y="217" width="85" height="32" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="294" y="237" text-anchor="middle" font-size="11" fill="#202124">/api/serve</text>
+      <rect x="347" y="217" width="85" height="32" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="390" y="237" text-anchor="middle" font-size="11" fill="#202124">static SPA</text>
+
+      <!-- Secret Manager ref -->
+      <rect x="252" y="263" width="190" height="58" rx="8" fill="#f3e8fd" stroke="#9c27b0" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="347" y="283" text-anchor="middle" font-size="11" font-weight="600" fill="#7b1fa2">Secret Manager</text>
+      <text x="347" y="300" text-anchor="middle" font-size="10" fill="#7b1fa2">CLIENT_ID · CLIENT_SECRET</text>
+      <text x="347" y="314" text-anchor="middle" font-size="10" fill="#7b1fa2">SESSION_SECRET · GCS_BUCKET</text>
+
+      <!-- Arrow: Cloud Run → Google OAuth -->
+      <line x1="252" y1="191" x2="170" y2="96" stroke="#5f6368" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Google OAuth -->
+      <rect x="20" y="40" width="148" height="60" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+      <text x="94" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#137333">Google OAuth 2.0</text>
+      <text x="94" y="82" text-anchor="middle" font-size="11" fill="#137333">@moloco.com only</text>
+      <text x="94" y="97" text-anchor="middle" font-size="10" fill="#5f6368">7-day signed cookie</text>
+
+      <!-- Arrow: Cloud Run → GCS -->
+      <line x1="462" y1="200" x2="530" y2="200" stroke="#5f6368" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="496" y="193" text-anchor="middle" font-size="10" fill="#5f6368">GCS SDK</text>
+
+      <!-- GCS bucket -->
+      <rect x="532" y="80" width="200" height="240" rx="10" fill="#fef9e3" stroke="#fbbc05" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="632" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="#b06000">GCS · gds-apac-html-reports</text>
+
+      <rect x="552" y="118" width="160" height="35" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="632" y="133" text-anchor="middle" font-size="11" font-weight="600" fill="#202124">meta/categories/</text>
+      <text x="632" y="148" text-anchor="middle" font-size="10" fill="#5f6368">{id}.json — category metadata</text>
+
+      <rect x="552" y="162" width="160" height="35" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="632" y="177" text-anchor="middle" font-size="11" font-weight="600" fill="#202124">meta/reports/</text>
+      <text x="632" y="192" text-anchor="middle" font-size="10" fill="#5f6368">{id}.json — report metadata</text>
+
+      <rect x="552" y="206" width="160" height="35" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="632" y="221" text-anchor="middle" font-size="11" font-weight="600" fill="#202124">uploaded/</text>
+      <text x="632" y="236" text-anchor="middle" font-size="10" fill="#5f6368">{id}.html — uploaded reports</text>
+
+      <rect x="552" y="250" width="160" height="35" rx="6" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+      <text x="632" y="265" text-anchor="middle" font-size="11" font-weight="600" fill="#202124">cache/</text>
+      <text x="632" y="280" text-anchor="middle" font-size="10" fill="#5f6368">{id}.html — GDrive proxy cache</text>
+
+      <!-- Arrow: Cloud Run → GDrive -->
+      <line x1="462" y1="130" x2="720" y2="100" stroke="#5f6368" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- GDrive -->
+      <rect x="722" y="60" width="158" height="70" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+      <text x="801" y="87" text-anchor="middle" font-size="12" font-weight="700" fill="#c5221f">Google Drive</text>
+      <text x="801" y="105" text-anchor="middle" font-size="11" fill="#c5221f">Drive API v3</text>
+      <text x="801" y="120" text-anchor="middle" font-size="10" fill="#5f6368">GDrive-sourced reports</text>
+
+      <!-- Cloud Build + GCR -->
+      <rect x="532" y="360" width="200" height="60" rx="10" fill="#f3e8fd" stroke="#9c27b0" stroke-width="1.5"/>
+      <text x="632" y="384" text-anchor="middle" font-size="12" font-weight="700" fill="#7b1fa2">Cloud Build + GCR</text>
+      <text x="632" y="402" text-anchor="middle" font-size="11" fill="#7b1fa2">deploy.sh → build → push → run</text>
+
+      <!-- Legend -->
+      <text x="20" y="410" font-size="11" fill="#5f6368">Boundaries:</text>
+      <rect x="90" y="401" width="12" height="12" rx="2" fill="#f8f9fa" stroke="#5f6368" stroke-dasharray="3,2"/>
+      <text x="107" y="412" font-size="11" fill="#5f6368">logical grouping</text>
+      <rect x="220" y="401" width="12" height="12" rx="2" fill="#e8f0fe" stroke="#1a73e8"/>
+      <text x="237" y="412" font-size="11" fill="#5f6368">frontend/backend</text>
+      <rect x="360" y="401" width="12" height="12" rx="2" fill="#fef9e3" stroke="#fbbc05"/>
+      <text x="377" y="412" font-size="11" fill="#5f6368">storage</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ── TECH STACK ── -->
+<div class="section" id="stack">
+  <div class="section-title">
+    <div class="icon" style="background:#e6f4ea">🛠️</div>
+    Tech Stack
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Backend</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="stack-item"><span class="stack-badge">FastAPI</span><div><div class="stack-name">Python 3.12 + uvicorn</div><div class="stack-desc">Async REST API; mounts static SPA bundle at root</div></div></div>
+        <div class="stack-item"><span class="stack-badge">Pydantic v2</span><div><div class="stack-name">Request / response models</div><div class="stack-desc">CategoryCreate/Update, ReportCreate/Update</div></div></div>
+        <div class="stack-item"><span class="stack-badge green">GCS</span><div><div class="stack-name">google-cloud-storage 2.16</div><div class="stack-desc">JSON blob KV store for metadata; HTML file storage</div></div></div>
+        <div class="stack-item"><span class="stack-badge yellow">Auth</span><div><div class="stack-name">Google OAuth 2.0 + itsdangerous</div><div class="stack-desc">PKCE flow; signed session cookie (7-day TTL)</div></div></div>
+        <div class="stack-item"><span class="stack-badge purple">Secrets</span><div><div class="stack-name">Secret Manager</div><div class="stack-desc">CLIENT_ID/SECRET, SESSION_SECRET, GCS_BUCKET_NAME</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Frontend</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="stack-item"><span class="stack-badge">React 18</span><div><div class="stack-name">TypeScript + Vite</div><div class="stack-desc">SPA, compiled to <code>backend/static/</code> at build time</div></div></div>
+        <div class="stack-item"><span class="stack-badge">React Router</span><div><div class="stack-name">v6 BrowserRouter</div><div class="stack-desc">Routes: <code>/</code> (Home), <code>/view/:id</code> (Viewer)</div></div></div>
+        <div class="stack-item"><span class="stack-badge green">URL State</span><div><div class="stack-name">useSearchParams</div><div class="stack-desc"><code>?cat=&amp;sub=</code> in URL preserves filter on back-nav</div></div></div>
+        <div class="stack-item"><span class="stack-badge yellow">Styling</span><div><div class="stack-name">Vanilla CSS (index.css)</div><div class="stack-desc">CSS variables, no framework; ~700 lines</div></div></div>
+        <div class="stack-item"><span class="stack-badge gray">Build</span><div><div class="stack-name">Multi-stage Docker</div><div class="stack-desc">node:20-slim builds SPA → python:3.12-slim serves it</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FILE STRUCTURE ── -->
+<div class="section" id="structure">
+  <div class="section-title">
+    <div class="icon" style="background:#f1f3f4">📁</div>
+    File Structure
+  </div>
+  <div class="grid-2">
+    <div>
+      <div class="file-tree">
+<span class="dir">html_deploy/</span>
+├── <span class="dir">backend/</span>
+│   ├── main.py            <span class="cmt"># app entry, static mount, SPA fallback</span>
+│   ├── auth.py            <span class="cmt"># OAuth flow, session cookie</span>
+│   ├── models.py          <span class="cmt"># Pydantic: Category/Report create/update</span>
+│   ├── <span class="dir">routes/</span>
+│   │   ├── categories.py  <span class="cmt"># GET/POST/PUT/DELETE /api/categories</span>
+│   │   ├── reports.py     <span class="cmt"># CRUD + /upload + /replace</span>
+│   │   └── serve.py       <span class="cmt"># GET /api/serve/{id} — HTML proxy</span>
+│   └── <span class="dir">services/</span>
+│       ├── meta.py        <span class="cmt"># GCS JSON blob KV store</span>
+│       ├── gcs.py         <span class="cmt"># upload/download/cache helpers</span>
+│       └── gdrive.py      <span class="cmt"># Google Drive API fetch</span>
+├── <span class="dir">frontend/src/</span>
+│   ├── App.tsx            <span class="cmt"># auth check, router</span>
+│   ├── types.ts           <span class="cmt"># User, Category, Report interfaces</span>
+│   ├── api.ts             <span class="cmt"># get/post/put/del fetch wrappers</span>
+│   ├── <span class="dir">pages/</span>
+│   │   ├── Home.tsx       <span class="cmt"># sidebar + sub-cat tabs + report grid</span>
+│   │   └── Viewer.tsx     <span class="cmt"># sandboxed iframe viewer</span>
+│   └── <span class="dir">components/</span>
+│       ├── CategorySidebar.tsx
+│       ├── ReportCard.tsx
+│       ├── UploadModal.tsx
+│       └── EditReportModal.tsx
+├── Dockerfile             <span class="cmt"># multi-stage build</span>
+├── deploy.sh              <span class="cmt"># Cloud Build + Cloud Run deploy</span>
+└── setup.sh               <span class="cmt"># one-time infra bootstrap</span>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Key design choices</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+          <div><strong>GCS as metadata store</strong><br><span style="color:var(--text-2)">Replaces Firestore (permission issues). <code>meta/categories/{id}.json</code> and <code>meta/reports/{id}.json</code> act as a lightweight KV store. No extra infra needed — Compute SA already has editor on <code>gds-apac</code>.</span></div>
+          <div><strong>Single Cloud Run service</strong><br><span style="color:var(--text-2)">Backend serves the compiled React SPA as static files. No separate frontend hosting needed.</span></div>
+          <div><strong>GDrive proxy</strong><br><span style="color:var(--text-2)"><code>/api/serve/{id}</code> fetches GDrive HTML server-side, bypassing iframe-blocking. Result is cached in GCS <code>cache/</code>.</span></div>
+          <div><strong>APP_BASE_URL env var</strong><br><span style="color:var(--text-2)">Cloud Run's internal proxy strips HTTPS. OAuth redirect URI must be set explicitly via env var, not derived from <code>request.base_url</code>.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">GCS bucket layout</div>
+        <div style="font-family:monospace;font-size:12px;line-height:2;color:var(--text-2)">
+          <code>meta/categories/{id}.json</code><br>
+          <code>meta/reports/{id}.json</code><br>
+          <code>uploaded/{id}.html</code><br>
+          <code>cache/{id}.html</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BACKEND ── -->
+<div class="section" id="backend">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f0fe">⚙️</div>
+    Backend Architecture
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Routes layer (<code>routes/</code>)</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+        <div><strong>categories.py</strong> — CRUD for categories. <code>list_categories</code> filters private categories the requester doesn't own. DELETE cascades to empty sub-categories.</div>
+        <div><strong>reports.py</strong> — Upload (<code>multipart/form-data</code>), metadata update (<code>PUT</code>), file replacement (<code>POST /{id}/replace</code>), delete. All mutating endpoints require <code>uploader == session.email</code>.</div>
+        <div><strong>serve.py</strong> — Proxies HTML to the iframe. Checks privacy before serving. For GDrive sources: fetches HTML via Drive API and caches in GCS. For uploads: reads directly from GCS.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Services layer (<code>services/</code>)</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+        <div><strong>meta.py</strong> — GCS JSON KV store. Functions: <code>list_categories()</code>, <code>get/put/delete_category()</code>, <code>list_sub_categories(parent_id)</code>, <code>category_has_reports(id)</code> (checks sub-cats too), plus report equivalents.</div>
+        <div><strong>gcs.py</strong> — Low-level GCS helpers: <code>write/read/delete_upload()</code>, <code>write/read/delete/exists_cache()</code>. Single <code>_bucket()</code> factory keeps client lazily initialized.</div>
+        <div><strong>gdrive.py</strong> — <code>fetch_html(file_id)</code> via Drive API v3, using the Compute SA credentials automatically injected by Cloud Run.</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Data models (<code>models.py</code>)</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Model</th><th>Fields</th><th>Used by</th></tr></thead>
+        <tbody>
+          <tr><td><code>CategoryCreate</code></td><td><code>name</code>, <code>color</code>, <code>description?</code>, <code>parent_id?</code>, <code>is_private=False</code></td><td>POST /api/categories</td></tr>
+          <tr><td><code>CategoryUpdate</code></td><td>Same as Create, all Optional (None = no change)</td><td>PUT /api/categories/{id}</td></tr>
+          <tr><td><code>ReportCreate</code></td><td><code>title</code>, <code>category_id</code>, <code>source_type</code>, <code>source_ref</code>, <code>description?</code>, <code>tags[]</code></td><td>POST /api/reports</td></tr>
+          <tr><td><code>ReportUpdate</code></td><td><code>title?</code>, <code>description?</code>, <code>category_id?</code></td><td>PUT /api/reports/{id}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── FRONTEND ── -->
+<div class="section" id="frontend">
+  <div class="section-title">
+    <div class="icon" style="background:#fef9e3">🖥️</div>
+    Frontend Architecture
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Component tree</div>
+      <div style="font-family:monospace;font-size:12px;line-height:2;color:var(--text-2)">
+        App<br>
+        &nbsp;├── Home<br>
+        &nbsp;│&nbsp;&nbsp;&nbsp;├── CategorySidebar<br>
+        &nbsp;│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── CategoryRow (inline edit)<br>
+        &nbsp;│&nbsp;&nbsp;&nbsp;├── SubCatTab (inline edit + privacy)<br>
+        &nbsp;│&nbsp;&nbsp;&nbsp;├── ReportCard (edit + delete for owner)<br>
+        &nbsp;│&nbsp;&nbsp;&nbsp;├── UploadModal<br>
+        &nbsp;│&nbsp;&nbsp;&nbsp;└── EditReportModal<br>
+        &nbsp;└── Viewer (sandboxed iframe)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">State &amp; navigation</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+        <div><strong>Filter state in URL</strong><br><span style="color:var(--text-2)"><code>useSearchParams</code> writes <code>?cat=&lt;id&gt;&amp;sub=&lt;id&gt;</code> on every filter change (replace, not push). On mount, reads initial state from URL params — so back-navigation from the viewer restores the exact filter.</span></div>
+        <div><strong>Back navigation</strong><br><span style="color:var(--text-2)">ReportCard passes <code>state.from = window.location.pathname + search</code> when navigating to viewer. Viewer's ← Back button returns to <code>state.from ?? '/'</code>.</span></div>
+        <div><strong>API wrapper</strong><br><span style="color:var(--text-2)"><code>api.ts</code> exposes <code>get/post/put/del</code> — always sends <code>credentials: 'include'</code> for session cookie. Throws with <code>detail</code> from error JSON.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AUTH ── -->
+<div class="section" id="auth">
+  <div class="section-title">
+    <div class="icon" style="background:#e6f4ea">🔐</div>
+    Authentication Flow
+  </div>
+  <div class="card">
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Login redirect</div>
+          <div class="flow-step-desc">Browser hits <code>GET /auth/login</code>. Backend builds Google OAuth URL with <code>hd=moloco.com</code> (hosted domain hint) and <code>scope=openid email profile</code>. Redirects to Google's consent screen.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-step-body">
+          <div class="flow-step-title">OAuth callback</div>
+          <div class="flow-step-desc"><code>GET /auth/callback?code=…</code> — backend exchanges code for tokens at <code>oauth2.googleapis.com/token</code>, then fetches userinfo from <code>googleapis.com/oauth2/v3/userinfo</code>.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Domain check</div>
+          <div class="flow-step-desc">Validates <code>email.endswith("@moloco.com")</code>. Non-moloco accounts receive HTTP 403. This check happens before any session is issued.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Session cookie</div>
+          <div class="flow-step-desc">Signs <code>{email, name, picture}</code> with <code>itsdangerous.URLSafeTimedSerializer</code> using <code>SESSION_SECRET</code>. Sets as <code>HttpOnly; Secure; SameSite=Lax</code> cookie with 7-day TTL. Redirects to <code>/</code>.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Session validation on every request</div>
+          <div class="flow-step-desc">Every <code>/api/*</code> and <code>/auth/me</code> route calls <code>require_session(request)</code>. Verifies cookie signature + expiry. Returns 401 on failure. No database lookup needed — session is self-contained.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout yellow">
+    <span class="callout icon">⚠️</span>
+    <span><strong>APP_BASE_URL</strong> must be set as a Cloud Run env var. Cloud Run's ingress proxy rewrites the scheme to <code>http://</code>, causing OAuth redirect URI mismatches. The env var overrides <code>request.base_url</code> in <code>_redirect_uri()</code>.</span>
+  </div>
+</div>
+
+<!-- ── STORAGE ── -->
+<div class="section" id="storage">
+  <div class="section-title">
+    <div class="icon" style="background:#fef9e3">🗄️</div>
+    Storage Model
+  </div>
+  <div class="callout green">
+    <span class="callout icon">✅</span>
+    <span>Firestore was the original design but was blocked by IAM permissions. GCS JSON blobs serve as a lightweight KV store — no schema migrations, no extra services, and the Compute SA already has editor access on <code>gds-apac</code>.</span>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Category blob schema</div>
+      <pre>{
+  <span class="key">"id"</span>:          <span class="str">"uuid4"</span>,
+  <span class="key">"name"</span>:        <span class="str">"Haewon"</span>,
+  <span class="key">"color"</span>:       <span class="str">"#4A90E2"</span>,
+  <span class="key">"description"</span>: <span class="kw">null</span>,
+  <span class="key">"parent_id"</span>:   <span class="str">"uuid4"</span>,   <span class="cmt">// null = top-level</span>
+  <span class="key">"is_private"</span>:  <span class="kw">false</span>,
+  <span class="key">"created_by"</span>:  <span class="str">"haewon.yum@moloco.com"</span>,
+  <span class="key">"created_at"</span>:  <span class="str">"2026-04-22T..."</span>
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Report blob schema</div>
+      <pre>{
+  <span class="key">"id"</span>:           <span class="str">"uuid4"</span>,
+  <span class="key">"title"</span>:        <span class="str">"KOR VT Analysis"</span>,
+  <span class="key">"description"</span>:  <span class="str">"..."</span>,
+  <span class="key">"category_id"</span>:  <span class="str">"uuid4"</span>,
+  <span class="key">"source_type"</span>:  <span class="str">"upload"</span>,  <span class="cmt">// or "gdrive"</span>
+  <span class="key">"source_ref"</span>:   <span class="str">"uploaded/{id}.html"</span>,
+  <span class="key">"uploader"</span>:     <span class="str">"haewon.yum@moloco.com"</span>,
+  <span class="key">"created_at"</span>:   <span class="str">"2026-04-22T..."</span>,
+  <span class="key">"updated_at"</span>:   <span class="str">"2026-04-22T..."</span>,
+  <span class="key">"tags"</span>:         []
+}</pre>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Performance note</div>
+    <p style="font-size:13px;color:var(--text-2)"><code>list_categories()</code> and <code>list_reports()</code> each do one GCS <code>list_blobs</code> call followed by parallel blob reads. <code>category_has_reports(id)</code> fetches all categories (to find sub-cat IDs) then all report blobs. This is O(n) but acceptable at current scale — an internal team tool with &lt;1K reports. At scale, a Firestore migration would reduce this to indexed queries.</p>
+  </div>
+</div>
+
+<!-- ── PRIVACY ── -->
+<div class="section" id="privacy">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8fd">🔒</div>
+    Privacy Model
+  </div>
+  <div class="callout blue">
+    <span class="callout icon">💡</span>
+    <span>Privacy is scoped to <strong>sub-categories only</strong>. Top-level categories are always visible to all Moloco users. A private sub-category and all its reports are invisible to everyone except the creator — enforced at the API layer, not just the UI.</span>
+  </div>
+  <div class="card">
+    <div class="privacy-row">
+      <div class="privacy-icon">👁️</div>
+      <div class="privacy-body">
+        <div class="privacy-label">Visibility filtering — <code>GET /api/categories</code></div>
+        <div class="privacy-desc">Backend filters: <code>[c for c in meta.list_categories() if not c.is_private or c.created_by == session.email]</code>. Non-owners never receive private category objects — the tab doesn't even exist in their UI.</div>
+      </div>
+    </div>
+    <div class="privacy-row">
+      <div class="privacy-icon">📋</div>
+      <div class="privacy-body">
+        <div class="privacy-label">Report list filtering — <code>GET /api/reports</code></div>
+        <div class="privacy-desc">Loads all categories into a dict, then filters out reports whose <code>category_id</code> maps to a private category not owned by the requester. One GCS read for all categories, then applied as a filter.</div>
+      </div>
+    </div>
+    <div class="privacy-row">
+      <div class="privacy-icon">🔗</div>
+      <div class="privacy-body">
+        <div class="privacy-label">Direct URL access — <code>GET /api/reports/{id}</code> + <code>GET /api/serve/{id}</code></div>
+        <div class="privacy-desc">Both endpoints load the report's category and check privacy before responding. Non-owners receive HTTP 404 (not 403) to avoid leaking existence of private reports.</div>
+      </div>
+    </div>
+    <div class="privacy-row">
+      <div class="privacy-icon">✏️</div>
+      <div class="privacy-body">
+        <div class="privacy-label">Edit / delete guards</div>
+        <div class="privacy-desc">On top of privacy, mutating endpoints also check <code>report.uploader == session.email</code>. A non-owner cannot edit or delete even a public report. HTTP 403 for ownership violations.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── API ── -->
+<div class="section" id="api">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f0fe">📡</div>
+    API Reference
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Auth — /auth/*</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method GET">GET</span></td><td><code>/auth/login</code></td><td>Redirect to Google OAuth consent screen (hd=moloco.com)</td></tr>
+          <tr><td><span class="method GET">GET</span></td><td><code>/auth/callback</code></td><td>OAuth code exchange → session cookie → redirect to <code>/</code></td></tr>
+          <tr><td><span class="method GET">GET</span></td><td><code>/auth/me</code></td><td>Returns current session <code>{email, name, picture}</code> or 401</td></tr>
+          <tr><td><span class="method POST">POST</span></td><td><code>/auth/logout</code></td><td>Deletes session cookie</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Categories — /api/categories</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method GET">GET</span></td><td><code>/api/categories</code></td><td><span class="pill gray">session</span></td><td>List all visible categories (private filtered by ownership)</td></tr>
+          <tr><td><span class="method POST">POST</span></td><td><code>/api/categories</code></td><td><span class="pill gray">session</span></td><td>Create category. Body: <code>CategoryCreate</code>. Returns created object.</td></tr>
+          <tr><td><span class="method PUT">PUT</span></td><td><code>/api/categories/{id}</code></td><td><span class="pill gray">session</span></td><td>Update name/color/is_private. None fields are skipped.</td></tr>
+          <tr><td><span class="method DELETE">DELETE</span></td><td><code>/api/categories/{id}</code></td><td><span class="pill gray">session</span></td><td>Cascade-deletes empty sub-categories. 409 if any reports exist.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Reports — /api/reports</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="method GET">GET</span></td><td><code>/api/reports</code></td><td><span class="pill gray">session</span></td><td>List reports. Params: <code>?category=id&amp;q=text</code>. Private category reports filtered out for non-owners.</td></tr>
+          <tr><td><span class="method POST">POST</span></td><td><code>/api/reports/upload</code></td><td><span class="pill gray">session</span></td><td>Multipart upload of <code>.html</code> file. Fields: <code>title</code>, <code>description</code>, <code>category_id</code>, <code>file</code>. Max 20 MB.</td></tr>
+          <tr><td><span class="method GET">GET</span></td><td><code>/api/reports/{id}</code></td><td><span class="pill gray">session</span></td><td>Get report metadata. 404 if private and non-owner.</td></tr>
+          <tr><td><span class="method PUT">PUT</span></td><td><code>/api/reports/{id}</code></td><td><span class="pill blue">uploader</span></td><td>Update title/description/category_id. 403 for non-uploader.</td></tr>
+          <tr><td><span class="method POST">POST</span></td><td><code>/api/reports/{id}/replace</code></td><td><span class="pill blue">uploader</span></td><td>Replace HTML file (upload-type only). Invalidates GCS cache. 403 for non-uploader.</td></tr>
+          <tr><td><span class="method DELETE">DELETE</span></td><td><code>/api/reports/{id}</code></td><td><span class="pill blue">uploader</span></td><td>Delete report + GCS objects. 403 for non-uploader.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Serve — /api/serve</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="method GET">GET</span></td>
+            <td><code>/api/serve/{id}</code></td>
+            <td><span class="pill gray">session</span></td>
+            <td>Returns raw HTML. For <code>gdrive</code>: fetches from Drive API, caches in GCS. For <code>upload</code>: reads from <code>uploaded/{id}.html</code>. Response headers: <code>X-Frame-Options: SAMEORIGIN</code>, <code>CSP: sandbox allow-scripts allow-same-origin</code>. 404 for private category non-owners.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── DEPLOY ── -->
+<div class="section" id="deploy">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8fd">🚀</div>
+    Deployment
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Cloud Run config</div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td style="color:var(--text-2);width:140px">Service name</td><td><code>mosaic</code></td></tr>
+            <tr><td style="color:var(--text-2)">Region</td><td><code>asia-northeast3</code> (Seoul)</td></tr>
+            <tr><td style="color:var(--text-2)">GCP project</td><td><code>gds-apac</code></td></tr>
+            <tr><td style="color:var(--text-2)">Container image</td><td><code>gcr.io/gds-apac/mosaic:latest</code></td></tr>
+            <tr><td style="color:var(--text-2)">Memory</td><td>512 Mi</td></tr>
+            <tr><td style="color:var(--text-2)">CPU</td><td>1 vCPU</td></tr>
+            <tr><td style="color:var(--text-2)">Min instances</td><td>0 (scale to zero)</td></tr>
+            <tr><td style="color:var(--text-2)">Max instances</td><td>3</td></tr>
+            <tr><td style="color:var(--text-2)">Ingress</td><td>Allow unauthenticated (auth handled in-app)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Deploy command</div>
+      <pre><span class="cmt"># From html_deploy/ directory</span>
+bash deploy.sh
+
+<span class="cmt"># What it does:</span>
+<span class="kw">gcloud</span> builds submit \
+  --tag gcr.io/gds-apac/mosaic:latest \
+  --project gds-apac .
+
+<span class="kw">gcloud</span> run deploy mosaic \
+  --image gcr.io/gds-apac/mosaic:latest \
+  --region asia-northeast3 \
+  --set-secrets GOOGLE_CLIENT_ID=...,\
+    GOOGLE_CLIENT_SECRET=...,\
+    SESSION_SECRET=...,\
+    GCS_BUCKET_NAME=...
+  --set-env-vars APP_BASE_URL=https://...</pre>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Dockerfile — multi-stage build</div>
+    <pre><span class="cmt"># Stage 1: build React SPA</span>
+<span class="kw">FROM</span> node:20-slim <span class="kw">AS</span> frontend-builder
+<span class="kw">WORKDIR</span> /app/frontend
+<span class="kw">COPY</span> frontend/package*.json ./
+<span class="kw">RUN</span> npm ci
+<span class="kw">COPY</span> frontend/ ./
+<span class="kw">RUN</span> npm run build   <span class="cmt"># → ../backend/static/</span>
+
+<span class="cmt"># Stage 2: Python backend + compiled SPA</span>
+<span class="kw">FROM</span> python:3.12-slim
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> backend/requirements.txt ./
+<span class="kw">RUN</span> pip install -r requirements.txt
+<span class="kw">COPY</span> backend/ ./backend/
+<span class="kw">COPY</span> --from=frontend-builder /app/backend/static ./backend/static/
+<span class="kw">CMD</span> ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8080"]</pre>
+  </div>
+  <div class="callout blue">
+    <span class="callout icon">📌</span>
+    <span><strong>Revision history:</strong> 00001–00006 (v1 MVP), 00007 (edit + sub-cat edit + uploader-only delete), 00008 (private sub-categories), 00009 (back-nav filter persistence)</span>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div style="text-align:center;padding:24px;font-size:12px;color:var(--text-3);border-top:1px solid var(--border)">
+  Generated Apr 2026 · Mosaic v4 · <a href="https://mosaic-326198683934.asia-northeast3.run.app" style="color:var(--accent)">Open Mosaic</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+[
+  {
+    "id": "mission",
+    "title": "Mission Statement",
+    "icon": "\ud83c\udfaf",
+    "notes": "",
+    "draft_status": "edited",
+    "objectives": [
+      {
+        "text": "Being a strategic partner backed by data, driving short term and durable growth (revenue), using proactive adoption of AI capability. ",
+        "key_results": [],
+        "kr_completed": []
+      }
+    ]
+  },
+  {
+    "id": "regional",
+    "title": "Regional Initiative",
+    "icon": "\ud83c\uddf0\ud83c\uddf7",
+    "notes": "These KRs balance external client impact (Netmarble, Nexon) with internal team-building and regional influence, reflecting the dual responsibility of a GDS Lead who both serves clients and elevates team capability. Metrics are directional placeholders and should be calibrated against actual Q1 2026 baselines once available.",
+    "draft_status": "edited",
+    "objectives": [
+      {
+        "text": "Establish Korea as a model GDS region by deepening data-driven partnership value with the Sales team for top customer support and scaling replicable analytics frameworks across the long-tail accounts.",
+        "key_results": [
+          "Premium account SoI or SoR increase to be ~10%",
+          "Build structured premium account supporting model in close collaboration with PSO and Sales teams by quarterly strategy revisit, initiative setting and action item tracking",
+          "Published at least 3 success cases per quarter which can be spreaded across other accounts",
+          "Develop a scalable self-serve solution for campaign diagnosis and growth opportunity identification across mid-market accounts",
+          "Build clear narratives or product escalations for regional measurement concerns around high CTR or VT"
+        ],
+        "kr_completed": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "id": "global",
+    "title": "Global Initiative",
+    "icon": "\ud83c\udf0f",
+    "notes": "This objective positions Haewon's KOR GDS work not just as local execution but as a strategic global contributor, which aligns with a 'Global Initiative' pillar. The key results balance client impact, platform performance, and organizational knowledge transfer \u2014 all realistic given her seniority and existing client relationships, though specific targets should be validated against actual Q1 baselines once data is available.",
+    "draft_status": "edited",
+    "objectives": [
+      {
+        "text": "Successfully build blueprint narrative based on analysis and dashboard in a sharable format with XFn teams",
+        "key_results": [
+          "Build blueprint dashboard with seller-insight view to be broadly used by GM, in collaboration with PM and Global GDS",
+          "Expand blueprint best practices into IAA, in collaboration with global IAA working group",
+          ""
+        ],
+        "kr_completed": [
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "text": "Up-level GDS team level AI proficiency to directly create business impact powered by AI",
+        "key_results": [
+          "Develop AI development framework and align within the team. "
+        ],
+        "kr_completed": [
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "id": "people",
+    "title": "People & Culture",
+    "icon": "\ud83e\udd1d",
+    "notes": "Given no direct Slack/Docs/Jira signals were available, these KRs are grounded in common high-impact People & Culture levers for a senior DS lead managing a regional team: onboarding quality, continuous learning culture, and individual development \u2014 all contextualized to KOR GDS and Moloco's gaming client ecosystem. Haewon should adjust headcount assumptions and specific targets based on actual team size and Q1 retrospective data.",
+    "draft_status": "edited",
+    "objectives": [
+      {
+        "text": "Foster a high-performing, collaborative GDS Korea team culture that deepens data science craft, and strengthens cross-functional collaboration to drive client impact at scale. ",
+        "key_results": [
+          "Enhance AI proficiency level of the team to be at \"Advanced\" level - at lease 1 skill contribution, 1 knowledge sharing with APAC team",
+          "Conduct structured 1:1 growth conversations with each KOR GDS team member using a defined career development framework, completing 100% of sessions and documenting at least one growth goal per person by June 30, 2026",
+          ""
+        ],
+        "kr_completed": [
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "id": "personal",
+    "title": "Personal Goal",
+    "icon": "\u2b50",
+    "notes": "",
+    "draft_status": "empty",
+    "objectives": [
+      {
+        "text": "",
+        "key_results": [],
+        "kr_completed": []
+      }
+    ]
+  }
+]

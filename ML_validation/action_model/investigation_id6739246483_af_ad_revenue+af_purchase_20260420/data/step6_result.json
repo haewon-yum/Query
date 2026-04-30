@@ -1,0 +1,18 @@
+{
+  "step": 6,
+  "verdict": "WARN",
+  "campaign_id": "IV7TA5O07K4JNsjn",
+  "control_plane": {
+    "dominant_type": "TYPE_ACTION (af_ad_revenue) + TYPE_SEC_KPI (af_purchase)",
+    "rows": [
+      {"date": "2026-04-20", "pricing_metadata_type": "TYPE_ACTION", "prediction_type": "UNIFIED_D7", "count": 8},
+      {"date": "2026-04-20", "pricing_metadata_type": "TYPE_SEC_KPI", "prediction_type": "UNIFIED_D7", "count": 8},
+      {"date": "2026-04-19", "pricing_metadata_type": "TYPE_ACTION", "prediction_type": "UNIFIED_D7", "count": 5},
+      {"date": "2026-04-19", "pricing_metadata_type": "TYPE_SEC_KPI", "prediction_type": "UNIFIED_D7", "count": 5}
+    ],
+    "note": "ML pipeline is pushing pricing configs for paused campaign IV7TA5O07K4JNsjn (expected — MEMS updater runs for non-terminal campaigns)."
+  },
+  "data_plane_checked": true,
+  "data_plane_impressions": 0,
+  "note": "0 impressions in last 3 days — confirms campaign IV7TA5O07K4JNsjn has been inactive (PAUSED since 2025-12-18). TYPE_ACTION configured correctly but campaign not serving."
+}

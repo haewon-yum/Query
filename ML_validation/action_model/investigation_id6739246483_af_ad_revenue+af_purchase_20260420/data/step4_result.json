@@ -1,0 +1,56 @@
+{
+  "step": 4,
+  "verdict": "WARN",
+  "models": [
+    {
+      "model": "action_consol_v2_ifa_cont",
+      "timestamp": 1776678283,
+      "deployed_utc": "2026-04-20 09:44 UTC",
+      "events": [
+        {
+          "event": "af_ad_revenue",
+          "pb_eval_found": true,
+          "bid_eval_found": false,
+          "pb_eval_positives": {"D1": 2382, "D3": 145, "D7": 79, "D14": 7, "D28": 0},
+          "total_examples": 3551,
+          "note": "D14=7 positives and D28=0 — AUC unreliable at long horizons"
+        },
+        {
+          "event": "af_purchase",
+          "pb_eval_found": true,
+          "bid_eval_found": false,
+          "pb_eval_positives": {"D1": 21, "D3": 12, "D7": 4, "D14": 0, "D28": 0},
+          "total_examples": 3551,
+          "note": "SPARSE POSITIVES: max 21 positives out of 3551. AUC 0.98-0.99 is trivially high. Normalizer unreliable."
+        }
+      ]
+    },
+    {
+      "model": "action_consol_v2_ifa_cpu_cont",
+      "timestamp": 1776678155,
+      "deployed_utc": "2026-04-20 09:42 UTC",
+      "events": [
+        {"event": "af_ad_revenue", "pb_eval_found": true, "bid_eval_found": false, "total_examples": 3551},
+        {"event": "af_purchase", "pb_eval_found": true, "bid_eval_found": false, "total_examples": 3551, "note": "Same sparse positives as ifa_cont"}
+      ]
+    },
+    {
+      "model": "action_consol_v2_lat_cont",
+      "timestamp": 1776677889,
+      "deployed_utc": "2026-04-20 09:38 UTC",
+      "events": [
+        {"event": "af_ad_revenue", "pb_eval_found": false, "bid_eval_found": false},
+        {"event": "af_purchase", "pb_eval_found": false, "bid_eval_found": false}
+      ]
+    },
+    {
+      "model": "action_consol_v2_lat_cpu_cont",
+      "timestamp": 1776677794,
+      "deployed_utc": "2026-04-20 09:36 UTC",
+      "events": [
+        {"event": "af_ad_revenue", "pb_eval_found": false, "bid_eval_found": false},
+        {"event": "af_purchase", "pb_eval_found": false, "bid_eval_found": false}
+      ]
+    }
+  ]
+}

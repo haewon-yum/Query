@@ -1,0 +1,22 @@
+{
+  "step": 4,
+  "verdict": "OK",
+  "models": [
+    {
+      "model": "action_consol_v2_lat_cpu_cont", "timestamp": 1776660333, "deployed_utc": "2026-04-20 04:45 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": true, "bid_eval_examples": 64287}]
+    },
+    {
+      "model": "action_consol_v2_lat_cont", "timestamp": 1776659813, "deployed_utc": "2026-04-20 04:36 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": true, "bid_eval_examples": 64287}]
+    },
+    {
+      "model": "action_consol_v2_ifa_cont", "timestamp": 1776660109, "deployed_utc": "2026-04-20 04:41 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": true, "bid_eval_examples": 293332}]
+    },
+    {
+      "model": "action_consol_v2_ifa_cpu_cont", "timestamp": 1776646240, "deployed_utc": "2026-04-20 00:50 UTC",
+      "events": [{"event": "zp_npuall", "pb_eval_found": false, "bid_eval_found": false, "bid_eval_examples": 0}]
+    }
+  ]
+}

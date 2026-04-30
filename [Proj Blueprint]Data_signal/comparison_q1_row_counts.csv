@@ -1,0 +1,7 @@
+version,blueprint_index,row_count
+v1,1_signal_quality,42134
+v2_1,1_signal_quality,42129
+v1,2_unattributed_installs,42134
+v2_1,2_unattributed_installs,42129
+v1,3_probabilistic_attribution,42134
+v2_1,3_probabilistic_attribution,42129

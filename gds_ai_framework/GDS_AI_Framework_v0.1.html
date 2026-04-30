@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GDS AI Development Framework</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-w: 230px;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --indigo: #6366f1;
+      --indigo-light: #eef2ff;
+      --indigo-dark: #4338ca;
+      --emerald: #10b981;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --sidebar-bg: #1e293b;
+      --sidebar-text: #cbd5e1;
+      --sidebar-active: #6366f1;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      overflow-y: auto;
+      padding: 28px 0 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .sidebar-header .doc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #334155;
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-header .live-dot {
+      width: 6px; height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .sidebar-header h1 {
+      color: #f1f5f9;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header .meta {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .sidebar nav {
+      padding: 16px 0;
+      flex: 1;
+    }
+
+    .sidebar nav .section-label {
+      color: #475569;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 12px 20px 4px;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 7px 20px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-size: 13px;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .sidebar nav a:hover {
+      color: #f1f5f9;
+      background: #334155;
+      border-left-color: var(--sidebar-active);
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px 0;
+      border-top: 1px solid #334155;
+      color: #475569;
+      font-size: 11px;
+    }
+
+    /* ── Main ── */
+    main {
+      margin-left: var(--sidebar-w);
+      padding: 40px 48px;
+      max-width: none;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 28px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .page-header .version-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-version { background: var(--indigo-light); color: var(--indigo-dark); }
+    .badge-living { background: #dcfce7; color: #15803d; }
+    .badge-draft { background: #fef9c3; color: #854d0e; }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ── Sections ── */
+    section {
+      margin-bottom: 56px;
+      scroll-margin-top: 24px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .section-num {
+      color: var(--indigo);
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--indigo-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 20px 0 10px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .card p { color: var(--text-muted); font-size: 13px; }
+
+    /* ── Architecture diagram ── */
+    .arch-layer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 24px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .arch-layer-label {
+      min-width: 140px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-top: 2px;
+    }
+
+    .arch-layer-label.foundation { color: #0284c7; }
+    .arch-layer-label.development { color: var(--purple); }
+    .arch-layer-label.operations { color: var(--emerald); }
+
+    .arch-layer-content {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .arch-chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    .arch-arrow {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 18px;
+      margin: 4px 0;
+    }
+
+    /* ── Tier table ── */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .tier-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      border-top: 3px solid;
+    }
+
+    .tier-card.t1 { border-top-color: var(--emerald); }
+    .tier-card.t2 { border-top-color: var(--blue); }
+    .tier-card.t3 { border-top-color: var(--purple); }
+    .tier-card.t4 { border-top-color: var(--orange); }
+
+    .tier-num {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .tier-card.t1 .tier-num { color: var(--emerald); }
+    .tier-card.t2 .tier-num { color: var(--blue); }
+    .tier-card.t3 .tier-num { color: var(--purple); }
+    .tier-card.t4 .tier-num { color: var(--orange); }
+
+    .tier-name {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .tier-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tier-card ul li {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 3px 0;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      gap: 6px;
+    }
+
+    .tier-card ul li::before { content: "—"; color: #cbd5e1; flex-shrink: 0; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: #475569;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbff; }
+
+    /* ── Status badges ── */
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-open { background: #fee2e2; color: #b91c1c; }
+    .status-inprogress { background: #fef9c3; color: #92400e; }
+    .status-done { background: #dcfce7; color: #15803d; }
+    .status-tbd { background: #f1f5f9; color: #64748b; }
+    .status-active { background: #dcfce7; color: #15803d; }
+    .status-exploring { background: #fef9c3; color: #92400e; }
+    .status-planning { background: var(--indigo-light); color: var(--indigo-dark); }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+
+    .code-block .comment { color: #475569; }
+    .code-block .dir { color: #93c5fd; }
+    .code-block .file { color: #86efac; }
+    .code-block .desc { color: #94a3b8; }
+
+    /* ── Knowledge flow ── */
+    .knowledge-flow {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr 40px 1fr;
+      gap: 0;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .kf-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .kf-box h4 { font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .kf-box ul { list-style: none; padding: 0; }
+    .kf-box ul li { font-size: 11px; color: var(--text-muted); padding: 2px 0; }
+    .kf-box ul li::before { content: "· "; color: #94a3b8; }
+
+    .kf-arrow {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 20px;
+    }
+
+    /* ── Callout ── */
+    .callout {
+      border-left: 4px solid var(--indigo);
+      background: var(--indigo-light);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 13px;
+      color: #312e81;
+    }
+
+    .callout strong { font-weight: 600; }
+
+    .callout-warn {
+      border-left-color: var(--orange);
+      background: #fffbeb;
+      color: #78350f;
+    }
+
+    /* ── Questions column ── */
+    .q-list { list-style: none; padding: 0; }
+    .q-list li {
+      font-size: 12px;
+      color: #dc2626;
+      padding: 2px 0;
+    }
+    .q-list li::before { content: "? "; font-weight: 700; }
+
+    /* ── Proficiency ladder ── */
+    .proficiency-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .prof-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .prof-level {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+      color: var(--indigo);
+    }
+
+    .prof-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .prof-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .prof-card ul li {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 2px 0;
+    }
+
+    .prof-card ul li::before { content: "✓ "; color: var(--emerald); font-weight: 700; }
+
+    /* ── Comment system ── */
+    .comment-highlight {
+      background: #fef9c3;
+      border-bottom: 2px solid #f59e0b;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .comment-highlight:hover { background: #fde68a; }
+    .comment-highlight.resolved-highlight { background: none; border-bottom: 2px dashed #cbd5e1; }
+
+    #selection-btn {
+      position: absolute;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(99,102,241,0.45);
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    #selection-btn:hover { background: #4f46e5; }
+
+    .comment-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.35);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .comment-modal {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .comment-modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+    #comment-selected-preview {
+      font-size: 12px;
+      color: #475569;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 3px solid #6366f1;
+      margin-bottom: 14px;
+      font-style: italic;
+    }
+    #comment-input {
+      width: 100%;
+      height: 90px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      outline: none;
+      color: #0f172a;
+      transition: border-color 0.15s;
+    }
+    #comment-input:focus { border-color: #6366f1; }
+    .comment-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+    .btn-cancel {
+      padding: 8px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-submit {
+      padding: 8px 18px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-submit:hover { background: #4f46e5; }
+
+    .comment-popover {
+      position: fixed;
+      z-index: 1500;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      width: 280px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+      font-family: 'Inter', sans-serif;
+    }
+
+    #comments-toggle {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 600;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+    #comments-toggle:hover { background: #4f46e5; }
+
+    #comments-panel {
+      position: fixed;
+      top: 0;
+      right: -360px;
+      width: 340px;
+      height: 100vh;
+      background: white;
+      border-left: 1px solid #e2e8f0;
+      z-index: 500;
+      transition: right 0.25s ease;
+      overflow-y: auto;
+      padding: 24px 20px;
+      font-family: 'Inter', sans-serif;
+    }
+    #comments-panel.open { right: 0; }
+
+    .comment-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .comment-item:hover { border-color: #6366f1; }
+    .comment-item.resolved { opacity: 0.5; cursor: default; }
+    .comment-item.resolved:hover { border-color: #e2e8f0; }
+    .comment-action-btn {
+      font-size: 11px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="doc-badge"><span class="live-dot"></span> Living Doc &nbsp;·&nbsp; v0.1</div>
+    <h1>GDS AI Development Framework</h1>
+    <div class="meta">Updated 2026-04-29 · Owner: Haewon Yum</div>
+  </div>
+  <nav>
+    <div class="section-label">Overview</div>
+    <a href="#purpose">Purpose</a>
+    <a href="#architecture">Framework Architecture</a>
+
+    <div class="section-label">Layers</div>
+    <a href="#baseline">Baseline AI Environment</a>
+    <a href="#stack">Tech Stack Inventory</a>
+    <a href="#tiers">Lifecycle Tiers</a>
+    <a href="#knowledge">Knowledge Layer</a>
+    <a href="#agents">Agent Architecture</a>
+
+    <div class="section-label">Team</div>
+    <a href="#proficiency">AI Proficiency Ladder</a>
+    <a href="#decisions">Open Decisions</a>
+  </nav>
+  <div class="sidebar-footer">
+    GDS · Moloco<br/>
+    This doc evolves with the team.
+  </div>
+</aside>
+
+<!-- ════════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════════ -->
+<main>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="version-row">
+      <span class="badge badge-version">v0.1</span>
+      <span class="badge badge-living">Living Document</span>
+      <span class="badge badge-draft">Draft</span>
+    </div>
+    <h1>GDS AI Development Framework</h1>
+    <p>A clear guideline for the GDS team on leveraging AI — accelerating speed of development, enabling knowledge sharing, and upleveling team AI proficiency without slowing down exploration or new invention.</p>
+  </div>
+
+  <!-- ── 1. PURPOSE ── -->
+  <section id="purpose">
+    <h2><span class="section-num">01</span> Purpose &amp; Scope</h2>
+    <p class="section-desc">Why this framework exists and what it governs.</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+      <div class="card">
+        <div class="card-title">⚡ Accelerate</div>
+        <p>Reduce time from question → insight → deployed service by standardizing how AI tools are used across the team.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔁 Share</div>
+        <p>Prevent knowledge fragmentation. When one team member solves a hard problem, everyone benefits — immediately and permanently.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 Uplevel</div>
+        <p>Build a clear proficiency ladder so every GDS member can grow from user → builder → architect of AI-powered analytics.</p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: 20px;">
+      <strong>Core tension to manage:</strong> Standardization should accelerate exploration, not block it. The framework defines <em>on-ramps</em> (how work gets promoted from personal → team → production), not gates that slow individual work.
+    </div>
+  </section>
+
+  <!-- ── 2. ARCHITECTURE ── -->
+  <section id="architecture">
+    <h2><span class="section-num">02</span> Framework Architecture</h2>
+    <p class="section-desc">Three layers: what we build on, how we build, and how we sustain.</p>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label foundation">Foundation</div>
+      <div class="arch-layer-content">
+        <span class="arch-chip">GCP Infrastructure</span>
+        <span class="arch-chip">LLM · Claude</span>
+        <span class="arch-chip">n8n Workflow</span>
+        <span class="arch-chip">GitHub-managed CLAUDE.md</span>
+        <span class="arch-chip">Shared memory templates</span>
+        <span class="arch-chip">Moloco domain wiki</span>
+        <span class="arch-chip">MCP connections</span>
+      </div>
+    </div>
+
+    <div class="arch-arrow">↕</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label development">Development</div>
+      <div class="arch-layer-content">
+        <span class="arch-chip">Analysis · Colab</span>
+        <span class="arch-chip">Skill · Speedboat</span>
+        <span class="arch-chip">Service · Cloud Run</span>
+        <span class="arch-chip">Report · HTML</span>
+        <span class="arch-chip">Agent · Searchlight / BQ Agent</span>
+      </div>
+    </div>
+
+    <div class="arch-arrow">↕</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label operations">Operations</div>
+      <div class="arch-layer-content">
+        <span class="arch-chip">Glean discoverability</span>
+        <span class="arch-chip">Feedback loops</span>
+        <span class="arch-chip">Version control</span>
+        <span class="arch-chip">AI proficiency tracking</span>
+        <span class="arch-chip">Skill review &amp; ownership</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. BASELINE ENVIRONMENT ── -->
+  <section id="baseline">
+    <h2><span class="section-num">03</span> Baseline AI Environment</h2>
+    <p class="section-desc">One-stop setup every GDS team member runs on day one. Managed in GitHub — updates propagate to everyone via <code>git pull</code>.</p>
+
+    <div class="callout">
+      <strong>Key insight:</strong> Domain knowledge (CLAUDE.md, memory, validated SQL) must be team-owned and version-controlled in GitHub — not scattered in personal <code>~/.claude/</code> directories. Searchlight and BQ Agent are only as good as the context they're grounded in.
+    </div>
+
+    <h3>Proposed repo: <code>moloco/gds-ai-toolkit</code></h3>
+
+    <div class="code-block">
+<span class="dir">gds-ai-toolkit/</span>
+├── <span class="file">CLAUDE.md</span>            <span class="desc"># Team-shared base context (GDS conventions, anti-patterns)</span>
+├── <span class="file">.mcp.json</span>            <span class="desc"># Standard MCP connections (BQ Agent, Glean, Jira, Slack, Jupyter, Drive)</span>
+├── <span class="dir">memory/</span>              <span class="desc"># Shared memory templates — team pulls, personalizes on top</span>
+│   ├── <span class="file">bq_tables.md</span>     <span class="desc"># Verified BQ schemas + gotchas (app_market_bundle nesting, etc.)</span>
+│   ├── <span class="file">client_profiles.md</span> <span class="desc"># Key clients: bundle IDs, KPI targets, contacts</span>
+│   └── <span class="file">conventions.md</span>   <span class="desc"># GDS SQL patterns, naming, notebook structure</span>
+├── <span class="dir">sql/</span>                 <span class="desc"># Validated, reusable SQL patterns</span>
+│   ├── <span class="file">market_share_soi.sql</span>
+│   ├── <span class="file">campaign_performance.sql</span>
+│   └── <span class="file">launch_analysis_template.sql</span>
+├── <span class="dir">skills/</span>              <span class="desc"># GDS-specific Claude Code skills (pre-installed)</span>
+├── <span class="file">setup.sh</span>             <span class="desc"># One-command setup: installs Claude Code, links MCP, populates memory</span>
+└── <span class="file">README.md</span>
+    </div>
+
+    <h3>Contribution model</h3>
+    <table style="margin-top: 8px;">
+      <thead>
+        <tr>
+          <th>What you discover</th>
+          <th>Where it goes</th>
+          <th>How</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BQ schema gotcha or new column path</td>
+          <td><code>memory/bq_tables.md</code></td>
+          <td>PR to gds-ai-toolkit</td>
+        </tr>
+        <tr>
+          <td>Validated SQL pattern</td>
+          <td><code>sql/</code></td>
+          <td>PR to gds-ai-toolkit</td>
+        </tr>
+        <tr>
+          <td>New GDS convention or anti-pattern</td>
+          <td><code>CLAUDE.md</code></td>
+          <td>PR to gds-ai-toolkit</td>
+        </tr>
+        <tr>
+          <td>Client context (bundle ID, KPI targets)</td>
+          <td>Client Slack channel (e.g. <code>#ads-netmarble</code>) + <code>memory/client_profiles.md</code></td>
+          <td>Slack post + PR to toolkit</td>
+        </tr>
+        <tr>
+          <td>New skill ready to share</td>
+          <td>Speedboat marketplace</td>
+          <td>Skill review → publish</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warn" style="margin-top: 16px;">
+      <strong>Open question:</strong> New repo vs. extend existing <code>mobius</code> repo? — see Open Decisions section.
+    </div>
+  </section>
+
+  <!-- ── 4. TECH STACK INVENTORY ── -->
+  <section id="stack">
+    <h2><span class="section-num">04</span> Tech Stack Inventory</h2>
+    <p class="section-desc">Current tools per category, status, and open questions. Update as the stack evolves.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Stack</th>
+          <th>Tool</th>
+          <th>Status</th>
+          <th>Open Questions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="3"><strong>Infrastructure</strong></td>
+          <td>Cloud</td>
+          <td>GCP</td>
+          <td><span class="status status-active">Active</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>LLM interface</td>
+          <td>Claude Code</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><ul class="q-list"><li>Efficient token consumption strategy?</li><li>How to enforce model selection (Haiku vs Sonnet vs Opus)?</li></ul></td>
+        </tr>
+        <tr>
+          <td>Workflow orchestration</td>
+          <td>n8n</td>
+          <td><span class="status status-exploring">Exploring</span></td>
+          <td><ul class="q-list"><li>Which recurring workflows are worth automating?</li></ul></td>
+        </tr>
+        <tr>
+          <td><strong>Baseline Env</strong></td>
+          <td>GitHub-managed context</td>
+          <td>CLAUDE.md + memory + MCP config</td>
+          <td><span class="status status-planning">Planning</span></td>
+          <td><ul class="q-list"><li>New repo vs. extend mobius?</li><li>Sync/update cadence for team?</li></ul></td>
+        </tr>
+        <tr>
+          <td><strong>Skill</strong></td>
+          <td>Marketplace plugin</td>
+          <td>Speedboat</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><ul class="q-list"><li>Standardized skill template?</li><li>Review/validation process before publishing?</li></ul></td>
+        </tr>
+        <tr>
+          <td><strong>Agent</strong></td>
+          <td>AI agents</td>
+          <td>Searchlight, BQ Agent, MOBIUS</td>
+          <td><span class="status status-active">Active (partial)</span></td>
+          <td><ul class="q-list"><li>How to compose agents for "virtual GDS" use case?</li><li>Which agents serve Sales/AM directly?</li></ul></td>
+        </tr>
+        <tr>
+          <td><strong>Service</strong></td>
+          <td>Deployment</td>
+          <td>Google Cloud Run</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><ul class="q-list"><li>Standardized GCR deployment template?</li><li>One-stop build → deploy pipeline?</li></ul></td>
+        </tr>
+        <tr>
+          <td><strong>Report</strong></td>
+          <td>HTML reports</td>
+          <td>HTML deployment platform (GAS)</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><ul class="q-list"><li>How to collect/exchange feedback on HTML reports?</li><li>Can HTML reports be Glean-indexed (Drive mirroring)?</li></ul></td>
+        </tr>
+        <tr>
+          <td rowspan="2"><strong>Analysis</strong></td>
+          <td>Notebook</td>
+          <td>Google Colab</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><ul class="q-list"><li>Shared team Colab repo (vs. individual fragmentation)?</li><li>How to validate Colab SQL before sharing?</li><li>Cross-team reusability?</li></ul></td>
+        </tr>
+        <tr>
+          <td>AI-assisted analysis</td>
+          <td>Searchlight, BQ Agent</td>
+          <td><span class="status status-active">Active</span></td>
+          <td><ul class="q-list"><li>Optimal local environment for max efficiency?</li></ul></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 5. LIFECYCLE TIERS ── -->
+  <section id="tiers">
+    <h2><span class="section-num">05</span> Lifecycle Tiers</h2>
+    <p class="section-desc">How work moves from personal exploration to team asset to production service. The tier defines the required standard — not a gate, but an on-ramp.</p>
+
+    <div class="tier-grid">
+      <div class="tier-card t1">
+        <div class="tier-num">Tier 1</div>
+        <div class="tier-name">Explore</div>
+        <ul>
+          <li>One-off query, notebook, or local skill</li>
+          <li>No review required</li>
+          <li>No documentation needed</li>
+          <li>Owned by individual</li>
+          <li>Not shared by default</li>
+        </ul>
+      </div>
+      <div class="tier-card t2">
+        <div class="tier-num">Tier 2</div>
+        <div class="tier-name">Share</div>
+        <ul>
+          <li>Posted to GDS shared folder or Slack</li>
+          <li>Basic explanation of what/why</li>
+          <li>SQL must run without errors</li>
+          <li>Peer awareness (no formal review)</li>
+          <li>Colab or HTML format preferred</li>
+        </ul>
+      </div>
+      <div class="tier-card t3">
+        <div class="tier-num">Tier 3</div>
+        <div class="tier-name">Standardize</div>
+        <ul>
+          <li>Speedboat skill or gds-ai-toolkit SQL</li>
+          <li>Peer review required</li>
+          <li>Input/output documented</li>
+          <li>Owner assigned</li>
+          <li>Validated against known baseline</li>
+        </ul>
+      </div>
+      <div class="tier-card t4">
+        <div class="tier-num">Tier 4</div>
+        <div class="tier-name">Productionize</div>
+        <ul>
+          <li>GCR service with public URL</li>
+          <li>Deployment checklist passed</li>
+          <li>SLA &amp; monitoring defined</li>
+          <li>On-call / owner registered</li>
+          <li>Deprecation policy set</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Promotion criteria</h3>
+    <table style="margin-top: 8px;">
+      <thead>
+        <tr><th>From → To</th><th>Trigger</th><th>Minimum bar</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>T1 → T2</td>
+          <td>Another team member would use this</td>
+          <td>SQL runs; brief context written in Slack or Colab header</td>
+        </tr>
+        <tr>
+          <td>T2 → T3</td>
+          <td>Used by &gt;1 person or repeatedly requested</td>
+          <td>Peer review, owner named, documented inputs/outputs</td>
+        </tr>
+        <tr>
+          <td>T3 → T4</td>
+          <td>Business team needs to access it without GDS involvement</td>
+          <td>GCR deploy checklist, monitoring, SLA commitment</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 6. KNOWLEDGE LAYER ── -->
+  <section id="knowledge">
+    <h2><span class="section-num">06</span> Domain Knowledge Layer</h2>
+    <p class="section-desc">What grounds AI agents in GDS/Moloco context — and how knowledge flows from individual discovery to team-wide availability.</p>
+
+    <div class="knowledge-flow">
+      <div class="kf-box">
+        <h4>📝 Knowledge Sources</h4>
+        <ul>
+          <li>Shared CLAUDE.md (GitHub)</li>
+          <li>Validated SQL (GitHub)</li>
+          <li>Client profiles (Notion)</li>
+          <li>Moloco wiki (Notion/Confluence)</li>
+          <li>BQ schemas (live via BQ Agent)</li>
+        </ul>
+      </div>
+      <div class="kf-arrow">→</div>
+      <div class="kf-box">
+        <h4>🔍 Index &amp; Retrieval</h4>
+        <ul>
+          <li>Glean indexes Notion + Drive</li>
+          <li>GitHub code search</li>
+          <li>BQ Agent for live schema</li>
+          <li>CLAUDE.md loaded at session start</li>
+        </ul>
+      </div>
+      <div class="kf-arrow">→</div>
+      <div class="kf-box">
+        <h4>🤖 Grounded Agents</h4>
+        <ul>
+          <li>Searchlight (/investigate)</li>
+          <li>BQ Agent (SQL execution)</li>
+          <li>MOBIUS (domain-aware queries)</li>
+          <li>Future: /domain-context skill</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Searchlight as retrieval engine, not knowledge store.</strong> Searchlight surfaces knowledge from Glean, Notion, and BQ — but the knowledge must first be written somewhere Glean can index. The missing piece is a <em>contribution workflow</em>: where does a team member's discovered insight land so everyone benefits?
+    </div>
+
+    <h3>Knowledge types &amp; homes</h3>
+    <table style="margin-top: 8px;">
+      <thead>
+        <tr><th>Knowledge Type</th><th>Lives in</th><th>Indexed by</th><th>Contributed via</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BQ schema gotchas, column paths</td>
+          <td><code>gds-ai-toolkit/memory/bq_tables.md</code></td>
+          <td>CLAUDE.md load + GitHub search</td>
+          <td>PR to toolkit repo</td>
+        </tr>
+        <tr>
+          <td>Client context (KPIs, bundles, contacts)</td>
+          <td>Client Slack channel (e.g. <code>#ads-netmarble</code>) + <code>memory/client_profiles.md</code></td>
+          <td>Glean (Slack indexed)</td>
+          <td>Slack post + PR to toolkit</td>
+        </tr>
+        <tr>
+          <td>Moloco terminology, product concepts</td>
+          <td>Notion/Confluence wiki</td>
+          <td>Glean</td>
+          <td>Wiki edit</td>
+        </tr>
+        <tr>
+          <td>Validated SQL patterns</td>
+          <td><code>gds-ai-toolkit/sql/</code></td>
+          <td>GitHub search</td>
+          <td>PR to toolkit repo</td>
+        </tr>
+        <tr>
+          <td>GDS conventions &amp; anti-patterns</td>
+          <td><code>gds-ai-toolkit/CLAUDE.md</code></td>
+          <td>CLAUDE.md load</td>
+          <td>PR to toolkit repo</td>
+        </tr>
+        <tr>
+          <td>Past analyses &amp; findings</td>
+          <td>Google Drive (Colab/Docs)</td>
+          <td>Glean</td>
+          <td>Save to GDS shared Drive</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 7. AGENT ARCHITECTURE ── -->
+  <section id="agents">
+    <h2><span class="section-num">07</span> Agent Architecture</h2>
+    <p class="section-desc">How existing and future agents are composed. Goal: a "Virtual GDS" that any stakeholder can interact with.</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <div class="card">
+        <div class="card-title">BQ Agent</div>
+        <p><strong>Responsibility:</strong> SQL execution, schema discovery, query validation.<br/>
+        <strong>Interface:</strong> Invoked by MOBIUS / Searchlight, never directly.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">MOBIUS</div>
+        <p><strong>Responsibility:</strong> Domain-aware query planning. Grounds BQ queries in Moloco context before execution.<br/>
+        <strong>Interface:</strong> Claude Code chat.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Searchlight</div>
+        <p><strong>Responsibility:</strong> Cross-domain RCA — BQ + Glean + Jira + Drive + Looker in one investigation.<br/>
+        <strong>Interface:</strong> Skill-prefixed CLI (<code>/investigate</code>, <code>/campaign-status</code>).</p>
+      </div>
+    </div>
+
+    <h3>Future: Virtual GDS Agent</h3>
+    <p class="section-desc">A composed agent that business stakeholders (Sales, AM) can query directly — answering campaign questions, surfacing past analyses, and routing to deeper investigation when needed.</p>
+
+    <div class="callout callout-warn">
+      <strong>Not yet defined.</strong> Architecture decisions needed: orchestration pattern (sequential vs. parallel agents), entry point (Slack bot / web UI / Claude Code), scope of access, and handoff protocol to human GDS analyst.
+    </div>
+  </section>
+
+  <!-- ── 8. PROFICIENCY LADDER ── -->
+  <section id="proficiency">
+    <h2><span class="section-num">08</span> AI Proficiency Ladder</h2>
+    <p class="section-desc">How GDS members grow from AI users to AI architects. Each level has clear capabilities and contributions.</p>
+
+    <div class="proficiency-row">
+      <div class="prof-card">
+        <div class="prof-level">Level 1</div>
+        <div class="prof-title">User</div>
+        <ul>
+          <li>Uses Claude Code for daily analysis</li>
+          <li>Runs existing skills (/investigate, /campaign)</li>
+          <li>Follows GDS CLAUDE.md conventions</li>
+          <li>Can read and run shared SQL from toolkit</li>
+        </ul>
+      </div>
+      <div class="prof-card">
+        <div class="prof-level">Level 2</div>
+        <div class="prof-title">Contributor</div>
+        <ul>
+          <li>Contributes to gds-ai-toolkit (PR)</li>
+          <li>Writes validated SQL → submits to shared library</li>
+          <li>Builds and shares Tier 2 analyses</li>
+          <li>Identifies when to use Haiku vs. Sonnet vs. Opus</li>
+        </ul>
+      </div>
+      <div class="prof-card">
+        <div class="prof-level">Level 3</div>
+        <div class="prof-title">Builder</div>
+        <ul>
+          <li>Builds Tier 3 Speedboat skills</li>
+          <li>Designs multi-step agent workflows</li>
+          <li>Deploys Tier 4 GCR services</li>
+          <li>Writes CLAUDE.md conventions for others</li>
+        </ul>
+      </div>
+      <div class="prof-card">
+        <div class="prof-level">Level 4</div>
+        <div class="prof-title">Architect</div>
+        <ul>
+          <li>Designs GDS agent architecture</li>
+          <li>Owns gds-ai-toolkit direction</li>
+          <li>Defines skill validation standards</li>
+          <li>Mentors others across all levels</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 9. OPEN DECISIONS ── -->
+  <section id="decisions">
+    <h2><span class="section-num">09</span> Open Decisions</h2>
+    <p class="section-desc">Decisions that block framework progress. Assign an owner and deadline — or explicitly defer.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Decision</th>
+          <th>Options</th>
+          <th>Owner</th>
+          <th>Due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>gds-ai-toolkit repo location</strong><br/><span style="font-size:11px;color:#64748b;">Where does the shared team baseline environment live?</span></td>
+          <td>New <code>moloco/gds-ai-toolkit</code> repo vs. extend <code>mobius</code></td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-open">Open</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Skill review / approval process</strong><br/><span style="font-size:11px;color:#64748b;">Who approves a Tier 3 skill before it goes to Speedboat marketplace?</span></td>
+          <td>Single designated owner vs. peer review (≥1 reviewer)</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-open">Open</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Token / API cost ownership</strong><br/><span style="font-size:11px;color:#64748b;">How are Claude API costs tracked and allocated?</span></td>
+          <td>Team budget pool vs. individual allocation</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-open">Open</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Colab fragmentation fix</strong><br/><span style="font-size:11px;color:#64748b;">Currently fragmented by individual Google accounts.</span></td>
+          <td>Shared GDS Google Drive folder vs. GitHub repo</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-open">Open</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>HTML report discoverability</strong><br/><span style="font-size:11px;color:#64748b;">Can HTML reports be indexed by Glean for team search?</span></td>
+          <td>Drive-mirrored HTML vs. native Glean connector vs. Notion embed</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-tbd">Needs IT input</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><strong>Knowledge contribution cadence</strong><br/><span style="font-size:11px;color:#64748b;">How often does the team sync and review toolkit contributions?</span></td>
+          <td>Weekly GDS sync agenda item vs. async PR review only</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-open">Open</span></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><strong>Virtual GDS agent scope</strong><br/><span style="font-size:11px;color:#64748b;">What can Sales/AM ask the virtual GDS agent? Where does it live?</span></td>
+          <td>Slack bot vs. web UI vs. Claude Code project</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-tbd">Future</span></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><strong>Model selection policy</strong><br/><span style="font-size:11px;color:#64748b;">How do we ensure the right Claude model is used for cost efficiency?</span></td>
+          <td>Haiku for fast/cheap, Sonnet default, Opus for deep analysis</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="status status-open">Open</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Footer -->
+  <div style="margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); color: #94a3b8; font-size: 12px; display: flex; justify-content: space-between;">
+    <span>GDS AI Development Framework · v0.1 · Living Document</span>
+    <span>Last updated: 2026-04-29 · Owner: Haewon Yum (KOR GDS)</span>
+  </div>
+
+</main>
+
+<!-- ── Floating comment button ── -->
+<button id="selection-btn" onclick="openCommentModal()">💬 Comment</button>
+
+<!-- ── Comment input modal ── -->
+<div id="comment-modal-overlay" class="comment-modal-overlay" onclick="if(event.target===this)closeCommentModal()">
+  <div class="comment-modal">
+    <h3>Add Comment</h3>
+    <div id="comment-selected-preview"></div>
+    <textarea id="comment-input" placeholder="Write your comment… (⌘↵ to submit)" onkeydown="if(event.key==='Enter'&&(event.metaKey||event.ctrlKey))submitComment()"></textarea>
+    <div style="font-size:11px;color:#94a3b8;margin-top:4px">⌘↵ to submit</div>
+    <div class="comment-modal-actions">
+      <button class="btn-cancel" onclick="closeCommentModal()">Cancel</button>
+      <button class="btn-submit" onclick="submitComment()">Add Comment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Comments toggle button ── -->
+<button id="comments-toggle" onclick="toggleCommentsPanel()">💬 Comments</button>
+
+<!-- ── Comments panel ── -->
+<div id="comments-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <span style="font-size:15px;font-weight:700">Comments</span>
+    <button onclick="toggleCommentsPanel()" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:20px;line-height:1">×</button>
+  </div>
+  <div id="comments-list"></div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'gds-framework-comments-v1';
+  let comments = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  let pendingSelection = null;
+
+  function saveComments() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  // ── Selection detection ──
+  document.addEventListener('mouseup', function(e) {
+    if (e.target.closest('#comment-modal-overlay') || e.target.closest('#comments-panel') || e.target.closest('#selection-btn') || e.target.closest('.comment-highlight')) return;
+    setTimeout(() => {
+      const sel = window.getSelection();
+      const text = sel ? sel.toString().trim() : '';
+      const btn = document.getElementById('selection-btn');
+      if (text.length > 2 && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        btn.style.display = 'flex';
+        btn.style.top  = (rect.top  + window.scrollY - 42) + 'px';
+        btn.style.left = (rect.left + rect.width / 2 - 58) + 'px';
+        pendingSelection = { text, range: range.cloneRange() };
+      } else {
+        btn.style.display = 'none';
+      }
+    }, 10);
+  });
+
+  document.addEventListener('mousedown', function(e) {
+    if (!e.target.closest('#selection-btn') && !e.target.closest('#comment-modal-overlay')) {
+      document.getElementById('selection-btn').style.display = 'none';
+    }
+  });
+
+  // ── Modal ──
+  function openCommentModal() {
+    document.getElementById('selection-btn').style.display = 'none';
+    if (!pendingSelection) return;
+    const preview = pendingSelection.text.length > 120
+      ? pendingSelection.text.slice(0, 120) + '…'
+      : pendingSelection.text;
+    document.getElementById('comment-selected-preview').textContent = '"' + preview + '"';
+    document.getElementById('comment-input').value = '';
+    document.getElementById('comment-modal-overlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('comment-input').focus(), 50);
+  }
+
+  function closeCommentModal() {
+    document.getElementById('comment-modal-overlay').style.display = 'none';
+    pendingSelection = null;
+  }
+
+  function submitComment() {
+    const text = document.getElementById('comment-input').value.trim();
+    if (!text || !pendingSelection) return;
+    const id = uid();
+
+    // Wrap selection in a highlight mark
+    const mark = createMark(id);
+    applyHighlight(pendingSelection.range, mark);
+
+    comments.push({
+      id,
+      selectedText: pendingSelection.text,
+      comment: text,
+      author: 'Haewon',
+      ts: new Date().toISOString(),
+      resolved: false
+    });
+
+    saveComments();
+    renderPanel();
+    updateToggle();
+    closeCommentModal();
+  }
+
+  function createMark(id) {
+    const mark = document.createElement('mark');
+    mark.className = 'comment-highlight';
+    mark.dataset.commentId = id;
+    mark.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showPopover(id, mark);
+    });
+    return mark;
+  }
+
+  // Wraps a range in a mark — handles cross-element selections via extract+reinsert fallback
+  function applyHighlight(range, mark) {
+    try {
+      range.surroundContents(mark);
+    } catch(e) {
+      mark.appendChild(range.extractContents());
+      range.insertNode(mark);
+    }
+  }
+
+  // Finds a text string across element boundaries by mapping all text nodes to a flat string
+  function findTextRange(root, searchText) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      // Skip text inside existing marks (already highlighted)
+      if (node.parentElement.closest('.comment-highlight')) continue;
+      nodes.push(node);
+    }
+
+    let flat = '', offsets = [];
+    nodes.forEach(n => { offsets.push(flat.length); flat += n.textContent; });
+
+    const idx = flat.indexOf(searchText);
+    if (idx === -1) return null;
+
+    const endIdx = idx + searchText.length;
+    let startNode, startOff, endNode, endOff;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const s = offsets[i], e = s + nodes[i].textContent.length;
+      if (!startNode && e > idx)   { startNode = nodes[i]; startOff = idx  - s; }
+      if (!endNode   && e >= endIdx) { endNode   = nodes[i]; endOff   = endIdx - s; }
+      if (startNode && endNode) break;
+    }
+
+    if (!startNode || !endNode) return null;
+    const r = document.createRange();
+    r.setStart(startNode, startOff);
+    r.setEnd(endNode, endOff);
+    return r;
+  }
+
+  // ── Popover ──
+  function showPopover(id, anchor) {
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    const c = comments.find(x => x.id === id);
+    if (!c) return;
+
+    const rect = anchor.getBoundingClientRect();
+    const pop = document.createElement('div');
+    pop.className = 'comment-popover';
+    pop.style.top  = (rect.bottom + 8) + 'px';
+    pop.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+    pop.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:#6366f1">${c.author}</span>
+        <span style="font-size:11px;color:#94a3b8">${new Date(c.ts).toLocaleDateString()}</span>
+      </div>
+      <p style="font-size:13px;color:#0f172a;margin-bottom:12px;line-height:1.5">${escHtml(c.comment)}</p>
+      <div style="display:flex;gap:12px">
+        <button class="comment-action-btn" style="color:#10b981" onclick="resolveComment('${id}')">✓ Resolve</button>
+        <button class="comment-action-btn" style="color:#ef4444" onclick="deleteComment('${id}')">Delete</button>
+      </div>`;
+    document.body.appendChild(pop);
+
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        if (!e.target.closest('.comment-popover') && !e.target.closest('.comment-highlight')) {
+          pop.remove();
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 200);
+  }
+
+  // ── Actions ──
+  function resolveComment(id) {
+    comments = comments.map(c => c.id === id ? { ...c, resolved: true } : c);
+    saveComments();
+    removeHighlight(id);
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    renderPanel();
+    updateToggle();
+  }
+
+  function deleteComment(id) {
+    comments = comments.filter(c => c.id !== id);
+    saveComments();
+    removeHighlight(id);
+    document.querySelectorAll('.comment-popover').forEach(p => p.remove());
+    renderPanel();
+    updateToggle();
+  }
+
+  function removeHighlight(id) {
+    const mark = document.querySelector(`mark[data-comment-id="${id}"]`);
+    if (!mark) return;
+    const parent = mark.parentNode;
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+  }
+
+  // ── Panel ──
+  function toggleCommentsPanel() {
+    const panel = document.getElementById('comments-panel');
+    panel.classList.toggle('open');
+    document.querySelector('main').style.marginRight =
+      panel.classList.contains('open') ? '340px' : '';
+  }
+
+  function renderPanel() {
+    const active   = comments.filter(c => !c.resolved);
+    const resolved = comments.filter(c =>  c.resolved);
+    const list = document.getElementById('comments-list');
+
+    if (!active.length && !resolved.length) {
+      list.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:13px;padding:24px 0">No comments yet.<br/>Select any text to add one.</p>';
+      return;
+    }
+
+    let html = '';
+    if (active.length) {
+      html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:10px">Open · ${active.length}</div>`;
+      active.forEach(c => {
+        html += `
+          <div class="comment-item" onclick="scrollTo('${c.id}')">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:700;color:#6366f1">${c.author}</span>
+              <span style="font-size:11px;color:#94a3b8">${new Date(c.ts).toLocaleDateString()}</span>
+            </div>
+            <div style="font-size:11px;color:#64748b;font-style:italic;margin-bottom:6px">"${escHtml(c.selectedText.slice(0,80))}${c.selectedText.length>80?'…':''}"</div>
+            <div style="font-size:13px;color:#0f172a;margin-bottom:10px;line-height:1.5">${escHtml(c.comment)}</div>
+            <div style="display:flex;gap:12px">
+              <button class="comment-action-btn" style="color:#10b981" onclick="event.stopPropagation();resolveComment('${c.id}')">✓ Resolve</button>
+              <button class="comment-action-btn" style="color:#ef4444" onclick="event.stopPropagation();deleteComment('${c.id}')">Delete</button>
+            </div>
+          </div>`;
+      });
+    }
+    if (resolved.length) {
+      html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin:20px 0 10px">Resolved · ${resolved.length}</div>`;
+      resolved.forEach(c => {
+        html += `
+          <div class="comment-item resolved">
+            <div style="font-size:11px;color:#94a3b8;font-style:italic;margin-bottom:4px">"${escHtml(c.selectedText.slice(0,80))}${c.selectedText.length>80?'…':''}"</div>
+            <div style="font-size:12px;color:#94a3b8">${escHtml(c.comment)}</div>
+          </div>`;
+      });
+    }
+    list.innerHTML = html;
+  }
+
+  function scrollTo(id) {
+    const mark = document.querySelector(`mark[data-comment-id="${id}"]`);
+    if (!mark) return;
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    mark.style.outline = '2px solid #6366f1';
+    mark.style.outlineOffset = '2px';
+    setTimeout(() => { mark.style.outline = ''; mark.style.outlineOffset = ''; }, 1500);
+  }
+
+  function updateToggle() {
+    const n = comments.filter(c => !c.resolved).length;
+    document.getElementById('comments-toggle').textContent = n > 0 ? `💬 Comments (${n})` : '💬 Comments';
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Re-apply highlights on load ──
+  function reapplyHighlights() {
+    const root = document.querySelector('main');
+    comments.filter(c => !c.resolved).forEach(c => {
+      const range = findTextRange(root, c.selectedText);
+      if (!range) return;
+      applyHighlight(range, createMark(c.id));
+    });
+  }
+
+  // ── Init ──
+  document.addEventListener('DOMContentLoaded', () => {
+    reapplyHighlights();
+    renderPanel();
+    updateToggle();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "step": 0,
+  "verdict": "OK",
+  "campaigns": [
+    {
+      "campaign_id": "RGPQHVtHfPNlSXcU",
+      "kpi_event": "zp_npuall",
+      "state": "ACTIVE",
+      "inactive_since": null,
+      "note": "Currently active — latest entity history: ACTIVE 2026-04-17. Brief pause on 2026-04-15 then reactivated."
+    },
+    {
+      "campaign_id": "Nu3RqJ9SKxUQHmK4",
+      "kpi_event": "zp_npuall",
+      "state": "PAUSED",
+      "inactive_since": "2026-04-09T06:58:13Z",
+      "note": "Paused 9 days ago (2026-04-09). Within 60-day inactive window."
+    },
+    {
+      "campaign_id": "f6EhdMGNHwGpKD4l",
+      "kpi_event": "zp_npuall",
+      "state": "DRAFT",
+      "inactive_since": null,
+      "note": "Never activated (no entity history). Draft state only."
+    }
+  ]
+}

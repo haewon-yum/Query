@@ -1,0 +1,3 @@
+campaign_id,bundle,table,date_range,d1_avg_action_labels,d7_avg_action_labels,cnt,note
+onLf8YMrzBKrT80y,id6550902247,tfexample_action_campaignlog_imp_v2,2026-03-13 to 2026-03-27,,,0,NO DATA - campaign has never bid so no impression-level finetuning samples exist
+onLf8YMrzBKrT80y,id6550902247,tfexample_action_postback_imp_v4_beta5_merged,2026-03-13 to 2026-03-27,,,0,NO DATA - no install-level pretraining samples found either

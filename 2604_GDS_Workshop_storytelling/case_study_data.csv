@@ -1,0 +1,27 @@
+## TABLE 1: First Purchase Amount (among m_rev_5 converters, iOS only)
+## Source: focal-elf-631.prod_stream_view.cv | Advertiser: nBsHBgiHeOljDuHW | Period: 2025-01-01 to 2025-04-15
+## What this shows: For users who successfully triggered m_rev_5, what was the size of their FIRST in-app purchase?
+## Key insight: All markets share similar medians (~$2-3), but USA has much wider P75 ($8) vs T2 markets ($2.9-3.3) — indicating a more whale-heavy, heterogeneous user base.
+
+country,os,user_count,avg_first_purchase_usd,p25_first_purchase_usd,median_first_purchase_usd,p75_first_purchase_usd
+AUS,IOS,50,4.1,1.9,3.0,3.1
+CAN,IOS,39,3.3,1.9,2.0,2.9
+DEU,IOS,41,3.8,1.1,2.2,3.0
+GBR,IOS,62,5.7,2.3,3.2,3.3
+JPN,IOS,829,6.3,2.1,3.2,12.2
+KOR,IOS,646,6.0,2.0,3.0,10.6
+USA,IOS,580,5.2,2.0,3.0,8.0
+
+## TABLE 2: Purchase Count & Accumulated Spend Before m_rev_5 Fires (iOS only, aggregated from user-level data)
+## Source: focal-elf-631.prod_stream_view.cv | Advertiser: nBsHBgiHeOljDuHW | Period: 2025-01-01 to 2025-04-15
+## What this shows: For m_rev_5 converters, how many af_purchase events occurred — and how much total spend accumulated — before the m_rev_5 event fired?
+## Key insight: T2 markets (AUS/CAN/DEU) reach m_rev_5 in 1 purchase (~$2-4). USA average is $31 but median is only $4 — the gap signals whale outliers pulling up the mean.
+
+country,os,n_users,avg_iap_count_before_rev5,median_iap_count_before_rev5,avg_total_spend_before_rev5_usd,median_total_spend_before_rev5_usd
+AUS,IOS,24,1.2,1,2.8,1.9
+CAN,IOS,29,1.4,1,3.4,2.9
+DEU,IOS,18,1.2,1,4.3,2.2
+GBR,IOS,51,1.8,2,6.6,5.5
+JPN,IOS,405,9.0,5,53.5,23.0
+KOR,IOS,258,8.7,4,51.9,23.9
+USA,IOS,436,5.7,1,31.4,4.0

@@ -1,0 +1,85 @@
+}
+campaign_stats {
+  campaign: "SqHUbqoeXYnCj6Ow"
+  product_app_bundle: "id6739246483"
+  dev_os: IOS
+  platform: "LIHUHU"
+  product_id: "sDMiZJXvhFbrcdOy"
+  advertiser: "hGlSfm9ulyvAXwYB"
+  action_stats {
+    kpi_event: "af_ad_revenue"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    pricing_metadata_type: TYPE_ACTION_LAT
+    normalizer: 0.8041973226794666
+    pb_eval_info {
+    }
+    bid_eval_info {
+    }
+  }
+  campaign_goal {
+    type: OPTIMIZE_ROAS_FOR_APP_UA
+    optimize_app_roas {
+      revenue_actions: "af_ad_revenue"
+      budget_centric {
+        rate: 1.0
+      }
+      post_conversion_pred_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    }
+    kpi_actions: "af_ad_revenue"
+    kpi_actions: "af_purchase"
+  }
+}
+campaign_stats {
+  campaign: "SqHptcjZP7X7vpVl"
+  product_app_bundle: "id1664036357"
+  dev_os: IOS
+  platform: "MADHOUSE"
+  product_id: "bsuLlHhDUtVlyWeL"
+  advertiser: "NnNpenaqo4jnvBRc"
+  action_stats {
+    kpi_event: "purchase"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D3
+    pricing_metadata_type: TYPE_ACTION_LAT
+    normalizer: 0.03902553573639186
+    num_examples_for_normalizer: 338761
+    normalizer_data_source: BIDLOG
+    pb_eval_info {
+      num_examples: 226
+      mean_prediction: 0.039925619295575206
+      num_positives: 1
+    }
+    bid_eval_info {
+      num_examples: 338761
+      mean_prediction: 0.03902553573639186
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "purchase"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D1
+    pricing_metadata_type: TYPE_ACTION_LAT
+    normalizer: 0.033882126861948
+    num_examples_for_normalizer: 338761
+    normalizer_data_source: BIDLOG
+    pb_eval_info {
+      num_examples: 226
+      mean_prediction: 0.03487838497831857
+      num_positives: 11
+    }
+    bid_eval_info {
+      num_examples: 338761
+      mean_prediction: 0.033882126861948
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "purchase"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    pricing_metadata_type: TYPE_ACTION_LAT
+    normalizer: 0.04462818268535025
+    num_examples_for_normalizer: 338761
+    normalizer_data_source: BIDLOG
+    pb_eval_info {
+      num_examples: 226
+      mean_prediction: 0.045340792597345164
+---

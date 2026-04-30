@@ -1,0 +1,20 @@
+{
+  "step": 6,
+  "verdict": "OK",
+  "control_plane": {
+    "dominant_type": "TYPE_ACTION_LAT",
+    "rows": [
+      {"date": "2026-04-19", "pricing_metadata_type": "TYPE_ACTION", "normalizer": 0.33148505604220135, "count": 5},
+      {"date": "2026-04-19", "pricing_metadata_type": "TYPE_ACTION_LAT", "normalizer": 0.21247346582930318, "count": 3},
+      {"date": "2026-04-19", "pricing_metadata_type": "TYPE_ACTION_LAT", "normalizer": 0.3138210680232054, "count": 1},
+      {"date": "2026-04-19", "pricing_metadata_type": "TYPE_ACTION", "normalizer": 0.35868492334253504, "count": 1}
+    ]
+  },
+  "data_plane_checked": true,
+  "impressions_3d": {
+    "total_action_lat_imps": 1987208,
+    "total_action_imps": 3219943,
+    "current_lat_normalizer": 0.2653898617654927,
+    "models_active": ["action_consol_v2_lat_cpu_cont", "action_consol_v2_lat_cont", "action_consol_v2_ifa_cpu_cont", "action_consol_v2_ifa_cont"]
+  }
+}

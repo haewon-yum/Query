@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ODSB-17593 · KB증권 Investigation (한국어)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --moloco-blue: #1a47e6;
+    --moloco-dark: #0b1f45;
+    --moloco-gray: #f4f6fb;
+    --moloco-border: #e1e5ef;
+    --text-primary: #1a2138;
+    --text-muted: #5d6a85;
+    --high: #15803d;
+    --medium: #b45309;
+    --low: #b91c1c;
+    --ruled-out: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    background: #f8fafc;
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.55;
+  }
+  .container { max-width: 1240px; margin: 0 auto; padding: 32px 40px 80px 280px; }
+  /* --- Sidebar navigator --- */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 240px; height: 100vh;
+    background: white;
+    border-right: 1px solid var(--moloco-border);
+    overflow-y: auto;
+    padding: 24px 0;
+    z-index: 100;
+    box-shadow: 2px 0 6px rgba(15, 30, 70, 0.04);
+  }
+  .sidebar-header {
+    padding: 0 20px 16px;
+    border-bottom: 1px solid var(--moloco-border);
+    margin-bottom: 12px;
+  }
+  .sidebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--moloco-dark);
+    letter-spacing: 0.3px;
+  }
+  .sidebar-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+  .sidebar-nav li a {
+    display: block;
+    padding: 8px 20px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 12.5px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.35;
+  }
+  .sidebar-nav li a:hover {
+    background: var(--moloco-gray);
+    color: var(--moloco-blue);
+  }
+  .sidebar-nav li a.active {
+    background: #eef2fb;
+    color: var(--moloco-blue);
+    border-left-color: var(--moloco-blue);
+    font-weight: 600;
+  }
+  .sidebar-nav .section-num {
+    display: inline-block;
+    width: 22px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+  }
+  .sidebar-nav .divider {
+    border-top: 1px solid var(--moloco-border);
+    margin: 10px 16px;
+  }
+  .sidebar-footer {
+    padding: 12px 20px;
+    margin-top: 12px;
+    border-top: 1px solid var(--moloco-border);
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .sidebar-footer code { font-size: 10px; }
+  .sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 101;
+    background: var(--moloco-dark);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  @media (max-width: 1000px) {
+    .container { padding-left: 40px; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: block; }
+  }
+  html { scroll-behavior: smooth; scroll-padding-top: 20px; }
+  header {
+    background: linear-gradient(135deg, var(--moloco-dark) 0%, var(--moloco-blue) 100%);
+    color: white;
+    padding: 40px 40px 32px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+  }
+  header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 700; }
+  header p { margin: 0; opacity: 0.9; font-size: 15px; }
+  .lang-switcher {
+    position: absolute;
+    top: 20px; right: 24px;
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 3px;
+  }
+  .lang-switcher a {
+    padding: 4px 10px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lang-switcher a.active { background: rgba(255,255,255,0.95); color: var(--moloco-dark); }
+  .lang-switcher a:not(.active):hover { color: white; }
+  header { position: relative; }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .meta-item { }
+  .meta-label { font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta-value { font-size: 15px; font-weight: 600; margin-top: 2px; }
+  h2 {
+    font-size: 22px;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--moloco-border);
+    color: var(--moloco-dark);
+  }
+  h3 { font-size: 17px; color: var(--moloco-dark); margin-top: 24px; margin-bottom: 12px; }
+  .card {
+    background: white;
+    border: 1px solid var(--moloco-border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(15, 30, 70, 0.04);
+  }
+  .tldr ol { margin: 0; padding-left: 22px; }
+  .tldr li { margin-bottom: 10px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .badge-high { background: #dcfce7; color: var(--high); }
+  .badge-medium { background: #fef3c7; color: var(--medium); }
+  .badge-low { background: #fee2e2; color: var(--low); }
+  .badge-ruled-out { background: #e5e7eb; color: var(--ruled-out); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0 8px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--moloco-border);
+  }
+  th { background: var(--moloco-gray); font-weight: 600; color: var(--moloco-dark); font-size: 12px; }
+  tr:hover td { background: #fafbfd; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .chart-wrapper { position: relative; height: 360px; margin: 16px 0; }
+  .chart-wrapper.tall { height: 420px; }
+  .chart-caption { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-style: italic; }
+  .layer {
+    border-left: 4px solid var(--moloco-border);
+    padding-left: 16px;
+    margin-bottom: 20px;
+  }
+  .layer-high { border-left-color: var(--high); }
+  .layer-medium { border-left-color: var(--medium); }
+  .layer-low { border-left-color: var(--low); }
+  .layer h3 { margin-top: 8px; }
+  .kv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .kv-item {
+    padding: 12px 14px;
+    background: var(--moloco-gray);
+    border-radius: 8px;
+  }
+  .kv-item .k { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .kv-item .v { font-weight: 600; font-size: 14px; }
+  .rec {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: var(--moloco-gray);
+    border-left: 4px solid var(--moloco-blue);
+  }
+  .rec h4 { margin: 0 0 6px; font-size: 14px; color: var(--moloco-dark); }
+  .rec p { margin: 0; font-size: 13px; }
+  .rec-immediate { border-left-color: var(--low); background: #fef5f5; }
+  .rec-structural { border-left-color: var(--moloco-blue); }
+  .rec-hold { border-left-color: var(--medium); background: #fffbeb; }
+  .callout {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  .callout-warn { background: #fef3c7; border-left: 4px solid var(--medium); }
+  .callout-info { background: #dbeafe; border-left: 4px solid var(--moloco-blue); }
+  .timeline {
+    position: relative;
+    margin: 16px 0;
+  }
+  .timeline-item {
+    display: flex;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--moloco-border);
+  }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-date {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .timeline-event { flex: 1; font-size: 13px; }
+  .timeline-event.highlight { font-weight: 600; color: var(--low); }
+  .code-ref { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 11px; background: #eef2fb; padding: 1px 6px; border-radius: 4px; color: var(--moloco-blue); text-decoration: none; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; cursor: pointer; }
+  .code-ref:hover { background: #dbeafe; border-color: var(--moloco-blue); text-decoration: none; }
+  details { margin: 8px 0; }
+  details summary { cursor: pointer; font-weight: 600; padding: 8px 0; color: var(--moloco-dark); }
+  pre { background: #f1f3f9; padding: 14px; border-radius: 6px; font-size: 11px; overflow-x: auto; line-height: 1.4; }
+  .disclaimer {
+    background: #fef9c3;
+    border-left: 4px solid #ca8a04;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .metric-big {
+    text-align: center;
+    padding: 20px;
+  }
+  .metric-big .val { font-size: 32px; font-weight: 700; color: var(--moloco-dark); }
+  .metric-big .label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .metric-big.red .val { color: var(--low); }
+  .metric-big.green .val { color: var(--high); }
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--moloco-border); color: var(--text-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ 메뉴</button>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">ODSB-17593</div>
+    <div class="sidebar-sub">KB증권 iOS · Session 57f49cb</div>
+  </div>
+  <ul class="sidebar-nav">
+    <li><a href="#sec-tldr"><span class="section-num">•</span>TL;DR</a></li>
+    <li><a href="#sec-headline"><span class="section-num">•</span>핵심 지표</a></li>
+    <li class="divider"></li>
+    <li style="padding:4px 20px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; font-weight:700;">Part I · 증상</li>
+    <li><a href="#sec-1"><span class="section-num">1</span>SoI 레짐 시프트</a></li>
+    <li><a href="#sec-2"><span class="section-num">2</span>Postback 트렌드 &amp; 3/20 cliff</a></li>
+    <li><a href="#sec-3"><span class="section-num">3</span>피어 코호트 범위</a></li>
+    <li class="divider"></li>
+    <li style="padding:4px 20px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; font-weight:700;">Part II · 조절 요인</li>
+    <li><a href="#sec-4"><span class="section-num">4</span>KB 구조적 취약성</a></li>
+    <li class="divider"></li>
+    <li style="padding:4px 20px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; font-weight:700;">Part III · 메커니즘</li>
+    <li><a href="#sec-5"><span class="section-num">5</span>4/3 복합 이벤트</a></li>
+    <li><a href="#sec-creative"><span class="section-num">5a</span>↳ 신규 크리에이티브 활성화</a></li>
+    <li class="divider"></li>
+    <li style="padding:4px 20px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; font-weight:700;">Part IV · 종합</li>
+    <li><a href="#sec-6"><span class="section-num">6</span>근본 원인 레이어</a></li>
+    <li><a href="#sec-7"><span class="section-num">7</span>전체 타임라인</a></li>
+    <li class="divider"></li>
+    <li style="padding:4px 20px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; font-weight:700;">Part V · 액션</li>
+    <li><a href="#sec-9"><span class="section-num">9</span>권고사항</a></li>
+    <li><a href="#sec-8"><span class="section-num">8</span>배제된 가설</a></li>
+    <li class="divider"></li>
+    <li style="padding:4px 20px; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; font-weight:700;">부록</li>
+    <li><a href="#sec-10"><span class="section-num">A</span>미해결 질문</a></li>
+    <li><a href="#sec-11"><span class="section-num">B</span>주장-근거 매핑</a></li>
+    <li><a href="#sec-12"><span class="section-num">C</span>출처 범례</a></li>
+    <li><a href="#sec-13"><span class="section-num">D</span>재현 쿼리</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    Session <code>57f49cb</code> · <strong>v2</strong><br>
+    개정 2026-04-19<br>
+    3 iterations · 35개 질문 · JUDGE: PASS
+  </div>
+</aside>
+
+<div class="container">
+
+<header>
+  <div class="lang-switcher">
+    <a href="investigation_57f49cb_REPORT_v2.html">EN</a>
+    <a href="investigation_57f49cb_REPORT_v2_ko.html" class="active">KO</a>
+  </div>
+  <h1>ODSB-17593 · KB증권 iOS 인스톨 하락 — 근본 원인 조사 <span style="background:#dc2626; color:white; padding:2px 10px; border-radius:6px; font-size:14px; margin-left:10px; vertical-align:middle;">v2</span></h1>
+  <p>Attributed install 지속 미회복에 대한 다중 반복(multi-iteration) 조사. Session <code>57f49cb</code>, 3 iterations, JUDGE_FINAL: PASS. <strong>v2 (2026-04-19)</strong>: 5-파트 내러티브 구조 재편, 크리에이티브 단위 finding 승격 (CDN 프리뷰 포함), IPM gap-fill.</p>
+  <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.2); font-size:13px; display:flex; gap:24px;">
+    <div><span style="opacity:0.7; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">작성자</span> &nbsp; <strong>Haewon Yum</strong> · KOR GDS</div>
+    <div><span style="opacity:0.7; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">일자</span> &nbsp; <strong>2026-04-19</strong></div>
+  </div>
+  <div class="meta-grid">
+    <div class="meta-item"><div class="meta-label">광고주</div><div class="meta-value">KB증권 (KB Securities)</div></div>
+    <div class="meta-item"><div class="meta-label">Bundle ID (iOS)</div><div class="meta-value" style="font-family:'SF Mono',Menlo,Consolas,monospace; font-size:13px;">kr.kbsec.iplustar<br><span style="opacity:0.7; font-size:11px; font-weight:400;">iTunes 350742701</span></div></div>
+    <div class="meta-item"><div class="meta-label">Ad Account</div><div class="meta-value" style="font-family:'SF Mono',Menlo,Consolas,monospace; font-size:13px;">syFnKP76xSYZQcMW</div></div>
+    <div class="meta-item"><div class="meta-label">MMP / Agency</div><div class="meta-value">AIRBRIDGE · DPLAN360</div></div>
+    <div class="meta-item"><div class="meta-label">조사 기간</div><div class="meta-value">2026-02-01 ~ 04-18</div></div>
+  </div>
+</header>
+
+<div class="disclaimer">
+<strong>⚠️ 고지사항:</strong> 본 리포트와 데이터는 정확하지 않을 수 있습니다. 오류, 누락된 데이터, 또는 공개 적절성이 없는 민감 정보가 포함될 수 있습니다. 재현 가능한 쿼리를 포함하였으니 독립 검증 가능합니다. 외부 공유 전 반드시 확인 바랍니다.
+</div>
+
+<!-- TL;DR -->
+<div class="card tldr" id="sec-tldr">
+<h2 style="margin-top:0">TL;DR — 결론 먼저</h2>
+<div style="background:#fef2f2; border-left:4px solid var(--low); padding:14px 16px; border-radius:6px; margin-bottom:16px;">
+<strong>인스톨이 돌아오지 않는 이유는 두 개의 별개 이벤트가 복합적으로 작용했기 때문이며, 그 중 하나만이 Moloco 통제 범위 내에 있습니다.</strong><br>
+<span style="font-size:13px; color:var(--text-muted)">3/20 07 UTC: 외부 postback-forwarding 장애로 KB의 <em>전체</em> AIRBRIDGE→Moloco 볼륨이 −71% 감소 (Moloco 상위 단계, KB 고유). 4/3: −50% 수동 예산 컷과 신규 nl 크리에이티브 활성화가 동시에 발생, 포맷+크리에이티브 레짐 변화를 트리거 → 블렌디드 IPM이 0.135 → 0.015/1k imp으로 −89% 붕괴.</span>
+</div>
+<ol>
+<li><strong>4-레이어 인과 cascade</strong> (단일 원인 아님):
+  <ul style="margin-top:6px">
+    <li><em>베이스라인 스트레서</em> — 3/1–10 PIM-2841 Moloco action-model 장애로 라벨 코퍼스 고갈.</li>
+    <li><em>조절 요인</em> — KB 구조적 취약성: AFP=FALSE + 깊은 퍼널 KPI <code>account_step16_complete</code> (양성 tfexample 0–4/일) + 피어 대비 21× 작은 예산 + KAKAO/TPMN 65% 공급 집중.</li>
+    <li><em>트리거</em> — 3/20 07 UTC 2단계 cliff (KB 단독): Phase 1 전체 pb 볼륨 <strong>−71%</strong> (attr/unattr 비례 drop = AIRBRIDGE-forwarding 장애, Moloco 상위 단계); Phase 2 attribution-specific 추가 열화.</li>
+    <li><em>가속 요인</em> — 4/3 수동 예산 컷 + <strong>신규 크리에이티브 <code>IhrxSOh9QzmyZyzv</code> (nl)</strong> 동일 일자 활성화, 1일차에 KAKAO 임프레션의 60% 점유.</li>
+  </ul>
+</li>
+<li><strong>Phase 1은 Moloco 이슈가 아님.</strong> 동일 MMP · OS · 지역 9개 피어 (삼성증권 포함) 모두 정상. pb 테이블 레벨 볼륨 드롭은 Moloco attribution 로직보다 상위 단계. <strong>KB 앱 측 / DPLAN360 agency / AIRBRIDGE tenant 측 조사가 최우선 다음 액션.</strong></li>
+<li><strong>4/3은 복합 레짐 체인지</strong> — 예산 컷 + 크리에이티브 교체 + 모델 응답이 동시 작용. 크리에이티브 단위 IPM (KAKAO, 4/3 이후): 신규 nl <code>IhrxSOh9QzmyZyzv</code> = 0.0121 / 기존 ib <code>ogMJ5cQEBJ4fNbOw</code> = 0.0196 (nl이 apples-to-apples 38% 열위). 그러나 기존 ib의 IPM도 동일 일자에 −82% 붕괴 → 포맷 믹스만으로 설명 불가, 동시 발생한 외부 KAKAO 오디언스/attribution 열화가 연관됨.</li>
+<li><strong>회복은 두 축 동시 수행 필요</strong>: (A) KB/DPLAN360 측에서 3/20 cliff 원인 규명, (B) 구조적 취약성 완화 (AFP=TRUE, exchange mix 다변화, 간이 KPI). <strong>(A) 없이 예산만 복구하면 비용 낭비</strong> — 3/23–27 divergence로 결정적 증명: 지출 Feb 베이스라인 +90% 상회 → SoI는 베이스라인의 12% 수준 유지.</li>
+<li><strong>배제된 가설</strong> (code-trace + 데이터 교차 검증): nrt_resolver, MPID capper, pickByPerformance, tracking_link_auto_standardization, MM-138/PR #70212, vertical-wide AIRBRIDGE 장애.</li>
+</ol>
+</div>
+
+<!-- Headline metrics -->
+<h2 id="sec-headline">핵심 지표</h2>
+<div class="card">
+<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+  <div class="metric-big red"><div class="val">-71%</div><div class="label"><strong>전체 pb 볼륨 드롭</strong> (3/20 07 UTC)<br>(381→111/hr · <em>Moloco 상위 단계, KB 단독</em>)</div></div>
+  <div class="metric-big red"><div class="val">-73% / -71%</div><div class="label"><strong>Attributed vs Unattributed</strong> 비례 드롭<br>(동일 시각 · upstream forwarding 장애의 signature)</div></div>
+  <div class="metric-big green"><div class="val">안정</div><div class="label"><strong>삼성증권</strong> 피어 (3/20-21)<br>(-13.9%, 노이즈 내 · 범위 = KB 단독)</div></div>
+  <div class="metric-big red"><div class="val">-89%</div><div class="label"><strong>블렌디드 KB iOS IPM</strong> (4/3 복합)<br>(0.135 → 0.015 /1k imp · 예산+크리에이티브 shock)</div></div>
+</div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PART I — 증상 -->
+<!-- ================================================================ -->
+<div style="margin:48px 0 8px; padding:18px 24px; background:linear-gradient(135deg, #0b1f45 0%, #1a47e6 100%); color:white; border-radius:10px;">
+  <div style="font-size:11px; letter-spacing:2px; opacity:0.7; text-transform:uppercase;">Part I</div>
+  <div style="font-size:22px; font-weight:700; margin-top:4px;">증상 — KB에 일어난 일</div>
+  <div style="font-size:13px; opacity:0.85; margin-top:6px;">§1–3에서 경험적 picture 확립: SoI 레짐 시프트 (§1), 77일 postback 흐름과 3/20 cliff 탐지 (§2), 이 shock이 플랫폼 전반이 아닌 KB 고유임을 증명하는 피어 코호트 증거 (§3).</div>
+</div>
+
+<!-- Chart 1: KB daily attribution rate --><h2 id="sec-1">1. KB AIRBRIDGE SoI (Share of Installs) — 레짐 시프트</h2>
+<div class="card">
+<p><strong>지표 정의.</strong> 이 차트에서 플롯되는 값은 <strong>SoI(Share of Installs)</strong> = <code>Moloco-attributed KB install postback / AIRBRIDGE로부터 수신한 전체 KB install postback</code>. 분모는 Moloco-attributed postback뿐 아니라 AIRBRIDGE가 Moloco에 forwarding하는 cross-network postback도 포함 (Moloco의 사전 click/impression 참여가 있었던 경우). 따라서 raw attribution-engine health 지표가 아닌 <strong>SoI 형태의 지표</strong>이다.</p>
+
+<p><strong>Spend overlay가 왜 필요한가.</strong> SoI는 KB의 Moloco spend 수준과 본질적으로 교란된다 — 낮은 spend → Moloco 낙찰 감소 → attribution 대상 click 감소 → SoI 기계적 하락. <em>인프라 장애</em>와 <em>spend-driven 기계적</em> SoI 하락을 구분하기 위해 KB iOS 일일 spend(USD)를 overlay. 결정적 테스트: <strong>spend가 회복되었는데 SoI가 평평하다면, 원인은 예산이 아니라 인프라.</strong></p>
+
+<p>KB의 SoI는 만성 상태가 아닌 <strong>실제 레짐 시프트</strong>이며, spend overlay로 spend-driven이 아님이 확인된다:</p>
+<ul>
+<li><strong>2월 baseline:</strong> SoI 10-14% @ ~$130/일 spend — 안정.</li>
+<li><strong>3/1-5 zero 에피소드:</strong> spend = $0 (PIM-2841 action-model 장애 blackout) → SoI 거의 0은 부분적으로 기계적 (spend 없으면 Moloco 귀속 없음). 여기에 KB가 impacted-campaigns sheet에 올라간 action-model 장애가 <em>겹침</em>.</li>
+<li><strong>3/6-20 회복:</strong> spend $150-360/일까지 상승; SoI도 7-14%로 동반 회복.</li>
+<li><strong>3/14-15 dip:</strong> spend 급감 (3/14 = $34) — SoI zero-episode는 <em>대부분 기계적</em>, 두 번째 action-model 장애라고 볼 수 없음.</li>
+<li><strong>3/19-20 REBOUND 10-14%:</strong> spend $250-360/일. Pre-cliff 최고점.</li>
+<li><strong>3/21-22 cliff:</strong> spend는 잠시 감소 (3/21 = $34) 후 3/22에는 $128로 회복했으나 — SoI는 0.78%로 유지. SoI가 spend와 decouple되는 첫 신호.</li>
+<li><strong>3/23-27 결정적 divergence:</strong> spend가 <strong>$272-366/일</strong> (2월 baseline 초과)로 급등했지만 SoI는 <strong>최고 6.4%</strong>에 그치고 3.5%로 감소. Spend는 회복, SoI는 미회복.</li>
+<li><strong>4/2-16 지속적 미회복:</strong> spend가 꾸준히 <strong>$200-304/일</strong> (2월 $130 baseline 훨씬 상회)인데 SoI는 <strong>0.8-1.9%</strong>에 머묾. 3/20 이후 SoI 붕괴가 <strong>인프라 장애</strong>이지 spend-driven이 아니라는 가장 명확한 증거.</li>
+</ul>
+
+<div class="chart-wrapper tall"><canvas id="chart_kb_attribution"></canvas></div>
+<div class="chart-caption">출처: <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A1</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a>, BQ-32d. Spend = fact_dsp_core (일일 KB iOS, USD). SoI = pb-level Moloco-attributed / total-forwarded. 2월 attribution % 중 일 단위 값이 없는 날은 <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a>의 주간 평균 interpolation 사용.</div>
+
+<div class="callout callout-info">
+<strong>결정적 테스트 통과:</strong> 원인이 "Moloco spend가 낮아서 attribution 감소"라면 SoI가 spend를 따라가야 함. 하지만 4/3-16 spend는 2월 baseline 대비 <strong>+90%</strong>였는데 SoI는 <strong>baseline의 12%</strong>에 머묾. 두 곡선이 3/21에서 decouple되고 다시 결합되지 않음. 이는 infrastructure-break의 signature.
+</div>
+</div>
+
+<!-- Chart 2: Hourly Mar 20-22 -->
+<h2 id="sec-2">2. Postback 트렌드 — Feb–Apr 77일 전체 흐름, Spend Overlay &amp; TS 분해</h2>
+<div class="card">
+
+<p>KB iOS AIRBRIDGE 일일 postback 볼륨 (2/1 – 4/18, 77일)과 일일 Moloco spend를 overlay한 차트. 두 개의 뚜렷한 regime이 보임: 정상적인 2월 baseline (일 1,200–4,100 pb, attribution 5–17%, spend ~$130/일), 그리고 3/20 이후 지속된 저-attribution 상태 (일 1,500–2,200 pb, ~1.3% attribution) — spend가 ~$250/일로 거의 2배 상승한 상태에서도 지속.</p>
+
+<!-- Primary chart: pb + spend overlay -->
+<div class="chart-wrapper tall" style="height:420px"><canvas id="chart_daily_32d"></canvas></div>
+<div class="chart-caption">KB iOS AIRBRIDGE 일일 postback (stacked: 청색 attributed + 주황 unattributed) · attribution % (점선 녹색, 우측 0–20%) · 일일 Moloco spend USD (점선 적색, 최우측 0–400). 2월 baseline attr % 5–17%가 3/20 이후 ~1.3% 지속 상태와 대비. Spend overlay가 보여주듯이 3월 후반 – 4월에 spend가 2월 수준을 크게 상회해도 attribution %는 회복되지 않음.</div>
+
+<h3>Window 내 주요 이벤트</h3>
+<p>차트 형태를 설명하는 5개 핵심 이벤트. (전체 11개 이벤트 타임라인은 아래 접힘 섹션에 있음.)</p>
+<table>
+<thead><tr><th>이벤트</th><th>Window</th><th>Signature</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td><strong>2월 baseline (정상)</strong></td><td>2/1 – 28</td><td>일 1,200–4,100 pb · attr 5–17% (평균 10.5%) · spend ~$130/일</td><td>"만족스러운" 참조 상태. Spend와 attribution이 함께 움직임.</td></tr>
+<tr><td><strong>3/1–5 PIM-2841 장애</strong></td><td>3/1 – 5</td><td>볼륨 여전히 유입 1,000–4,800 pb · attr 0–0.6% · spend $0</td><td>Moloco action model P1 인시던트; KB가 impacted-campaigns sheet 포함. AIRBRIDGE forwarding은 영향 없음 — Moloco 측 attribution만 zero.</td></tr>
+<tr style="background:#fee2e2"><td><strong>3/20 07 UTC cliff (primary trigger)</strong></td><td>3/20 07:00 UTC = 3/20 16:00 KST</td><td>시간당 pb 381 → 111 (−71%) one-shot; 다음 날 일일 3,345 → 947; attribution이 16 UTC에 0으로 붕괴, 3/22 20 UTC까지 flatline</td><td><strong>2단계 upstream 장애.</strong> attr와 unattr가 07 UTC에 비례 drop (Phase 1, MMP-forwarding layer); attribution rate는 1–9시간 뒤 추가로 붕괴 (Phase 2, downstream). KB 단독 — 피어 코호트는 안정 (§3).</td></tr>
+<tr style="background:#fff7ed"><td><strong>3/31 → 4/1 KST 자정 spike</strong></td><td>3/31 15:00 UTC → 4/1 16:00 UTC (~26h)</td><td>Onset 707 pb/hr (정상의 7×); 일일 3,599 / 3,768 (trailing median의 2.2–2.3×); attribution 0.4–3.9% 유지</td><td>볼륨만 부분 회복, attribution은 여전히 broken. Onset이 정확히 KST 자정에 일치 → MMP 또는 퍼블리셔 측 scheduled/batch signature.</td></tr>
+<tr><td><strong>4/3+ 지속된 저-attribution 상태</strong></td><td>4/3 – 18</td><td>일 1,100–2,240 pb · attr 0.8–1.9% · spend $200–304 (2월 baseline 상회)</td><td>회복 없음. Spend는 baseline 상회, attribution은 baseline의 ~12% → spend-driven dip 아님. MMP-forwarding layer 미해결 상태.</td></tr>
+</tbody>
+</table>
+
+<details style="margin-top:12px; border:1px solid var(--moloco-border); border-radius:8px; padding:10px 14px;">
+<summary style="cursor:pointer; font-weight:600; color:var(--moloco-dark); font-size:14px;">📋 펼치기 — 전체 11개 이벤트 타임라인 (모든 중간 이벤트 포함)</summary>
+<table style="margin-top:12px">
+<thead><tr><th>#</th><th>이벤트</th><th>시점</th><th>볼륨</th><th>Attribution</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>2월 baseline (정상)</td><td>2/1 – 28</td><td>일 1,200–4,100 pb; 평균 ~2,400/일</td><td>5–17% (평균 10.5%)</td><td>CPI ~$0.52. Spend ~$130/일. 참조 상태.</td></tr>
+<tr><td>1</td><td>3/1–5 장애</td><td>3/1 – 5</td><td>일 1,089–4,844 pb</td><td>0–0.6%</td><td>PIM-2841 Moloco action-model P1; spend = $0.</td></tr>
+<tr><td>2</td><td>3/6–13 회복</td><td>3/6 – 13</td><td>일 1,772–3,276</td><td>1.8–9.2% 상승</td><td>Spend 재개; action model 온라인 복귀.</td></tr>
+<tr><td>3</td><td>3/14–15 spend-driven dip</td><td>3/14 – 15</td><td>일 1,321–1,462</td><td>0.4%</td><td>3/14 spend 급감 ($34/일); 기계적 SoI 하락.</td></tr>
+<tr><td>4</td><td>3/16–20 pre-cliff peak</td><td>3/16 – 20</td><td>일 1,645–3,345</td><td>6.9–13.8%</td><td>Attribution이 2월 baseline으로 재상승.</td></tr>
+<tr style="background:#fee2e2"><td>5</td><td><strong>3/20 07 UTC cliff</strong></td><td>3/20 07:00 UTC</td><td>시간당 381 → 111 (−71%)</td><td>15.6% → 13.5% → 0%</td><td>Primary trigger — Phase 1 + Phase 2.</td></tr>
+<tr><td>6</td><td>3/22 21 UTC 부분 회복</td><td>3/22 21:00 UTC</td><td>일 1,152 → 1,744</td><td>0% → 잠시 5–7%, 이후 3–8%</td><td>54시간 attribution blackout 종료.</td></tr>
+<tr><td>7</td><td>3/28–29 주말 dip</td><td>3/28 – 29</td><td>일 1,251–1,338</td><td>0.3–0.4%</td><td>주말 (KST 토-일) + post-cliff 저점.</td></tr>
+<tr style="background:#fff7ed"><td>8</td><td><strong>3/31 – 4/1 KST spike</strong></td><td>3/31 15 UTC → 4/1 16 UTC</td><td>일 3,599 / 3,768 (2.2–2.3×)</td><td>0.4–3.9%</td><td>볼륨 only 회복; MMP 측 batch 이벤트.</td></tr>
+<tr><td>9</td><td>4/3 KB 예산 컷</td><td>4/3</td><td>일 2,249 → 1,586 → 1,250</td><td>1.7 → 1.9 → 1.4%</td><td>KB UA 예산 363k → 181k KRW (−50%).</td></tr>
+<tr><td>10</td><td>4/13–17 볼륨 drift</td><td>4/13 – 17</td><td>일 1,853–2,241</td><td>1.2–1.9%</td><td>볼륨은 상승하나 attribution 회복 없음.</td></tr>
+<tr><td>11</td><td>4/18 현재</td><td>4/18</td><td>일 1,248</td><td>1.44%</td><td>지속된 미회복 확인.</td></tr>
+</tbody>
+</table>
+</details>
+
+<div class="callout callout-warn" style="margin-top:16px">
+<strong>3/20 cliff가 Moloco attribution 코드가 아닌 MMP→Moloco forwarding layer에 있는 이유.</strong> <code>pb</code> 테이블은 AIRBRIDGE가 bundle에 대해 Moloco로 보내는 모든 postback을 집계 — Moloco-attributed와 cross-network 모두. 07:00 UTC에 두 버킷이 균등하게 −71%/−73% 하락한 것은 AIRBRIDGE가 KB에 대해 Moloco로 보내는 postback이 71% 감소했음을 의미 — Moloco attribution engine보다 상위 단계. Moloco-attribution-side 코드 변경은 이 신호를 만들 수 없음. 3/31–4/1 spike (볼륨 부분 회복되지만 attribution은 여전히 broken)와 결합하면 그림이 다음과 부합: (a) 3/20에 AIRBRIDGE-side forwarding disruption 시작, (b) post-cliff 간헐적 볼륨 변동, (c) tagging/macro 이슈 지속으로 attribution rate 계속 낮음. 조사 surface는 KB 앱 / DPLAN360 agency / AIRBRIDGE tenant 설정.
+</div>
+
+<!-- TS DECOMPOSITION -->
+<h3 style="margin-top:28px">가시적 변동성이 실제 신호인가, 요일 패턴인가? — 시계열 분해</h3>
+
+<p>Pre-3/20 window (n=48일)에 대해 가법 분해 (7일 주기)를 적용하여 일일 pb 시리즈를 세 성분으로 분리: trend (7일 centered moving average), 주간 seasonal (trend로부터의 요일별 편차), residual (미설명 / 이벤트 기인).</p>
+
+<div class="callout callout-info">
+<strong>결론:</strong> 주간 seasonality는 non-trend variability의 <strong>~43%</strong>를 설명 — 의미 있지만 지배적이지 않음. 주요 이벤트 (3/3 spike, 3/20 cliff)는 분해를 거친 뒤에도 대형 residual로 남아 주간 패턴에 귀속되지 않음. 차트 변동을 7일 MA (trend)로 읽으면 underlying 추세가 깨끗하게 드러남.
+</div>
+
+<table>
+<thead><tr><th>Pre-cliff window (2/1 – 3/20, n=48일)</th><th class="num">Stddev</th><th class="num">Non-trend 분산 점유</th></tr></thead>
+<tbody>
+<tr><td>Observed total_pb</td><td class="num">920 pb/일</td><td class="num">—</td></tr>
+<tr><td>Trend (7일 centered MA)</td><td class="num">482 pb/일</td><td class="num">—</td></tr>
+<tr><td>주간 seasonal 성분</td><td class="num">439 pb/일</td><td class="num"><strong>42.9%</strong></td></tr>
+<tr><td>Residual (irregular / 이벤트)</td><td class="num">507 pb/일</td><td class="num"><strong>57.1%</strong></td></tr>
+</tbody>
+</table>
+
+<div class="chart-wrapper tall" style="height:400px"><canvas id="chart_ts_decomp"></canvas></div>
+<div class="chart-caption">일일 observed total_pb (얇은 회색) · trend (청색, 7일 centered MA) · 주간 seasonal (주황, 요일 편차) · residual (적색, observed − trend − seasonal). 3/3과 3/20에 큰 양/음의 residual; 4/18 엣지는 MA window 미완성으로 NaN.</div>
+
+<details style="margin-top:12px; border:1px solid var(--moloco-border); border-radius:8px; padding:10px 14px;">
+<summary style="cursor:pointer; font-weight:600; color:var(--moloco-dark); font-size:14px;">📋 펼치기 — 분해 방법론, 요일 성분, 이벤트 레벨 residual 검증</summary>
+
+<h4 style="margin-top:14px">방법론</h4>
+<p>가법 분해: <code>observed = trend + seasonal + residual</code>. Trend는 centered 7일 rolling mean. Seasonal은 detrended 잔차를 요일별로 grouping해 평균낸 뒤 주간 합이 0이 되도록 re-centering. Residual은 나머지. Pre-cliff window (2/1 – 3/20, n=48)를 사용하여 자연스러운 주간 패턴을 학습 (post-cliff window는 구조적 break 때문에 seasonal 추정이 오염됨).</p>
+
+<h4>요일별 seasonal 성분 (trend로부터의 편차)</h4>
+<table>
+<thead><tr><th>요일</th><th class="num">Seasonal 편차</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td>목</td><td class="num"><strong>+610</strong></td><td>최고점</td></tr>
+<tr><td>수</td><td class="num">+432</td><td></td></tr>
+<tr><td>화</td><td class="num">+232</td><td></td></tr>
+<tr><td>금</td><td class="num">+134</td><td></td></tr>
+<tr><td>월</td><td class="num">−303</td><td>주 시작 dip</td></tr>
+<tr><td>토</td><td class="num">−527</td><td></td></tr>
+<tr><td>일</td><td class="num"><strong>−579</strong></td><td>최저점</td></tr>
+</tbody>
+</table>
+<p>평일 평균: <strong>+221</strong> · 주말 평균: <strong>−553</strong> · 평일/주말 gap ≈ <strong>774 pb/일</strong> (pre-cliff 평균 2,395의 32%).</p>
+
+<h4>이벤트 레벨 residual 검증 — 주요 이벤트가 분해를 거쳐도 살아남는가?</h4>
+<table>
+<thead><tr><th>날짜</th><th class="num">Observed</th><th class="num">Trend</th><th class="num">Seasonal (요일)</th><th class="num">Residual</th><th>해석</th></tr></thead>
+<tbody>
+<tr style="background:#fff7ed"><td><strong>3/3</strong> (화 spike)</td><td class="num">4,786</td><td class="num">2,935</td><td class="num">+232</td><td class="num"><strong>+1,619</strong></td><td>화요일 seasonal은 trend 위 +232만 설명; 실제는 +1,619 — <strong>seasonal 효과의 7×</strong>. 실제 anomaly.</td></tr>
+<tr style="background:#fee2e2"><td><strong>3/20</strong> (금, pre-cliff 마지막)</td><td class="num">3,319</td><td class="num">1,960</td><td class="num">+134</td><td class="num"><strong>+1,225</strong></td><td>Pre-cliff 활동이 trend 위로 elevated.</td></tr>
+<tr style="background:#fee2e2"><td><strong>3/21</strong> (토, post-cliff)</td><td class="num">947</td><td class="num">1,976</td><td class="num">−527</td><td class="num"><strong>−502</strong></td><td>토요일 seasonal은 trend 아래 −527 예측; 실제는 그보다 −502 residual 추가 하락 (이중 음수 stacking).</td></tr>
+</tbody>
+</table>
+<p><strong>3/20 → 3/21 cliff 분해:</strong></p>
+<ul>
+<li>Observed drop: <strong>−2,372</strong> (3,319 → 947)</li>
+<li>금→토 seasonality 기대: <strong>−660</strong> (observed drop의 28%)</li>
+<li>미설명 residual drop: <strong>−1,728</strong> (observed drop의 72%)</li>
+</ul>
+<p>자연스러운 금→토 주간 dip은 cliff의 ~28%만 설명. 나머지 72%는 실제 anomaly — 아래 Phase 1 / Phase 2 분해에 기록된 07 UTC upstream-forwarding 장애와 부합.</p>
+</details>
+
+<!-- PHASE 1 / PHASE 2 — 핵심 유지 -->
+<h3 style="margin-top:28px">3/20 07 UTC cliff — Phase 1 vs Phase 2 시간 단위 분해</h3>
+
+<table>
+<thead><tr><th>Hour (UTC)</th><th class="num">Total pb</th><th class="num">Attributed</th><th class="num">Unattributed</th><th class="num">Attr %</th><th>Phase / Notes</th></tr></thead>
+<tbody>
+<tr><td>3/20 06:00 (baseline)</td><td class="num">381</td><td class="num">~55</td><td class="num">~326</td><td class="num">15.6%</td><td>정상</td></tr>
+<tr style="background:#fff7ed"><td><strong>3/20 07:00</strong></td><td class="num"><strong>111</strong></td><td class="num"><strong>15 (−73%)</strong></td><td class="num"><strong>96 (−71%)</strong></td><td class="num">13.5%</td><td><strong>Phase 1 — 볼륨 cliff.</strong> Attr와 unattr 비례 drop. Attribution rate 안정 → Moloco 상위 단계.</td></tr>
+<tr><td>3/20 08:00</td><td class="num">84</td><td class="num">7</td><td class="num">77</td><td class="num">8.3%</td><td>Phase 2 시작 — attribution % 하락 시작</td></tr>
+<tr><td>3/20 09-13</td><td class="num">59-88</td><td class="num">5-11</td><td class="num">54-77</td><td class="num">7-12%</td><td>Phase 2 — attribution 열화</td></tr>
+<tr><td>3/20 14-15</td><td class="num">49-67</td><td class="num">1-3</td><td class="num">48-64</td><td class="num">1.5-6.1%</td><td>Phase 2 — near-dead</td></tr>
+<tr style="background:#fee2e2"><td><strong>3/20 16:00</strong></td><td class="num">26</td><td class="num"><strong>0</strong></td><td class="num">26</td><td class="num"><strong>0.0%</strong></td><td><strong>Phase 2 peak — 최초 완전 zero 시간</strong></td></tr>
+<tr><td>3/20 17 – 3/22 20</td><td class="num">3-84</td><td class="num">0-2</td><td class="num">3-82</td><td class="num">~0% (평균 0.2%)</td><td>Flatline (54시간 blackout)</td></tr>
+<tr style="background:#f0fdf4"><td>3/22 21-23</td><td class="num">19-69</td><td class="num">1-5</td><td class="num">18-64</td><td class="num">5-7%</td><td>부분 회복 시작</td></tr>
+</tbody>
+</table>
+
+<div class="two-col" style="margin-top:16px">
+<div style="padding:14px 16px; background:#fff7ed; border-left:4px solid var(--medium); border-radius:6px;">
+<h4 style="margin:0 0 6px; font-size:14px; color:var(--medium)">Phase 1 — 07:00 UTC 볼륨 drop</h4>
+<p style="margin:0; font-size:13px"><strong>메커니즘:</strong> AIRBRIDGE가 Moloco로 보내는 postback 수가 감소.<br><strong>근거:</strong> Attr −73%와 unattr −71% 동일 drop; attribution rate 13.5% 유지.<br><strong>후보:</strong> AIRBRIDGE tenant postback endpoint 변경 · KB 앱 SDK 업데이트 · DPLAN360 forwarding rule 변경.<br><strong>Moloco 측에서 해결 불가</strong>; 파트너 측 audit 필요.</p>
+</div>
+<div style="padding:14px 16px; background:#fee2e2; border-left:4px solid var(--low); border-radius:6px;">
+<h4 style="margin:0 0 6px; font-size:14px; color:var(--low)">Phase 2 — 08–16 UTC attribution 붕괴</h4>
+<p style="margin:0; font-size:13px"><strong>메커니즘:</strong> 이미 감소된 분모에서 attribution rate가 볼륨과 독립적으로 추가 하락.<br><strong>근거:</strong> Attr % 8.3% → 7% → 1.5% → 0%; 볼륨은 flat이나 attribution만 추가 drop.<br><strong>Caveat:</strong> 낮은 n (26–88/hr)으로 Phase 1 아티팩트와 분리 어려움. Downstream consequence일 수도, coincident Moloco-side 이벤트일 수도.</p>
+</div>
+</div>
+
+<details style="margin-top:20px; border:1px solid var(--moloco-border); border-radius:8px; padding:10px 14px;">
+<summary style="cursor:pointer; font-weight:600; color:var(--moloco-dark); font-size:14px;">📋 펼치기 — 시간 단위 cliff uniqueness scan (1,840개 전이에 걸친 z-score 순위) + unattributed-only 시간 차트</summary>
+
+<h4 style="margin-top:14px">방법론 — unattributed-only 필터</h4>
+<p>Unattributed-only pb 볼륨 (<code>moloco.campaign_id IS NULL OR = ''</code> postback, 즉 AIRBRIDGE가 다른 네트워크로 credit된 install을 forward한 경우)은 신호를 Moloco 측 attribution 효과로부터 분리. Unattributed 볼륨은 KB 자체 install rate + KST-diurnal + AIRBRIDGE forwarding 로직을 따르며 Moloco 일일 spend와 거의 무관.</p>
+
+<h4>Baseline 속성 (2/1 – 2/28, n=672시간)</h4>
+<table>
+<thead><tr><th>속성</th><th class="num">값</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td>Peak hour (14 UTC = 23 KST)</td><td class="num">138.5 pb/hr</td><td>KST 저녁 surge</td></tr>
+<tr><td>Trough hour (20 UTC = 05 KST)</td><td class="num">19.5 pb/hr</td><td>KST 야간 저점</td></tr>
+<tr><td>Peak-to-trough 비율</td><td class="num"><strong>7.09×</strong></td><td>7× 하루 내 진폭은 정상</td></tr>
+<tr><td>Hour-to-hour % 변화 (n=1,079)</td><td class="num">+6.52%, σ 41.2%</td><td>±40% 시간당 변화는 noise 범위</td></tr>
+<tr><td>5백분위수 worst drop</td><td class="num">−45.0%</td><td>~45% drop은 일상적</td></tr>
+<tr><td>Pre-3/20 관측 worst drop</td><td class="num">−71.8% (3/14 14→15 UTC)</td><td>KST peak→trough handoff; 정상 diurnal</td></tr>
+</tbody>
+</table>
+
+<h4>Seasonally-controlled z-score Top 5 drops (77일 전체, 1,840 전이)</h4>
+<table>
+<thead><tr><th>순위</th><th>전이 (UTC)</th><th class="num">이전</th><th class="num">이후</th><th class="num">% drop</th><th class="num">z-score</th><th>맥락</th></tr></thead>
+<tbody>
+<tr style="background:#fee2e2"><td><strong>#1</strong></td><td><strong>3/20 06→07</strong></td><td class="num">316</td><td class="num">96</td><td class="num"><strong>−69.6%</strong></td><td class="num"><strong>−4.89σ</strong></td><td>KST 15→16 오후 — 구조적으로 atypical 시간</td></tr>
+<tr><td>#2</td><td>3/14 14→15</td><td class="num">163</td><td class="num">46</td><td class="num">−71.8%</td><td class="num">−3.14σ</td><td>KST 23→00 peak→trough handoff (정상)</td></tr>
+<tr><td>#3</td><td>4/11 04→05</td><td class="num">—</td><td class="num">—</td><td class="num">−</td><td class="num">~−3.0σ</td><td>주말/trough 시간</td></tr>
+<tr><td>#4</td><td>3/13 06→07</td><td class="num">—</td><td class="num">—</td><td class="num">−</td><td class="num">~−2.9σ</td><td>KST 15→16 오후</td></tr>
+<tr><td>#5</td><td>3/5 14→15</td><td class="num">—</td><td class="num">—</td><td class="num">−</td><td class="num">~−2.8σ</td><td>KST 23→00 handoff</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-info">
+<strong>3/20 06→07 UTC는 유일하게 이상:</strong> 동일 hour-of-day 2월 baseline 대비 −4.89σ (1,840 전이 중 순위 #1). window 전체에서 before-volume &gt;300인 &gt;60% drop은 이것이 유일. 4.89σ 이벤트는 정상 조건에서 약 백만 시간 전이 중 1번. 앞선 45일 window에는 3/20과 비교할 만한 숨겨진 cliff가 없음.
+</div>
+
+<h4>보조 — 3/19-20 cliff 직전 unattributed spike</h4>
+<p>Cliff 직전 24–30시간 동안 KB의 unattributed pb 볼륨이 2월 baseline 대비 3–4× 상승 (3/20 00–06 UTC = 272–326 unattr/hr vs 2월 UTC 00–06 평균 ~120). KB 자체 install rate가 cliff 직전 급등 중이었고, 07 UTC의 −70% drop이 이미 elevated 수준에서 발생 — 직전 추세 대비 측정하면 cliff가 더욱 이상.</p>
+
+<h4>Unattributed-only 시간 단위 추이 — 77일 전체 window</h4>
+<div class="chart-wrapper tall" style="height:380px"><canvas id="chart_unattr_hourly"></canvas></div>
+<div class="chart-caption">Unattributed pb 시간 단위, 2/1 – 4/18 (n=1,841시간). 좌측: unattr pb/hr (청색). 우측: attribution % (점선 녹색). 가시적 특징: (1) 규칙적 KST-diurnal 진동, (2) 3/1–5 Moloco 장애 (unattr flat-to-elevated, attribution 0 — 두 선 gap 가시), (3) <strong>3/20 07 UTC cliff</strong> — sharp intra-hour drop, 이후 진동 저진폭, (4) 3/31 – 4/1 KST spike with attribution 여전히 평평, (5) 4/13–17 볼륨 drift, attribution 미회복.</div>
+
+<h4>일일 차트의 모든 "cliff처럼 보이는" 이벤트 분류</h4>
+<table>
+<thead><tr><th>일일 차트 cliff 후보</th><th>시간 단위 signature</th><th>분류</th></tr></thead>
+<tbody>
+<tr><td>2월 일일 변동 (1,200–4,100)</td><td>정상 7× KST diurnal + 주말 dip</td><td><strong>정상 변동성</strong> — 이 볼륨 스케일에서 예상</td></tr>
+<tr><td>3/1–5 dip</td><td>점진적 감소, KST diurnal 보존; intra-hour cliff 없음</td><td><strong>Spend-zero + PIM-2841 attribution 장애</strong></td></tr>
+<tr><td>3/14–15 dip</td><td>점진적 — spend $34 급감 추종</td><td><strong>Spend-driven</strong> + PIM-2841 여진 가능성</td></tr>
+<tr style="background:#fee2e2"><td>3/20 07 UTC cliff</td><td>시간 내 −70.9% 전이; 54시간+ 지속; attr &amp; unattr 균일 drop</td><td><strong>진정한 upstream cliff</strong> — 질적으로 다름</td></tr>
+<tr><td>3/28–29 dip</td><td>정상 KST 주말 패턴</td><td><strong>주말 seasonality</strong> + post-cliff 저점</td></tr>
+<tr style="background:#fff7ed"><td>3/31 – 4/1 spike</td><td>onset 707 pb/hr (7×), 26시간 지속, attr 0.4–3.9% 유지</td><td><strong>볼륨 only spike, attribution 회복 없음</strong> — MMP batch 이벤트</td></tr>
+</tbody>
+</table>
+
+<div class="chart-wrapper tall"><canvas id="chart_hourly"></canvas></div>
+<div class="chart-caption">3/19–22 UTC window 시간 단위 pb. Attributed (청색), Unattributed (주황), Attribution % (점선 녹색 우축). Phase 1: 07:00 UTC에 attr+unattr 비례 drop. Phase 2: 08:00 UTC부터 볼륨은 낮게 유지되는 동안 attribution %만 추가 하락.</div>
+
+</details>
+</div>
+
+<!-- OLD SECTION 2 REMOVED BELOW — block cleanup -->
+<div style="display:none">
+<h3>Window 내 주요 이벤트 (구버전)</h3>
+<table>
+<thead><tr><th>이벤트</th><th>시점</th><th>볼륨</th><th>Attribution</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td><strong>0. 2월 baseline (정상)</strong></td><td>2/1 – 28</td><td>일일 1,200-4,100 pb; 평균 ~2,400/일</td><td><strong>5-17% (평균 10.5%)</strong>, 2월 중순 주 12-17%</td><td>"만족스러운" 참조 상태. CPI ~$0.52. Spend ~$130/일. 정상적인 KB iOS attribution 스택의 모습.</td></tr>
+<tr><td><strong>1. 3/1-5 outage</strong></td><td>3/1 – 5</td><td>일일 1,089-4,844 pb (계속 흐름 — AIRBRIDGE 측 영향 없음)</td><td>0-0.6% (3/4 = 0/4,724)</td><td>Moloco action-model P1 장애 (PIM-2841). KB가 impacted-campaigns sheet 포함. Spend = $0. 정상 AIRBRIDGE postback flow에도 Moloco-side attribution zero.</td></tr>
+<tr><td><strong>2. 3/6-13 회복</strong></td><td>3/6 – 13</td><td>일일 1,772-3,276</td><td>1.8-9.2% 상승</td><td>Spend 재개, attribution 재구축. Action model 온라인 복귀.</td></tr>
+<tr><td><strong>3. 3/14-15 spend-driven dip</strong></td><td>3/14 – 15</td><td>일일 1,321-1,462</td><td>0.4%</td><td>3/14 spend 급감 ($34/일) — 기계적 SoI 하락, 또 다른 장애 아님.</td></tr>
+<tr><td><strong>4. 3/16-20 pre-cliff peak</strong></td><td>3/16 – 20</td><td>일일 1,645-3,345</td><td><strong>6.9-13.8%</strong> pre-cliff 최고점으로 재상승</td><td>3/19 spend $359, 3/20 $251. Attribution 2월 baseline 수준으로 회귀.</td></tr>
+<tr style="background:#fee2e2"><td><strong>5. 3/20 07 UTC cliff (primary trigger)</strong></td><td>3/20 07:00 UTC (= 16:00 KST)<br>3/20 16:00 UTC (= 3/21 01:00 KST)에 attribution zero</td><td>시간당 381 → 111 (-71%); 일일 3,345 → 971 (3/21)</td><td>15.6% → 13.5% → 0%</td><td><strong>Phase 1 (볼륨) + Phase 2 (attribution)</strong> — 07:00 UTC에 attr와 unattr가 비례하여 drop (Moloco 상위 단계); attribution은 1-9시간 후 zero로 붕괴.</td></tr>
+<tr><td><strong>6. 3/22 21 UTC 부분 회복</strong></td><td>3/22 21:00 UTC (= 3/23 06:00 KST)</td><td>일일 1,152 → 1,744 (3/23) 상승</td><td>0% → 잠시 5-7%, 3/27까지 3-8%</td><td>54시간 attribution blackout 종료. 54시간 만의 첫 non-zero attributed 이벤트. Pre-cliff baseline 여전히 미달.</td></tr>
+<tr><td><strong>7. 3/28-29 주말 dip</strong></td><td>3/28 – 29</td><td>일일 1,251-1,338</td><td>0.3-0.4%</td><td>주말 (KST 토-일) + post-cliff 저점; 추가 이벤트 아님.</td></tr>
+<tr style="background:#fff7ed"><td><strong>8. 3/31 – 4/1 KST spike</strong></td><td>3/31 15:00 UTC → 4/1 16:00 UTC (= 4/1 00:00 → 4/2 01:00 KST; ~26시간)</td><td>onset 707 pb/hr (정상의 7×); 일일 3,599 / 3,768 (7일 중앙값 대비 2.2-2.3×)</td><td><strong>0.4-3.9% 낮게 유지</strong></td><td><strong>볼륨 only spike, attribution 회복 없음.</strong> 97-100% unattributed. onset이 정확히 KST 자정과 일치 = MMP/퍼블리셔 측 scheduled/batch signature.</td></tr>
+<tr><td><strong>9. 4/3 KB 예산 컷</strong></td><td>KB UA 예산 363k → 181k KRW</td><td>일일 2,249 → 1,586 → 1,250 (점진적)</td><td>1.7 → 1.9 → 1.4% (step 없음)</td><td>급격한 pb 효과 없음 — 예산에 비례한 감소; 지속적 미회복 계속.</td></tr>
+<tr><td><strong>10. 4/13-17 볼륨 drift</strong></td><td>4/13-17</td><td>일일 1,853-2,241 (pre-cliff 최고점의 ~40%)</td><td>1.2-1.9% (회복 없음)</td><td>볼륨은 상승 중이나 attribution 회복 없음 — MMP forwarding layer 여전히 broken.</td></tr>
+<tr><td><strong>11. 4/18 현재 상태</strong></td><td>4/18 (부분 집계)</td><td>일일 1,248 pb (15:00 UTC 시점까지)</td><td>1.44%</td><td>지속적 미회복 확인. 2월 baseline attribution의 ~12%.</td></tr>
+</tbody>
+</table>
+
+<div class="chart-wrapper tall"><canvas id="chart_daily_32d"></canvas></div>
+<div class="chart-caption">출처: <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a> (2/1 – 3/17) + BQ-32d (3/18 – 4/18). 좌측 축: 일일 stacked attributed + unattributed postback count. 우측 축: attribution %. 2월 baseline (정상 5-17% attr)이 3/20 이후 지속된 ~1.3% 상태와 명확히 대비.</div>
+
+<div class="callout callout-info">
+<strong>3/31 – 4/1 spike (이벤트 8)에서 얻은 핵심 인사이트:</strong> 이 spike는 <strong>볼륨 only</strong>. AIRBRIDGE는 onset 시간(3/31 15:00 UTC = 4/1 00:00 KST, 정확히 KST 자정)에 약 7배 많은 postback을 전송했으나, <strong>attribution rate는 내내 0.4-3.9%</strong>로 — post-cliff baseline과 본질적으로 동일. 즉 AIRBRIDGE가 잠시 Moloco로의 postback forwarding을 증가시켰지만, <em>attribution을 깨뜨리는 조건(empty campaign_id / 깨진 macro substitution)이 post-cliff baseline과 똑같이 동반</em>된 채로 도착. 이 spike는 <strong>MMP-forwarding-layer 근본 원인 가설을 더욱 강화</strong> — AIRBRIDGE 측에서 간헐적 upstream activity는 있지만, Moloco가 postback을 credit하지 못하게 하는 조건은 그대로. Spike onset이 KST 자정과 hour 단위로 일치하는 것은 MMP 또는 퍼블리셔 측의 scheduled/batch-driven 이벤트와 부합하며, Moloco 내부 플랫폼 변경이 아님.
+</div>
+
+<div class="callout callout-warn">
+<strong>이 모든 것이 3/20 cliff 내러티브에 의미하는 바:</strong> <code>pb</code> 테이블은 AIRBRIDGE가 bundle에 대해 Moloco로 보내는 모든 postback을 집계 — Moloco-attributed와 cross-network 모두. 3/20에 두 버킷 모두 균등하게 -71%/-73% 하락한 것은 AIRBRIDGE가 KB에 대해 Moloco로 보내는 postback이 71% 감소했음을 의미 — <strong>이것은 MMP→Moloco forwarding layer의 이슈로, Moloco의 attribution engine보다 상위 단계</strong>. Moloco-attribution-side 코드 변경(MM-138, PR #70212 등)은 <em>이 신호를 만들 수 없음</em>. 이벤트 8의 구성(볼륨 회복 but attribution은 여전히 broken)과 결합하면, 그림이 다음과 일치: (1) 3/20에 AIRBRIDGE-side forwarding disruption + upstream tagging/macro 이슈 시작; (2) post-cliff 간헐적 볼륨 변동(3/31-4/1 spike 포함); (3) tagging/macro 이슈가 지속되므로 attribution rate는 계속 낮게 유지. 조사해야 할 surface는 KB 앱 측 / DPLAN360 agency / AIRBRIDGE tenant 설정이라는 결론이 명확.
+</div>
+
+<h3>이 변동성이 정상인가? — Unattributed-only cliff scan, 2/1 – 4/18</h3>
+<p><strong>방법론 노트.</strong> 여기서는 <strong>unattributed-only</strong> pb 볼륨 — <code>moloco.campaign_id IS NULL OR = ''</code>인 postback (즉 AIRBRIDGE가 다른 네트워크에 귀속된 install을 forward한 경우) —에 집중한다. 이는 Moloco 측 attribution 효과로부터 신호를 분리: unattributed 볼륨은 KB 자체 install rate + KST-diurnal + AIRBRIDGE forwarding 로직을 따르며, Moloco 일일 spend 수준과는 거의 무관.</p>
+
+<p>BQ로 검증된 전체 2/1 – 4/18 window의 시간 단위 데이터(<strong>1,840개 hour 전이</strong>)로 "정상"이 어떤 모습인지, 그리고 3/20이 실제로 어디에 위치하는지에 대한 적절한 통계적 통제된 view를 확보했다.</p>
+
+<table>
+<thead><tr><th>Baseline 속성 (2/1 – 2/28 unattributed-only, n=672 hours)</th><th class="num">값</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td>Peak hour (14 UTC = 23 KST)</td><td class="num">평균 138.5 unattr pb/hr</td><td>KST 저녁 surge (한국 business-hour install flow)</td></tr>
+<tr><td>Trough hour (20 UTC = 05 KST)</td><td class="num">평균 19.5 unattr pb/hr</td><td>KST 야간 저점</td></tr>
+<tr><td>Peak-to-trough 비율</td><td class="num"><strong>7.09×</strong> (하루 내)</td><td>강한 KST-diurnal cycle; 7× 진폭은 <strong>정상</strong></td></tr>
+<tr><td>Hour-of-day CV (시간별 내부 분산)</td><td class="num">0.443</td><td>시간 특화 노이즈는 적당한 수준</td></tr>
+<tr><td>Hour-to-hour % 변화 — 평균, σ (2/1 – 3/17, n=1,079 전이)</td><td class="num">+6.52%, σ 41.2%</td><td>±40% 시간당 변화는 noise 범위 내</td></tr>
+<tr><td>5백분위수 최악 drop</td><td class="num">−45.0%</td><td>시간당 ~45% drop까지는 일상적</td></tr>
+<tr><td>1백분위수 최악 drop</td><td class="num">−56.8%</td><td>~57% drop은 약 1% 빈도로 발생</td></tr>
+<tr><td>2/1 – 3/17 (n=1,079) 관측 최악 drop</td><td class="num">−71.8% (3/14 14→15 UTC)</td><td>3/20 이전 최악 전이 — KST peak→trough handoff 시간대</td></tr>
+<tr><td>2/1 – 3/17 중 70% 초과 drop</td><td class="num"><strong>1,079개 중 1건</strong></td><td>이 정도 drop은 극히 드묾</td></tr>
+</tbody>
+</table>
+
+<h4>2/1 – 4/18 전 구간 seasonally-controlled z-score 기준 Top 5 drops (동일 hour-of-day baseline)</h4>
+<table>
+<thead><tr><th>순위</th><th>전이 (UTC)</th><th class="num">이전</th><th class="num">이후</th><th class="num">% drop</th><th class="num">z-score (same-HOD)</th><th>KST 맥락</th></tr></thead>
+<tbody>
+<tr style="background:#fee2e2"><td><strong>#1</strong></td><td><strong>3/20 06→07 UTC</strong></td><td class="num">316</td><td class="num">96</td><td class="num"><strong>−69.6%</strong></td><td class="num"><strong>−4.89σ</strong></td><td>KST 15→16 오후 — cliff 시간대로 구조적으로 atypical</td></tr>
+<tr><td>#2</td><td>3/14 14→15 UTC</td><td class="num">163</td><td class="num">46</td><td class="num">−71.8%</td><td class="num">−3.14σ</td><td>KST 23→00 peak→trough handoff (정상 diurnal 패턴)</td></tr>
+<tr><td>#3</td><td>4/11 04→05 UTC</td><td class="num">—</td><td class="num">—</td><td class="num">−</td><td class="num">~−3.0σ</td><td>주말/trough 시간</td></tr>
+<tr><td>#4</td><td>3/13 06→07 UTC</td><td class="num">—</td><td class="num">—</td><td class="num">−</td><td class="num">~−2.9σ</td><td>KST 15→16 오후</td></tr>
+<tr><td>#5</td><td>3/5 14→15 UTC</td><td class="num">—</td><td class="num">—</td><td class="num">−</td><td class="num">~−2.8σ</td><td>KST 23→00 peak→trough handoff</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-info">
+<strong>3/20 06→07 UTC는 1,840개 전이에 걸쳐 유일하게 이상:</strong>
+<ul style="margin:8px 0 0 18px">
+<li>동일 hour-of-day 2월 baseline 대비 <strong>−4.89σ</strong> (77일 전체 window에서 순위 #1)</li>
+<li>window 전체에서 <strong>before-volume >300인 >60% drop은 이것이 유일</strong>. 더 큰 % 크기의 drop 3개(3/27 17→18, 3/14 14→15, 3/24 19→20)는 모두 before-volume < 40이며, 이는 정상 KST-diurnal peak→trough handoff에서 작은 절대값 drop이 큰 퍼센트로 증폭된 경우.</li>
+<li>raw 크기 top 20 중 11개는 UTC 14→15 또는 15→16 전이 (KST 23→00 또는 24→01) — 자연스러운 KST peak→post-peak handoff. 진짜 이상은 아님.</li>
+<li>3/20은 KST 15→16 UTC 06→07 — <strong>자연스러운 diurnal trough가 없는 오후 중반 시간대</strong>에 발생하여 drop이 구조적으로 atypical.</li>
+</ul>
+<p style="margin-top:8px">4.89σ 이벤트는 정상 조건에서 약 100만 시간 전이 중 1번. 앞선 45일간의 2월-3월 초 window에는 <strong>3/20과 비교할 만한 숨겨진 cliff가 없음</strong>. 3/20은 진정으로 unique.</p>
+</div>
+
+<h4>흥미로운 보조 관찰 — 3/19-20 cliff 직전 unattributed spike</h4>
+<p>Cliff 직전 24-30시간 동안, KB의 unattributed pb 볼륨이 2월 baseline 대비 <strong>3-4× 상승</strong> (3/20 00-06 UTC = 272-326 unattr/hr vs 2월 UTC 00-06 평균 ~120). 즉 KB 자체 install rate가 cliff 직전 급등하고 있었다는 의미 — 07 UTC의 −70% drop이 이미 elevated 상태에서 일어난 것. 직전 추세(단지 2월 baseline이 아니라)에 대비해 측정하면 cliff는 구조적으로 더욱 이상.</p>
+
+<h4>Unattributed-only 시간 단위 추이 — 77일 전체 window</h4>
+<div class="chart-wrapper tall" style="height:420px"><canvas id="chart_unattr_hourly"></canvas></div>
+<div class="chart-caption">출처: BQ-검증 pb unattributed-only 시간 단위 (2/1 – 4/18, n=1,841 시간). 좌측 축: unattributed pb/hr (파란 선). 우측 축: attribution % (점선 녹색). 가시적 특징: (1) 규칙적 KST-diurnal 진동 (peak 14 UTC / 23 KST, trough 20 UTC / 05 KST), (2) 2월 baseline 진폭 ~20-350/hr, (3) 3/1-5 action-model 장애 — unattributed 볼륨은 평평~elevated이나 attribution %만 붕괴 (두 선 사이 gap 가시적), (4) <strong>3/20 07 UTC cliff</strong> — 파란 선에 sharp intra-hour drop; 이후 모든 진동은 2월보다 낮은 진폭, (5) 3/31 – 4/1 KST spike — 볼륨 bump 보이지만 attribution %는 평평, (6) 4/13-17 볼륨 점진 상승, attribution 회복 없음.</div>
+
+<h3>일일 차트의 모든 "cliff처럼 보이는" 이벤트 분류</h3>
+<p>일일 drop이 모두 같은 것은 아님. 아래 표는 각 "cliff 같은" 특징이 실제로 무엇인지 signature로 구분한다:</p>
+
+<table>
+<thead><tr><th>일일 차트의 cliff 후보</th><th>시간 단위 signature</th><th>볼륨 + attribution 패턴</th><th>분류</th></tr></thead>
+<tbody>
+<tr><td>2월 일일 변동 (1,200-4,100 범위)</td><td>정상 7× KST diurnal + 주말 dip</td><td>볼륨은 spend + 요일에 따라 변동, attribution은 5-17% 유지</td><td><strong>정상 변동성</strong> — 이 볼륨 스케일에서 예상되는 수준</td></tr>
+<tr><td>3/1-5 dip</td><td><strong>점진적 일일 감소, KST diurnal 보존</strong>; intra-hour cliff 없음</td><td>3/1-2 억제, 3/3-5는 다시 4K 수준; <strong>attribution ~0% 내내 유지</strong></td><td><strong>Spend-zero + PIM-2841 attribution 장애</strong> (spend = $0, action model P1). 볼륨 cliff가 아니라 볼륨 없이 attribution만 cliff.</td></tr>
+<tr><td>3/14-15 dip</td><td>점진적 — spend를 따라감</td><td>볼륨 1,321-1,462, attribution 0.4%</td><td><strong>Spend-driven</strong> (3/14 spend $34) + PIM-2841 여진 가능성</td></tr>
+<tr style="background:#fee2e2"><td><strong>3/20 07 UTC cliff</strong></td><td><strong>한 시간 전이에서 −70.9%</strong> (동일 hour baseline 대비 −5.0σ); 54시간+ 지속</td><td>attr & unattr가 균일하게 drop, 이후 attribution이 9시간 뒤 구체적으로 0</td><td><strong>진정한 upstream cliff</strong> — 이전 어떤 이벤트와도 질적으로 다름</td></tr>
+<tr><td>3/28-29 dip</td><td>정상 KST 주말 패턴</td><td>볼륨 1,251-1,338; attribution 0.3-0.4% (post-cliff baseline과 동일)</td><td><strong>주말 seasonality</strong> (KST 토-일) + post-cliff 저점</td></tr>
+<tr style="background:#fff7ed"><td>3/31 – 4/1 spike</td><td>onset 707 pb/hr (정상의 7×), 26시간 지속</td><td>볼륨 ~2.3×이나 attribution 0.4-3.9% 유지</td><td><strong>볼륨 only spike, attribution 회복 없음</strong> — MMP 측 batch/scheduled 이벤트, fix 아님</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-info">
+<strong>변동성에 대한 결론:</strong> KB의 일일 차트가 변동성 있어 보이는 이유는 (a) advertiser가 ~2,400 pb/일의 소규모 볼륨이고, (b) 강한 KST-diurnal + 주말 seasonality 패턴이 있고, (c) 2월 spend가 하루 2-3× 변동했기 때문. <strong>이것은 모두 정상.</strong> 하지만 3/20 07 UTC 이벤트는 <strong>질적으로 다름</strong>: 시간 내 −5σ drop이 54시간+ 지속되며, 이전 어떤 이벤트와도 공유하지 않는 signature (attr+unattr 균등 drop). Window 내 유일한 진짜 cliff.
+</div>
+
+<div class="chart-wrapper tall"><canvas id="chart_hourly"></canvas></div>
+<div class="chart-caption">Source: <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a> — hourly aggregation of <code>prod_stream_view.pb</code>. Attributed (solid blue), Unattributed (solid orange), Attribution % (dashed green, right axis). Phase 1: both attr+unattr drop proportionally at 07:00 UTC. Phase 2: attribution % diverges downward starting 08:00 UTC while volume components stay low.</div>
+
+<h3>Phase 1 vs Phase 2 — component decomposition</h3>
+<table>
+<thead><tr><th>Hour (UTC)</th><th class="num">Total pb</th><th class="num">Attributed</th><th class="num">Unattributed</th><th class="num">Attr %</th><th>Phase / Notes</th></tr></thead>
+<tbody>
+<tr><td>Mar 20 06:00 (baseline)</td><td class="num">381</td><td class="num">~55</td><td class="num">~326</td><td class="num">15.6%</td><td>Normal</td></tr>
+<tr style="background:#fff7ed"><td><strong>Mar 20 07:00</strong></td><td class="num"><strong>111</strong></td><td class="num"><strong>15 (-73%)</strong></td><td class="num"><strong>96 (-71%)</strong></td><td class="num">13.5%</td><td><strong>Phase 1 — Volume cliff: attr and unattr drop PROPORTIONALLY. Attribution rate stable. Upstream of Moloco.</strong></td></tr>
+<tr><td>Mar 20 08:00</td><td class="num">84</td><td class="num">7</td><td class="num">77</td><td class="num">8.3%</td><td>Phase 2 begins — attribution % diverges down</td></tr>
+<tr><td>Mar 20 09-13</td><td class="num">59-88</td><td class="num">5-11</td><td class="num">54-77</td><td class="num">7-12%</td><td>Phase 2 — attribution degrading</td></tr>
+<tr><td>Mar 20 14-15</td><td class="num">49-67</td><td class="num">1-3</td><td class="num">48-64</td><td class="num">1.5-6.1%</td><td>Phase 2 — near-dead</td></tr>
+<tr style="background:#fee2e2"><td><strong>Mar 20 16:00</strong></td><td class="num">26</td><td class="num"><strong>0</strong></td><td class="num">26</td><td class="num"><strong>0.0%</strong></td><td><strong>Phase 2 peak — first fully-zero hour</strong></td></tr>
+<tr><td>Mar 20 17 – Mar 22 20</td><td class="num">3-84</td><td class="num">0-2</td><td class="num">3-82</td><td class="num">~0% (avg 0.2%)</td><td>Flatline</td></tr>
+<tr style="background:#f0fdf4"><td>Mar 22 21-23</td><td class="num">19-69</td><td class="num">1-5</td><td class="num">18-64</td><td class="num">5-7%</td><td>Partial recovery begins (rollback/fix signature?)</td></tr>
+</tbody>
+</table>
+
+<div class="two-col" style="margin-top:16px">
+<div style="padding:14px 16px; background:#fff7ed; border-left:4px solid var(--medium); border-radius:6px;">
+<h4 style="margin:0 0 6px; font-size:14px; color:var(--medium)">Phase 1 — Volume drop @ 07:00 UTC</h4>
+<p style="margin:0; font-size:13px"><strong>Mechanism:</strong> AIRBRIDGE sends fewer postbacks to Moloco.<br><strong>Evidence:</strong> Attr -73% and unattr -71% drop equally; attribution rate stays 13.5%.<br><strong>Candidates:</strong> AIRBRIDGE tenant postback endpoint change · KB app SDK update · DPLAN360 forwarding rule change.<br><strong>Not Moloco-fixable</strong>; needs partner-side audit.</p>
+</div>
+<div style="padding:14px 16px; background:#fee2e2; border-left:4px solid var(--low); border-radius:6px;">
+<h4 style="margin:0 0 6px; font-size:14px; color:var(--low)">Phase 2 — Attribution collapse @ 08-16 UTC</h4>
+<p style="margin:0; font-size:13px"><strong>Mechanism:</strong> Attribution rate falls independently of volume, on already-low denominators.<br><strong>Evidence:</strong> Attr % 8.3% → 7% → 1.5% → 0%; volume flat but attribution drops further.<br><strong>Caveat:</strong> Hard to disentangle from Phase 1 artifact given low n (26-88/hr). Could be downstream consequence OR coincident Moloco-side event.</p>
+</div>
+</div>
+</div>
+
+<!-- Chart 3: Peer cohort -->
+<h2 id="sec-3">3. 피어 코호트 범위 검증 — KB만 고유하게 타격</h2>
+<div class="card">
+<p>3/18-23 기간 동안 8개 AIRBRIDGE iOS KOR 피어 어드버타이저를 추적 — 대표는 <strong>삼성증권 (Samsung Securities)</strong>으로 동일 vertical이며 agency cluster도 같을 가능성이 높음. KB는 <strong>-93.7% outlier</strong>; 최악의 피어 Coinone도 -32%에 그치고 3/23에 회복. 삼성증권은 평평(5-6%). 이는 AIRBRIDGE tenant-wide 이슈, KR 증권 vertical cluster 이슈, allow_fingerprinting-only 차등을 모두 배제 (삼성의 AFP=TRUE/FALSE 혼합 campaign이 모두 안정).</p>
+<div class="chart-wrapper tall"><canvas id="chart_peers"></canvas></div>
+<div class="chart-caption">출처: <a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a> — KB + 8개 한국 iOS 피어 advertiser의 일일 AIRBRIDGE install postback attribution %. Zeta (Scatter Lab / com.scatterlab.messenger)는 조사 중 검토되었으나 entertainment vertical 앱이므로 한국 증권/MTS advertiser 피어로 부적합하여 peer set에서 제거.</div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PART II — 조절 요인 -->
+<!-- ================================================================ -->
+<div style="margin:48px 0 8px; padding:18px 24px; background:linear-gradient(135deg, #0b1f45 0%, #1a47e6 100%); color:white; border-radius:10px;">
+  <div style="font-size:11px; letter-spacing:2px; opacity:0.7; text-transform:uppercase;">Part II</div>
+  <div style="font-size:22px; font-weight:700; margin-top:4px;">조절 요인 — KB가 왜 민감한가</div>
+  <div style="font-size:13px; opacity:0.85; margin-top:6px;">§4는 KB에 영향을 주는 모든 shock을 증폭시키는 구조적 조건들 (AFP=FALSE, 깊은 퍼널 KPI, 작은 라벨 코퍼스, 작은 예산, 집중된 공급)을 기록. 트리거가 아닌, 피어 대비 KB의 불균형한 응답을 설명하는 요인.</div>
+</div>
+
+<!-- Chart 4: Structural fragility -->
+<h2 id="sec-4">4. 구조적 취약성 — Moderator</h2>
+<div class="card">
+<p>KB의 iOS attribution 스택은 만성적으로 취약. KB의 셋업이 한국 증권 앱 기준으로 실제로 약한지 평가하기 위해 <strong>삼성증권 (Samsung Securities, <code>com.samsungpop.ios.mpop</code>)</strong>와 비교 — 동일 vertical, 동일 MTS 제품 카테고리, 동일 MMP (AIRBRIDGE), 동일 OS/지역, agency cluster도 같을 가능성. 삼성은 "한국 증권 MMP iOS advertiser가 달성 가능한 수준"을 평가할 수 있는 가장 강력한 사용 가능 피어 — 비즈니스 모델에 내재된 변수(규제 기반 계좌 개설 flow로 인한 KPI 깊이, 클라이언트 전략에 의한 예산, 타겟 오디언스에 의한 exchange mix)로부터 문제가 되는 구조적 변수를 분리할 수 있기 때문.</p>
+
+<table>
+<thead><tr><th>구조적 요인</th><th>KB증권</th><th style="background:#eef2fb"><strong>삼성증권<br>(주요 vertical 피어)</strong></th><th>함의</th></tr></thead>
+<tbody>
+<tr><td><strong>AIRBRIDGE attribution rate</strong> 3/18-22 (cliff 전후)</td><td><strong>10-14% → 0.74%</strong> (−93.7%)</td><td style="background:#f0fdf4"><strong>5-6% 평평</strong> (−13.9%, noise 범위)</td><td>삼성은 3/20-21 cliff window를 거치며 안정 — cliff가 KB 고유 이슈이고 vertical-wide나 agency-wide가 아님을 확인</td></tr>
+<tr><td><code>allow_fingerprinting</code> (AFP)</td><td><strong>FALSE</strong> (전 campaign 100%)</td><td style="background:#f0fdf4">혼합: <strong>TRUE=8, FALSE=4</strong> (~67% / 33%)</td><td>삼성의 AFP=FALSE campaign도 안정 → AFP 단독은 differential이 아님. KB의 전 campaign FALSE는 취약 요인 중 하나이지만 smoking gun은 아님.</td></tr>
+<tr><td>최적화 KPI</td><td><code>account_step16_complete</code> (16단계 계좌 개설, 깊은 퍼널)</td><td style="background:#f0fdf4">직접 조회 안 됨 [TBC]</td><td>규제 기반 계좌 개설 flow 때문에 vertical 피어들도 유사한 깊은 퍼널 KPI를 쓸 가능성 높으나, 삼성의 정확한 KPI는 이번 조사에서 미조회</td></tr>
+<tr><td>tfexample 양성 라벨/일</td><td class="num"><strong>0-4</strong></td><td style="background:#f0fdf4" class="num">직접 조회 안 됨 [TBC]</td><td>KB의 label corpus는 미세하나, 삼성이 동일하게 starved인지 또는 중간 퍼널 KPI로 더 많은 label을 확보하는지 불명</td></tr>
+<tr><td>일일 예산 규모</td><td class="num">~18.2만~36.3만 KRW</td><td style="background:#f0fdf4" class="num">직접 조회 안 됨 [TBC]</td><td>예산 규모 비교는 삼성 데이터 pull 대기</td></tr>
+<tr><td>Exchange mix</td><td>KAKAO+TPMN ≈ 65%</td><td style="background:#f0fdf4">직접 조회 안 됨 [TBC]</td><td>KB의 한국 퍼블리셔 집중은 확인; 삼성의 mix는 미조회</td></tr>
+<tr><td>공급-side SKAN 4.0 선언 점유율 <span style="color:var(--text-muted); font-size:11px">(bid-request supply flag, traffic type 아님)</span></td><td class="num">98.9%</td><td style="background:#f0fdf4" class="num">직접 조회 안 됨 [TBC]</td><td>인벤토리 구성에 대한 사실 — 아래 caveat 참조</td></tr>
+<tr style="background:#f0fdf4"><td><strong>LAT rate / IDFA 가용성</strong> (실제 traffic-type 지표) <span style="color:var(--text-muted); font-size:11px">[BQ-검증 weekly, KB만]</span></td><td>73.5% LAT (2/2) → 44.9% (3/2) → 24.1% (4/6) → 20.3% (4/13 부분). <strong>−53 pp</strong>. IDFA: 26.5% → 79.7%</td><td>직접 조회 안 됨 [TBC]</td><td>KB의 IDFA 가용성이 극적으로 개선 (긍정 방향) — LAT은 KB에게 순풍이지 취약 요인이 아님</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-info" style="margin-top:12px">
+<strong>삼성증권이 주요 피어로 적절한 이유.</strong> 동일 vertical (한국 리테일 증권 / MTS), agency cluster도 같을 가능성. 3/20-21 window에서 삼성의 5-6% attribution이 안정적으로 유지되고, 일부 AFP=FALSE campaign도 drop이 없었다는 사실이 "vertical-wide / agency-wide AIRBRIDGE 이벤트" 가설과 "AFP-only differential" 가설 모두에 대한 가장 깔끔한 falsifier.
+</div>
+
+<div class="callout callout-warn" style="margin-top:12px">
+<strong>⚠ 미조회 데이터 갭.</strong> 이번 조사에서 삼성증권에 대해 직접 조회되지 않은 차원: 최적화 KPI, tfexample 양성 라벨 볼륨, 일일 예산, exchange mix 구성, SKAN 4.0 공급 점유율, LAT rate. "구조적 취약성" 내러티브를 강화하려면 후속 pull이 필요.
+</div>
+
+<div class="callout callout-warn" style="margin-top:12px">
+<strong>⚠ Terminology caveat (BQ-verified).</strong> "SKAN" is a <em>measurement framework</em> (Apple's SKAdNetwork postback mechanism), not a traffic type. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F8</a>'s "98.9% SKAN 4.0" comes from <code>req.ext.skadn.version</code> in bid requests — a publisher/exchange supply-side declaration of SKAN framework support, independent of user IDFA status. KB's <code>skadn.version=4.0</code> share was stable at 98.7-99.9% throughout the Feb-Apr window while LAT collapsed from 73% to 20% — confirming these are independent dimensions. The correct traffic-type metric is <strong>LAT rate / IDFA availability</strong>, shown in the highlighted row. KB's IDFA availability improved dramatically (26.5% → 79.7%) over 10 weeks, which is a tailwind — so the LAT dimension is not part of the fragility story.
+</div>
+
+<p style="margin-top:12px"><strong>This is the moderator</strong>, not the trigger. AFP=FALSE + deep-funnel KPI + chronic label starvation + thin budget + concentrated supply = KB amplifies any platform perturbation more than peers.</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- PART III — 메커니즘 -->
+<!-- ================================================================ -->
+<div style="margin:48px 0 8px; padding:18px 24px; background:linear-gradient(135deg, #0b1f45 0%, #1a47e6 100%); color:white; border-radius:10px;">
+  <div style="font-size:11px; letter-spacing:2px; opacity:0.7; text-transform:uppercase;">Part III</div>
+  <div style="font-size:22px; font-weight:700; margin-top:4px;">메커니즘 — 4/3 레짐 체인지의 작동 방식</div>
+  <div style="font-size:13px; opacity:0.85; margin-top:6px;">§5는 4/3 복합 이벤트를 4개 메커니즘으로 분해: exchange 믹스 마이그레이션 (기존 3/20 추세), 포맷 step-function, <strong>신규 크리에이티브 활성화</strong> (크리에이티브 <code style="background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:3px">IhrxSOh9QzmyZyzv</code>, §5a), 고전적 under-prediction 입찰 signature. 크리에이티브 단위 IPM gap-fill 포함.</div>
+</div>
+
+<!-- Chart 5: Creative format mix shift -->
+<h2 id="sec-5">5. 4/3 복합 이벤트 — Exchange · 포맷 · 크리에이티브 레짐 체인지</h2>
+<div class="card">
+<p>일일 cr_format 및 exchange-mix 궤적(2/1 – 4/18)이 <strong>피드백 루프 내러티브를 실질적으로 보정</strong>한다. 이전 3-snapshot view (Pre / Post / Recent)는 점진적 climb을 시사했지만, 일일 view는 실제로는 <strong>4/3에 step-function</strong>이며 3/20 cliff가 아닌 예산 컷에 의해 trigger되었음을 보여준다. 두 별개의 regime change가 존재하며 혼동하지 말아야 한다.</p>
+
+<h3>Finding 1 — nl 폭증은 4/3의 step-function (3/21부터 점진적 아님)</h3>
+<ul>
+<li><strong>2월 baseline:</strong> nl 점유율 4-12% 안정; ib 지배 (~65-75%).</li>
+<li><strong>3/21 – 4/2 (post-cliff, pre-budget-cut):</strong> nl 여전히 <strong>2-4%</strong> — pre-cliff와 본질적으로 변동 없음. <strong>3/20 cliff는 cr_format shift를 trigger하지 않았음.</strong></li>
+<li><strong>4/3: 하루에 +27.9 pp</strong> (3.47% → 32.0% nl 점유율).</li>
+<li><strong>4/4:</strong> 45.3%. <strong>4/9:</strong> 60%. 4/18까지 58-62% plateau.</li>
+<li>Thresholds: 4/3 20%, 4/4 40%, 4/9 60% 돌파 — <strong>7일 안의 교과서적 regime change</strong>.</li>
+</ul>
+
+<div class="chart-wrapper tall" style="height:380px"><canvas id="chart_cr_daily"></canvas></div>
+<div class="chart-caption">출처: fact_dsp_creative 일일 cr_format 임프레션 점유율, 2/1 – 4/18. Stacked area: ib (2월 baseline 지배) / ni / nl (step-change) / ii. 4/3 불연속이 sharp하고 명확.</div>
+
+<h3>Finding 2 — nl 폭증은 전적으로 KAKAO 현상 (완전한 퍼블리셔 이동)</h3>
+<ul>
+<li><strong>4/3 이전:</strong> nl 임프레션의 ~99%가 <strong>INMOBI</strong>에 있었음 (2/1: 99%).</li>
+<li><strong>4/3 이후:</strong> <strong>nl 임프레션의 94-98%가 KAKAO</strong>, INMOBI는 2-6%로 감소, 나머지 ≈ 0.</li>
+<li>이는 <strong>nl 인벤토리의 완전한 퍼블리셔 이동</strong> — INMOBI → KAKAO — 예산 컷과 동시 발생. 단순 포맷 shift가 아닌, 퍼블리셔+포맷 shift.</li>
+</ul>
+
+<h3>Finding 3 — Exchange mix shift는 별개로 더 일찍 발생 (3/20 cliff 즈음)</h3>
+<ul>
+<li><strong>KAKAO 점유율</strong> 진행: <strong>2/15: 28%</strong> → <strong>3/20: 76%</strong> → <strong>4/3: 76%</strong> → <strong>4/10: 83%</strong>.</li>
+<li>KAKAO 집중은 <strong>4/3 이전부터 이미 진행 중</strong>이었음 — cr_format step-change와 독립적으로 3/20 window 즈음 발생.</li>
+<li>4/3이 바꾼 것은 <strong>KAKAO가 어떤 포맷을 서빙하는가</strong>이지, KAKAO가 지배하는가 여부가 아님. 4/3 이후 모델은 KAKAO가 서빙하는 인벤토리를 mixed (ib/ni)에서 nl-heavy로 이동시킴.</li>
+</ul>
+
+<div class="chart-wrapper tall" style="height:380px"><canvas id="chart_ex_daily"></canvas></div>
+<div class="chart-caption">출처: fact_dsp_all 일일 exchange 임프레션 점유율, 2/1 – 4/18. Top-8 exchange stacked + OTHER 버킷. KAKAO 집중도는 2-3월에 걸쳐 성장, 3/20 cliff 즈음 spike, post-cliff ~75-83% plateau. 다른 exchange들은 비례하여 축소. 4/3 이후 INMOBI 가시적 축소, KAKAO의 nl-share 확대.</div>
+
+<h3 id="sec-creative">Finding 4 — 4/3 nl 폭증은 NEW 크리에이티브 활성화 (크리에이티브 프리뷰 + IPM gap-fill 포함)</h3>
+<p><strong>KAKAO 내부</strong> creative_id 레벨 impression share (2/1 – 4/18)를 drill-down하면, 기존의 "모델이 기존 nl 인벤토리를 reweight했다"는 해석이 뒤집힙니다. 4/3 step-function은 <strong>완전히 새로운 creative group의 활성화</strong>로 설명되며, 모델이 억제되어 있던 nl 크리에이티브를 벤치에서 꺼낸 것이 아닙니다.</p>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin:16px 0; align-items:start;">
+  <div style="border:1px solid var(--moloco-border); border-radius:10px; padding:14px; background:#fff;">
+    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">신규 크리에이티브 에셋 프리뷰</div>
+    <img src="https://cdn-f.adsmoloco.com/syFnKP76xSYZQcMW/creative/mni9bepx_sqo7bc1_mvvysv3x1erkepfc.jpg" alt="KB증권 신규 크리에이티브 IhrxSOh9QzmyZyzv" style="width:100%; max-height:240px; object-fit:contain; border-radius:6px; background:#f4f6fb;">
+    <div style="font-size:12px; margin-top:10px; line-height:1.5;">
+      <strong>Creative:</strong> <code>IhrxSOh9QzmyZyzv</code><br>
+      <strong>Group:</strong> <code>EVX0myMHmYIGMRgQ</code> <span class="badge badge-high">신규 4/3</span><br>
+      <strong>파일:</strong> 몰로코_B_1200X600.jpg<br>
+      <strong>Type:</strong> NATIVE_IMAGE · 1200 × 600 JPEG<br>
+      <strong>Serving 포맷:</strong> nl (Native Logo) + ni (Native Image) — 동일 에셋
+    </div>
+    <div style="font-size:11px; color:var(--text-muted); margin-top:8px; word-break:break-all;">
+      CDN: <a href="https://cdn-f.adsmoloco.com/syFnKP76xSYZQcMW/creative/mni9bepx_sqo7bc1_mvvysv3x1erkepfc.jpg" target="_blank" style="color:var(--moloco-blue);">cdn-f.adsmoloco.com/…/mni9bepx_sqo7bc1_mvvysv3x1erkepfc.jpg</a>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">밀려난 기존 크리에이티브 (컨텍스트)</div>
+    <div style="border:1px solid var(--moloco-border); border-radius:10px; padding:14px; background:#fafbfd;">
+      <img src="https://cdn-f.adsmoloco.com/syFnKP76xSYZQcMW/creative/mmo956nt_l0sktqz_cneoggnewfdr2rja.png" alt="KB증권 기존 크리에이티브 ogMJ5cQEBJ4fNbOw" style="width:100%; max-height:180px; object-fit:contain; border-radius:6px; background:#fff; margin-bottom:10px;">
+      <div style="font-size:12px; line-height:1.6;">
+        <strong>Creative:</strong> <code>ogMJ5cQEBJ4fNbOw</code><br>
+        <strong>Group:</strong> <code>oEhJ3TVKrYHMaSWX</code><br>
+        <strong>파일:</strong> 몰로코_B_1029x258.png<br>
+        <strong>Type:</strong> IMAGE · 1029 × 258 PNG<br>
+        <strong>포맷:</strong> ib (image banner) · <strong>최초 등장:</strong> 2/1<br>
+        <strong>이력:</strong> 2월부터 KAKAO placement의 기존 asset; 4/2까지 KB iOS KAKAO 임프레션의 94% serving.
+      </div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:8px; word-break:break-all;">
+        CDN: <a href="https://cdn-f.adsmoloco.com/syFnKP76xSYZQcMW/creative/mmo956nt_l0sktqz_cneoggnewfdr2rja.png" target="_blank" style="color:var(--moloco-blue);">cdn-f.adsmoloco.com/…/mmo956nt_l0sktqz_cneoggnewfdr2rja.png</a>
+      </div>
+    </div>
+    <div style="margin-top:12px; padding:12px; background:#fff7ed; border-left:3px solid #b45309; border-radius:6px; font-size:12px;">
+      <strong>핵심 관찰.</strong> 신규 크리에이티브 <code>IhrxSOh9QzmyZyzv</code>는 동일한 1200×600 에셋으로 <code>nl</code>과 <code>ni</code> 두 placement를 모두 serving. 4/3 활성화는 §5의 포맷 step-function과 §3의 퍼블리셔 마이그레이션을 동시에 설명할 수 있는 <em>유일한</em> 신규 인벤토리 이벤트.
+    </div>
+  </div>
+</div>
+
+<h4 style="margin-top:20px;">크리에이티브 단위 KAKAO 임프레션 점유율 (2/1 – 4/18)</h4>
+<table>
+<thead><tr><th>creative_id</th><th>Creative group</th><th>cr_format</th><th>최초 등장</th><th>KAKAO 점유율 (4/3 이전)</th><th>KAKAO 점유율 (4/3 이후)</th><th>Δ</th></tr></thead>
+<tbody>
+<tr><td><code>ogMJ5cQEBJ4fNbOw</code></td><td><code>oEhJ3TVKrYHMaSWX</code></td><td><strong>ib</strong></td><td>2/1</td><td class="num"><strong>94.0%</strong></td><td class="num">25.4%</td><td class="num" style="color:var(--low)"><strong>−68.6 pp</strong></td></tr>
+<tr style="background:#fef2f2"><td><code>IhrxSOh9QzmyZyzv</code></td><td><code>EVX0myMHmYIGMRgQ</code> <span class="badge badge-high">NEW</span></td><td><strong>nl</strong></td><td><strong>4/3</strong></td><td class="num">0.0%</td><td class="num"><strong>59.6%</strong></td><td class="num" style="color:var(--low)"><strong>+59.6 pp</strong></td></tr>
+<tr><td><code>5d4mE9c14jMHBZlV</code></td><td><code>oEhJ3TVKrYHMaSWX</code></td><td>ib</td><td>2/1</td><td class="num">3.2%</td><td class="num">6.5%</td><td class="num">+3.3 pp</td></tr>
+<tr><td>기타 (15 크리에이티브)</td><td>mixed</td><td>ib/ni/ii</td><td>—</td><td class="num">~2.8%</td><td class="num">~8.5%</td><td class="num">+5.7 pp</td></tr>
+</tbody>
+</table>
+<div class="chart-caption">출처: moloco-ae-view.athena.fact_dsp_creative, KB증권 iOS × KAKAO only. Pre-window: 2/1 – 4/2. Post-window: 4/3 – 4/18. 총 18개 distinct creative; 상위 2개 개별 표기.</div>
+
+<h4 style="margin-top:20px;">NEW — 크리에이티브 단위 IPM 비교 (KAKAO only, v2 gap-fill 쿼리)</h4>
+<p>포맷 시프트만으로 컨버전 붕괴가 설명되는지 판단하기 위해, 크리에이티브 단위 IPM을 <strong>KAKAO 한정, apples-to-apples</strong>로 계산:</p>
+<table>
+<thead><tr><th>크리에이티브</th><th>구간</th><th class="num">Imp</th><th class="num">Clicks</th><th class="num">Installs</th><th class="num">IPM</th></tr></thead>
+<tbody>
+<tr><td><code>ogMJ5cQEBJ4fNbOw</code> (ib, 기존)</td><td>4/3 이전</td><td class="num">11,693,071</td><td class="num">4,921</td><td class="num">1,282</td><td class="num"><strong>0.1096</strong></td></tr>
+<tr style="background:#fff7ed"><td><code>ogMJ5cQEBJ4fNbOw</code> (ib, 기존)</td><td>4/3 이후</td><td class="num">4,529,538</td><td class="num">2,131</td><td class="num">89</td><td class="num" style="color:var(--low)"><strong>0.0196</strong> <span style="font-size:11px">(−82%)</span></td></tr>
+<tr style="background:#fef2f2"><td><code>IhrxSOh9QzmyZyzv</code> (nl, 신규)</td><td>4/3 이후</td><td class="num">11,385,144</td><td class="num">0</td><td class="num">138</td><td class="num" style="color:var(--low)"><strong>0.0121</strong> <span style="font-size:11px">(ib 대비 38% 열위)</span></td></tr>
+<tr><td colspan="2"><em>블렌디드 KB iOS (전 크리에이티브, 전 exchange)</em></td><td class="num">74,190,860</td><td class="num">—</td><td class="num">10,037</td><td class="num">0.1353 → <strong style="color:var(--low)">0.0145</strong> (−89%)</td></tr>
+</tbody>
+</table>
+<div class="chart-caption">출처: fact_dsp_creative × pb installs, creative_id-레벨 조인, KAKAO only. IPM = installs / impressions × 1000.</div>
+
+<div class="callout callout-warn" style="margin-top:14px">
+<strong>두 메커니즘이 복합 작용 — 단일 원인이 아님.</strong>
+<ol style="margin:6px 0 0 18px">
+<li><strong>크리에이티브 품질</strong>: 신규 nl 크리에이티브 <code>IhrxSOh9QzmyZyzv</code>는 동일한 4/3 이후 KAKAO 인벤토리 위에서 0.0121/1k, 기존 ib는 0.0196/1k로 컨버전. <strong>구조적으로 38% 열위</strong> — 실제 크리에이티브 품질 liability.</li>
+<li><strong>동시 발생한 외부 열화</strong>: 기존 ib 크리에이티브의 IPM 자체가 동일 4/3 일자에 82% 붕괴 (0.1096 → 0.0196), 계속 serving 중임에도 불구. 포맷 믹스로 설명 불가 — 다른 요인 (KAKAO 오디언스 품질 변동, 3/20 cliff부터 이어진 attribution-path 열화, 또는 저품질 인벤토리로의 예산 재배분)이 동시에 타격.</li>
+</ol>
+<p style="margin-top:8px">회복 시사점: <code>IhrxSOh9QzmyZyzv</code>를 pause하면 크리에이티브 품질 gap의 ~38%가 회복되지만, 기존 ib의 82% 붕괴는 고쳐지지 않음. 3/20 attribution break가 여전히 핵심 레버.</p>
+</div>
+
+<ul>
+<li><strong>단 하나의 creative가 shift의 ~60% 유발</strong>: <code>IhrxSOh9QzmyZyzv</code> (nl format, creative group <code>EVX0myMHmYIGMRgQ</code>)는 <strong>4/3 이전 모든 exchange에서 임프레션 0</strong> → 4/3 당일 즉시 KAKAO 임프레션의 ~60% 점유.</li>
+<li><strong>기존 ib creative 밀려남</strong>: <code>ogMJ5cQEBJ4fNbOw</code> (4/3 이전 KAKAO 94%)가 25%로 drop — 완전히 retired 된 것은 아니지만, 점유율을 새 nl creative에 빼앗김.</li>
+<li><strong>Finding 5와의 정합성</strong>: <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a>는 <em>ib</em> creative group에 대한 고전적 under-prediction signature (3/20 → 4/3 bid/win 동반 붕괴)를 보여줍니다. 새 creative group <code>EVX0myMHmYIGMRgQ</code>는 별개 자산이며, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a> signature는 모델이 ib에서 다변화하려는 <em>동기</em>를 설명하고, 본 테이블은 그 <em>수단</em> (새로 available 해진 nl creative)을 식별합니다.</li>
+<li><strong>기각된 가설</strong>: 모델이 4/3에 기존에 억제되어 있던 nl 인벤토리를 reweight한 것이 <em>아님</em> — 4/3 이전에 이 광고주+OS에는 reweight할 nl 인벤토리 자체가 존재하지 않았음.</li>
+</ul>
+
+<h3>Finding 5 — 고전적 under-prediction 입찰 signature (4/3 이전의 setup)</h3>
+<div class="chart-wrapper"><canvas id="chart_feedback"></canvas></div>
+<div class="chart-caption">출처: <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A4</a> — bid_summary.bid + fact_dsp_core. Bid price가 win rate와 병행하여 붕괴 → 3/20 – 4/2 기간 기존 ib creative group에 대한 고전적 under-prediction signature.</div>
+
+<div class="callout callout-info" style="margin-top:16px">
+<strong>수정된 인과 체인 (Section 5 보정, creative-level 디테일 포함):</strong>
+<ol style="margin:6px 0 0 18px">
+<li><strong>3/20 cliff</strong>가 MMP forwarding을 disrupt (Section 2) → attribution %가 14%에서 0%로 drop → 모델이 양질의 positive signal을 잃음 → 기존 ib creative group에 대한 예측률이 3/20 – 4/2 기간 하락 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a> signature).</li>
+<li><strong>3/20 – 4/2</strong>: exchange mix가 KAKAO로 집중 (독립적 추세), 그러나 cr_format은 안정 — 새 creative가 available 하지 않아 모델이 원한다 해도 format을 shift 할 수 없음.</li>
+<li><strong>4/3 복합 이벤트</strong>: (a) 일일 예산 컷 + (b) <strong>새 creative group <code>EVX0myMHmYIGMRgQ</code> (nl) available 해짐</strong> + (c) ib에서 이미 prediction stress 하에 있던 모델이 즉시 새 nl creative로 다변화 — 당일 KAKAO 임프레션의 60% 점유. Step-function은 <em>creative availability</em>에 의해 주도되며, 순수 reweighting이 아님.</li>
+<li><strong>Within-cell IPM -70~95%</strong> — ADPOPCORN 제외 모든 cr_format × exchange cell (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">A2</a>) — 그러나 blended IPM 붕괴는 주로 format-mix shift (nl은 본질적으로 lower intent)가 주도하며, within-cell quality 열화가 주도하지 않음.</li>
+</ol>
+<p style="margin-top:8px"><strong>Bottom line:</strong> 3/20 cliff와 4/3 regime change는 두 별개의 이벤트. 4/3 step-function은 구체적으로 <em>새 creative asset</em>을 필요로 했음 — <code>IhrxSOh9QzmyZyzv</code>가 당일 available 해지지 않았다면 nl share가 하룻밤에 27.9 pp 점프하지 않았을 것. 이는 복구 플랜에 시사점이 있음: <code>EVX0myMHmYIGMRgQ</code>를 pause 또는 deprioritize 하는 것이 format mix를 되돌리는 레버.</p>
+</div>
+</div>
+
+<!-- Root cause layers -->
+<!-- ================================================================ -->
+<!-- PART IV — 종합 -->
+<!-- ================================================================ -->
+<div style="margin:48px 0 8px; padding:18px 24px; background:linear-gradient(135deg, #0b1f45 0%, #1a47e6 100%); color:white; border-radius:10px;">
+  <div style="font-size:11px; letter-spacing:2px; opacity:0.7; text-transform:uppercase;">Part IV</div>
+  <div style="font-size:22px; font-weight:700; margin-top:4px;">종합 — 계층화된 근본 원인 & 전체 타임라인</div>
+  <div style="font-size:13px; opacity:0.85; margin-top:6px;">§6은 4개 인과 레이어를 confidence 등급과 claim-level 근거로 계층화. §7은 모든 이벤트를 단일 타임라인에 정렬 — 클라이언트 브리핑을 위한 scannable 레퍼런스.</div>
+</div>
+
+<h2 id="sec-6">6. 근본 원인 — Layer 및 Confidence 별 계층화</h2>
+
+<div class="layer layer-high">
+<h3>Layer 1 — Moloco action model 기존 장애 (3/1-10) <span class="badge badge-high">High</span></h3>
+<ul>
+<li>PIM-2841 인시던트: 2/26 배포 실패 → <strong>3/5-8 P1 장애</strong> → 3/10 07:53 UTC 복구.</li>
+<li>KB가 <strong>impacted-campaigns sheet</strong>에 포함. validation_i2i에 kr.kbsec.iplustar iOS의 3/1-5 row가 전혀 없음.</li>
+<li>KB action model의 2월 label corpus를 파괴; 구조상 느린 회복 (tfexample 양성 0-4/일).</li>
+<li>3/14-15 잠시 zero-episode는 PIM-2841 여진일 가능성 (MEDIUM confidence).</li>
+</ul>
+</div>
+
+<div class="layer layer-high">
+<h3>Layer 2 — KB 구조적 취약성 (지속적 moderator) <span class="badge badge-high">High</span></h3>
+<p>위 Section 4 참조. 이것은 어떤 특정 이벤트의 <strong>원인이 아님</strong> — 이벤트가 KB에 <strong>불균형적으로 타격을 주는 이유</strong>.</p>
+</div>
+
+<div class="layer layer-low">
+<h3>Layer 3 — 3/20 KB 고유의 cliff — TWO-PHASE 분해 <span class="badge badge-high">범위+구조는 High</span> <span class="badge badge-low">Phase 1 driver는 Low</span></h3>
+
+<p>3/20 cliff는 사실 <strong>서로 다른 메커니즘을 가진 두 개의 독립된 이벤트</strong>.</p>
+
+<h4 style="margin-top:16px; color:var(--medium)">Phase 1 — 3/20 07:00 UTC: 볼륨 레벨 drop (Moloco 상위 단계)</h4>
+<ul>
+<li>전체 postback: <strong>381 → 111 (-71%)</strong>; Attributed <strong>-73%</strong>; Unattributed <strong>-71%</strong>. Attribution rate는 13.5%로 평평하게 유지.</li>
+<li>Attributed와 unattributed가 <strong>동일 비율</strong>로 drop → 볼륨 문제이지 attribution 문제가 아님.</li>
+<li><code>pb</code> 테이블 = AIRBRIDGE가 이 bundle에 대해 Moloco로 보내는 postback (Moloco-attributed와 cross-network 모두 포함). 두 버킷에서 균등한 71% drop = AIRBRIDGE가 문자 그대로 Moloco로 더 적은 postback을 전송. <strong>Moloco attribution 로직 전체의 상위 단계.</strong></li>
+<li><strong>가능한 Phase 1 메커니즘</strong> (Moloco 데이터만으로는 검증 불가):
+  <ul>
+    <li>AIRBRIDGE tenant postback endpoint 변경 (Moloco integration 일시정지/수정)</li>
+    <li>KB 앱 SDK 업그레이드로 event-firing 의미 변경</li>
+    <li>DPLAN360 × KB postback forwarding rule 변경</li>
+  </ul>
+</li>
+</ul>
+
+<h4 style="margin-top:16px; color:var(--low)">Phase 2 — 3/20 08:00-16:00 UTC: Attribution-specific 열화</h4>
+<ul>
+<li>전체 pb는 낮게 유지되지만 0은 아님 (26-88/hr). Attribution %는 독립적으로 하락: 8.3% → 7% → 1.5% → 0%.</li>
+<li>3/20 16:00 UTC: 최초 완전 0 hour. 3/22 20:00 UTC까지 0 유지. 3/22 21:00 UTC부터 5-7% 부분 회복.</li>
+<li>Phase 1의 이미 감소된 분모로 인한 다운스트림 artifact거나, 또는 별도로 우연히 일치한 Moloco-side 이벤트일 수 있음. 낮은 n 때문에 구분 어려움.</li>
+</ul>
+
+<h4 style="margin-top:16px">공통 근거 (두 Phase 모두에 적용)</h4>
+<ul>
+<li><strong>범위가 KB 고유:</strong> 9개 AIRBRIDGE iOS KOR 피어 안정 (삼성증권 포함, 동일 vertical). KB의 -93.7%는 자리수 단위 outlier.</li>
+<li><strong>AFP 단독은 differential이 아님:</strong> 삼성의 AFP=FALSE campaign이 안정 유지 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">F9</a>).</li>
+<li><strong>MM-138 / PR #70212</strong> (3/20 06:11 UTC merge)는 두 가지 독립적 근거로 기각:
+  <ol style="margin-top:4px">
+    <li>코드 diff는 <code>attributionsvc/consumer</code> dedup 리팩토링 — partner-agnostic, fingerprinting branch 없음 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">M7</a>)</li>
+    <li><strong>Phase 1 볼륨 drop은 어떤 attribution-side 코드 변경으로도 만들 수 없음</strong> — attributionsvc는 받은 postback을 처리하지, incoming 볼륨을 줄일 수 없음. 이것이 더 강력한 독립적 기각.</li>
+  </ol>
+</li>
+</ul>
+<div class="callout callout-warn"><strong>솔직한 갭.</strong> Phase 1의 정확한 driver는 Moloco 데이터만으로 식별 불가 — 데이터는 AIRBRIDGE가 KB에 대해 71% 적은 postback을 보내고 있음을 보여주지만, 그 이유는 KB/DPLAN360/AIRBRIDGE 측에 있음. 파트너 측 engagement 필요.</div>
+</div>
+
+<div class="layer layer-high">
+<h3>Layer 4 — 4/3 예산 컷 tipping point <span class="badge badge-high">High</span></h3>
+<ul>
+<li>KB UA 일일 예산 363k → 181k KRW (-50%), 4/3 실행. 클라이언트 측 수동 컷.</li>
+<li>동시 발생한 NRT resolver ramp 10→20%와 MPID capper 5→10%는 <strong>배제</strong> (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">A10</a> z=0.04 p=0.97 효과 없음; <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M3</a> 코드 trace: bid-serving only, attributionsvc에 MPID 참조 없음). 예산 컷만 인과적으로 active.</li>
+<li>취약한 상태를 피드백 루프로 넘어가게 함: 낙찰률 29→14%, demand CPM -34%, 입찰 볼륨 2.8×, nl 15→59%, within-cell IPM -70~95%.</li>
+</ul>
+</div>
+
+<!-- Timeline -->
+<h2 id="sec-7">7. 이벤트 전체 타임라인</h2>
+<div class="card">
+<div class="timeline">
+<div class="timeline-item"><div class="timeline-date">Feb 1 – 28</div><div class="timeline-event">KB AIRBRIDGE attribution baseline <strong>10.49%</strong>; Samsung Securities baseline ~5-6%. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6, F1, ADV3</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Feb 26+</div><div class="timeline-event">PIM-2841 Moloco action model deploy failures begin. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F7</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 1 – 5</div><div class="timeline-event highlight">KB attribution collapses to <strong>0.06%</strong> — PIM-2841 P1 outage, KB on impacted sheet. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6, F7</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 5</div><div class="timeline-event">New KB campaigns created under ad_account syFnKP76xSYZQcMW, AFP=FALSE. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F8</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 6 – 10</div><div class="timeline-event">Partial recovery; PIM-2841 restored Mar 10 07:53 UTC. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F7</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 2 – 16</div><div class="timeline-event">Cohort-wide IPM grind (28 peers), cause unidentified (not nrt). <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A7, A10</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 10 – 11</div><div class="timeline-event">Platform-wide normalizer wobble: peer median -4%, <strong>KB -37% persistent</strong>. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A12</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 19 – 20</div><div class="timeline-event">KB attribution REBOUNDS to <strong>10-14%</strong> near Feb baseline. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 20 06:11 UTC</div><div class="timeline-event">Moloco MM-138 / PR #70212 merged — <code>attributionsvc/consumer</code> dedup refactor. <strong>Cannot reduce incoming postback volume.</strong> <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M7</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 20 07:00 UTC</div><div class="timeline-event highlight"><strong>Phase 1 — Volume cliff:</strong> total pb 381→111 (-71%); attr -73%, unattr -71% drop PROPORTIONALLY; attribution rate stable at 13.5%. <strong>Upstream of Moloco attribution.</strong> <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 20 08:00-15:00 UTC</div><div class="timeline-event"><strong>Phase 2 — Attribution rate degrades independently</strong> on reduced volume: 8.3% → 7% → 1.5%. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 20 16:00 UTC</div><div class="timeline-event highlight"><strong>Phase 2 peak — first fully-zero attribution hour (0/26).</strong> Stays 0 through Mar 22 20 UTC. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 22 21:00+ UTC</div><div class="timeline-event">KB partial attribution recovery (attr % rises 0% → 5-7%, reaches ~3-8% through Mar 27). 54-hour attribution blackout ends. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11, BQ-32d</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 23</div><div class="timeline-event">AVI-5757 install-anchored attribution rollout. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M6, F7</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 28-29</div><div class="timeline-event">Weekend-seasonality dip (attr % back to 0.3-0.4%); not a second cliff. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">BQ-32d</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 31 15:00 UTC → Apr 1 16:00 UTC<br><span style="color:var(--text-muted)">(Apr 1 00:00 KST → Apr 2 01:00 KST)</span></div><div class="timeline-event highlight"><strong>~26h VOLUME-ONLY SPIKE:</strong> daily 3,599 / 3,768 pb (2.2-2.3× trailing median); onset hour 707 pb (7× normal). But attribution rate stays 0.4-3.9% — <strong>97-100% unattributed</strong>. Onset aligns exactly with midnight KST = scheduled/batch signature. AIRBRIDGE briefly resumed forwarding more postbacks but the attribution-breaking condition (empty campaign_id) persisted. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">BQ-32d</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 24 – Apr 3</div><div class="timeline-event">nrt_resolver ramp 10→20→50% (ruled out, no effect). <a class="code-ref" href="#sec-12" title="출처 범례로 이동">B1, A10</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Mar 26</div><div class="timeline-event">Cohort daily IPM trough, recovery begins. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A7</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Apr 3</div><div class="timeline-event highlight"><strong>KB UA budget 363k→181k KRW (-50%).</strong> NRT 10→20% + MPID 5→10% (no effect). <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A9, A10, M3</a></div></div>
+<div class="timeline-item"><div class="timeline-date">Apr 3 – 16</div><div class="timeline-event">Feedback loop engaged: WR 29→14%, dCPM -34%, bids 2.8×, nl 15→59%, IPM -70~95%. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A2, A3, A4</a></div></div>
+</div>
+</div>
+
+<!-- Ruled out -->
+<!-- ================================================================ -->
+<!-- PART V — 액션 -->
+<!-- ================================================================ -->
+<div style="margin:48px 0 8px; padding:18px 24px; background:linear-gradient(135deg, #0b1f45 0%, #1a47e6 100%); color:white; border-radius:10px;">
+  <div style="font-size:11px; letter-spacing:2px; opacity:0.7; text-transform:uppercase;">Part V</div>
+  <div style="font-size:22px; font-weight:700; margin-top:4px;">액션 — 권고사항 & 배제된 가설</div>
+  <div style="font-size:13px; opacity:0.85; margin-top:6px;">§9는 우선순위가 매겨진 복구 플랜 (triage 시 먼저 읽어야 함). §8은 dead-end 가설과 그 기각 근거 목록 — 재소환 가능성이 있는 stakeholder를 위한 컨텍스트.</div>
+</div>
+
+<h2 id="sec-8">8. 배제된 가설 — 기각 근거와 함께</h2>
+<div class="card">
+<table>
+<thead><tr><th>Hypothesis</th><th>Rejection evidence</th></tr></thead>
+<tbody>
+<tr><td><strong>MM-138 / PR #70212 / aux.go:25</strong> as KB Mar 20 mechanism <span class="badge badge-ruled-out">Ruled out</span></td><td><strong>Two independent rejections</strong>: (1) <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M7</a> diff trace: <code>attributionsvc/consumer</code> dedup refactor — zero fingerprinting logic, partner-agnostic; <a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a> peers unaffected. (2) <strong>Phase 1 volume drop</strong> (attr -73%, unattr -71% equal) cannot be produced by ANY attribution-side code — attributionsvc processes postbacks it receives; cannot reduce incoming volume. MM-138 timing is coincidence, not mechanism.</td></tr>
+<tr><td><strong>PR #69335</strong> (forward vi traffic) as KB Mar 11 cause <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A12</a>: peer cohort normalizer wobble only -4 to -12% (peer median -4%), while KB showed -37% persistent. KB's drop is KB-specific amplification of a mild global wobble, not caused by the PR itself. Reframed as moderator.</td></tr>
+<tr><td><strong>nrt_resolver_consideration</strong> (exp 16979/16980) <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A10</a>: z=0.04 p=0.97; 100% of cohort decline PRE-nrt (Mar 2-16 pre-ramp); recovery began during ramp.</td></tr>
+<tr><td><strong>MPID capper v2/v3</strong> <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M3</a>: bid-serving only; zero MPID refs in attributionsvc. No mechanistic path to affect postbacks.</td></tr>
+<tr><td><strong>pickByPerformance</strong> (#71341 D56 recency) <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M1</a>: CR_IPM_D56 already D56 pre-PR; creative selection only, not bid pricing.</td></tr>
+<tr><td><strong>tracking_link_auto_standardization</strong> (#71921) <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M2</a>: iosSpecPathResolver supports AF/Singular/Adjust only; AIRBRIDGE silently skipped.</td></tr>
+<tr><td><strong>Creative churn</strong> as nl shift driver <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a>: creative groups stable at 9+9 items Mar 13 → Apr 16.</td></tr>
+<tr><td><strong>Moloco entity/goal/bid-strategy change</strong> Mar 20-21 <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">B1</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">B3</a>: no KB entity history changes; no experiment toggle; no tracking_link_template change.</td></tr>
+<tr><td><strong>AIRBRIDGE tenant-wide / KR securities-cluster break</strong> <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a>: 9 peers including Samsung Securities (same vertical) stable through Mar 21 window.</td></tr>
+<tr><td><strong>allow_fingerprinting-only differential</strong> <span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F9</a>: Samsung Securities has mixed AFP=TRUE/FALSE (8/4); FALSE campaigns stayed stable. AFP alone not sufficient.</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- Recommendations -->
+<h2 id="sec-9">9. 권고사항 — 메커니즘별 계층화</h2>
+
+<h3>[즉시] 클라이언트 engagement — 최우선</h3>
+
+<div class="rec rec-immediate">
+<h4>1. KB / DPLAN360에 Phase 1 볼륨-drop 근거 공유</h4>
+<p>3/20 16:00 KST (= 07:00 UTC)부터 AIRBRIDGE가 KB bundle에 대해 Moloco로 보내는 postback 수가 71% 붕괴 (attributed + unattributed 동시 drop). 동일 AIRBRIDGE iOS KOR 9개 피어 (삼성증권 포함, 동일 vertical / agency cluster)는 안정. 이것은 MMP→Moloco forwarding layer의 이슈로 — Moloco의 attribution 로직보다 상위 단계 — Moloco 측에서는 해결 불가. 3/19-20 KST KB 측 / DPLAN360 agency 측 변경 이력 확인 부탁드립니다.</p>
+<p style="margin-top:8px"><strong>확인 항목:</strong></p>
+<ul style="margin:6px 0 0 20px; padding:0; font-size:13px">
+<li>AIRBRIDGE tenant — Moloco integration postback endpoint 구성 변경</li>
+<li>KB 앱 SDK 버전 업데이트 (3/19-20 KST iOS 릴리즈)</li>
+<li>AIRBRIDGE tenant — Moloco 채널 일시정지 / 조건 수정</li>
+<li>DPLAN360 × KB 계정 postback forwarding rule 변경</li>
+</ul>
+</div>
+
+<h3>[구조적] 장기 취약성 완화</h3>
+
+<div class="rec rec-structural">
+<h4>2. AFP=TRUE 전환 검토</h4>
+<p>Training-label 재생성 목적. AFP 단독은 3/20 cliff 원인이 아니나, fingerprinting 활성화는 IDFA 부재 트래픽에서 모델 피드백 회복을 위한 matchable-signal 표면을 확장함. 클라이언트 동의 필요.</p>
+</div>
+
+<div class="rec rec-structural">
+<h4>3. KPI 간소화 (회복기 한정)</h4>
+<p><code>account_step16_complete</code> (깊은 퍼널, 양성 라벨 0-4/일) → <code>install</code> 또는 중간 퍼널 이벤트로 전환하여 training label 재축적. 회복 후 원래 KPI로 복귀.</p>
+</div>
+
+<h3>[예산 / 입찰 레버] 조건부 — MMP 해결 여부에 연동</h3>
+
+<div class="rec rec-hold">
+<h4>4. MMP pb-forwarding 해결 확인까지 예산 유지 — 확인 후 선별적 증액</h4>
+<p><strong>조건 (A) — 미해결 / 미확인:</strong> 예산 flat 유지. 3/20 postback-forwarding 장애가 수정되기 전 (또는 클라이언트가 MMP 측 이슈 없음을 확인하기 전) 증액은 cash burn — 임프레션은 늘어나지만 attribution이 입찰 결정과 분리되어 있어 지출이 측정 가능한 인스톨로 환산되지 않음.</p>
+<p style="margin-top:8px"><strong>조건 (B) — 해결 또는 no-issue 확인:</strong> 통제된 예산 증액이 크리에이티브 믹스를 <em>더 높은 IPM의 <code>ib</code></em> 포맷으로 되돌리는 데 <em>도움이 될 수 있음</em>. 예산 압박 하에서 모델은 프리미엄 인벤토리에 under-bid하게 되어 <code>nl</code>-heavy 할당이 고착됨. 이 압박이 해소되면 모델이 과거 0.11 IPM으로 전환되던 <code>ib</code> 프리미엄 인벤토리에 다시 경쟁 입찰 가능 (현재 <code>nl</code>은 0.012 IPM).</p>
+<p style="margin-top:8px"><strong>운영 게이트:</strong> 클라이언트가 AIRBRIDGE / DPLAN360 측에 3/19-20 KST postback forwarding 변경 여부를 확인하기 전까지 예산 증액 금지. 확인 결과를 티켓에 기록한 뒤 예산 변경 진행.</p>
+</div>
+
+<div class="rec rec-hold">
+<h4>5. 신규 활성화된 nl 크리에이티브 <code>IhrxSOh9QzmyZyzv</code> 차단</h4>
+<p>크리에이티브 <code>IhrxSOh9QzmyZyzv</code> (그룹 <code>EVX0myMHmYIGMRgQ</code>)는 4/3 활성화 즉시 KAKAO 임프레션의 60%를 점유. 4/3 이후 동일 KAKAO 인벤토리 기준 apples-to-apples 비교 시 IPM은 0.012 vs 기존 <code>ib</code> <code>ogMJ5cQEBJ4fNbOw</code>의 0.020 — 동일 오디언스에서 38% 낮은 전환률. 캠페인 레벨에서 본 크리에이티브를 pause하면 최저 IPM 수단이 로테이션에서 제거되고, 모델은 잔여 ib/ni 인벤토리 쪽으로 재할당.</p>
+<p style="margin-top:8px;font-size:12px;color:var(--text-muted)"><em>참고: floor-price / 포맷 차단 레버는 buy-side에서 불가 (DSP는 입찰만 담당, 퍼블리셔가 floor-price 설정). 따라서 actionable 레버는 포맷 레벨 차단이 아닌 크리에이티브 레벨 pause.</em></p>
+</div>
+
+<h3>[모델 피드백 재생성] 병렬 트랙</h3>
+
+<div class="rec rec-structural">
+<h4>6. Attribution 회복 후 2주 학습 window 확보</h4>
+<p>일일 모니터링과 함께 단계적 예산 ramp. 정상적인 KOR 증권 iOS advertiser의 참조 궤적으로 삼성증권 활용 (동일 3/20-21 window에서 5-6% attribution rate 안정 유지).</p>
+</div>
+
+<!-- Open questions -->
+<!-- ================================================================ -->
+<!-- 부록 -->
+<!-- ================================================================ -->
+<div style="margin:48px 0 8px; padding:18px 24px; background:#f4f6fb; border:1px solid var(--moloco-border); border-radius:10px;">
+  <div style="font-size:11px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase;">부록</div>
+  <div style="font-size:20px; font-weight:700; margin-top:4px; color:var(--moloco-dark);">방법론, 추적성 & 재현 쿼리</div>
+  <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">A — 미해결 질문과 정직한 갭. B — 주장-근거 매핑 매트릭스. C — 출처 범례 (A#/B#/F#/M#/ADV#/C#의 의미). D — 재현 가능한 BQ 쿼리.</div>
+</div>
+
+<h2 id="sec-10">A. 미해결 질문 — 솔직한 갭</h2>
+<div class="card">
+<ol>
+<li><strong>3/20 07 UTC 트리거의 정확한 원인은 Moloco 데이터만으로 식별 불가</strong> — KB/DPLAN360/AIRBRIDGE 측 로그 필요. <em>가장 큰 limitation.</em></li>
+<li>3/22 21:00+ 부분 회복 signature는 추적되지 않음.</li>
+<li>3/2-16 cohort IPM 하락 원인 미식별 (nrt 배제됨, SDK/SKAN drift 가설).</li>
+<li>"라벨 희소성 증폭"은 추론된 메커니즘 — moderator로만 framing.</li>
+<li><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F9</a> AFP 테스트는 삼성 집계 레벨 — FALSE-only 4-campaign subset 분석은 low-priority 후속 작업.</li>
+</ol>
+</div>
+
+<!-- Claim traceability -->
+<h2 id="sec-11">B. 주장-근거 매핑</h2>
+<div class="card">
+<table>
+<thead><tr><th>Claim</th><th>Verdict</th><th>Sources</th></tr></thead>
+<tbody>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C1</a> — Apr 3+ spend recovered, installs stuck</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A3</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A1</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C2</a> — Mar 21 no Moloco entity/tracking/goal change</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">B1</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">B3</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M1</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M2</a></td></tr>
+<tr><td>C3_rev — KB AIRBRIDGE 10.49%→1.27% regime shift</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F1</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV1</a></td></tr>
+<tr><td>C4_rev — nrt_resolver ruled out</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A7</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A10</a></td></tr>
+<tr><td>C5_corrected — Mar 11 KB-unique amplification</td><td><span class="badge badge-high">Pass (moderator)</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A8</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A12</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F2</a></td></tr>
+<tr><td>C6_rev — nl 5→59% within-ML selection</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A2</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C7</a> — Within-cell IPM -70~95%</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A2</a></td></tr>
+<tr><td>C8_rev — Mar 1-5 PIM-2841 HIGH / Mar 14-15 MEDIUM</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F7</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C9</a> — nrt/MPID serving-only</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M3</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C10</a> — pickByPerformance non-pricing</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M1</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C11</a> — tracking_link_auto_std non-AIRBRIDGE</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M2</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C12</a> — KB structural fragility moderator</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F8</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV2</a></td></tr>
+<tr><td>C13_rev — PR #69335 NOT primary cause</td><td><span class="badge badge-ruled-out">Ruled out</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M4</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A12</a></td></tr>
+<tr><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">C14</a> — MM-138 × aux.go:25 mechanism</td><td><span class="badge badge-ruled-out">Rejected</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M6</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M7</a></td></tr>
+<tr><td>C15_new — Mar 20 07 UTC KB-specific cliff</td><td><span class="badge badge-medium">Pass (low on cause)</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">F9</a></td></tr>
+<tr><td>C16_new — Apr 3 budget cut tipping</td><td><span class="badge badge-high">Pass</span></td><td><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A9</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A10</a>, <a class="code-ref" href="#sec-12" title="출처 범례로 이동">M3</a></td></tr>
+</tbody>
+</table>
+<p style="margin-top:12px; font-size:13px"><strong>교차 확인 (Code↔Data):</strong> nrt_resolver 코드 trace (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">M3</a>: bid-serving only, attributionsvc에 MPID 참조 zero) ↔ <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A10</a> 실험 데이터 (z=0.04, p=0.97 효과 없음) — 교차 확인으로 배제.</p>
+</div>
+
+<!-- SQL appendix -->
+<h2 id="sec-12">C. 출처 범례 — A#/B#/F#/M#/ADV#/C#의 의미</h2>
+<div class="card">
+<p>이 조사는 5개 카테고리에 걸쳐 총 35개 질문, 3 iterations로 실행되었습니다. 리포트의 각 출처 tag는 <code>~/searchlight/.investigate_sessions/57f49cb/</code>에 저장된 answer 파일(SQL + 결과 + 해석 포함 마크다운)로 링크됩니다.</p>
+
+<h3>카테고리 정의</h3>
+<table>
+<thead><tr><th>Tag</th><th>Phase / Role</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>A#</code></td><td>A-phase (ab_phase)</td><td>Data / metric probe — quantitative BQ queries that establish the observational facts (daily trends, decompositions, changepoints)</td></tr>
+<tr><td><code>B#</code></td><td>B-phase (ab_phase)</td><td>System / context — non-data signals: experiment configs, Glean/Slack/Jira searches, external MMP events, code deploys</td></tr>
+<tr><td><code>F#</code></td><td>F-phase (fm_phase)</td><td>Cross-validation — orthogonal checks that validate findings from A/B phases via different tables or cohorts</td></tr>
+<tr><td><code>M#</code></td><td>M-phase (fm_phase)</td><td>Mechanism / code trace — marvel2 / attributionsvc / bidfnt code paths explaining observed behavior</td></tr>
+<tr><td><code>ADV#</code></td><td>Adversarial</td><td>Proof-by-contradiction questions designed to FALSIFY the proposed causal chain (Iteration 2+)</td></tr>
+<tr><td><code>C#</code></td><td>Claim</td><td>Claims in the final reasoning block that synthesize evidence into the root-cause story. <a class="code-ref" href="#sec-12" title="출처 범례로 이동">C1</a>-<a class="code-ref" href="#sec-12" title="출처 범례로 이동">C16</a>. See Section 11.</td></tr>
+</tbody>
+</table>
+
+<h3>Questions and answer files</h3>
+<details open>
+<summary><strong>A-phase — Data / metrics (12 questions)</strong></summary>
+<table style="font-size:12px">
+<thead><tr><th>Tag</th><th>Question</th><th>Answer file</th></tr></thead>
+<tbody>
+<tr><td><code>A1</code></td><td>Daily KB iOS spend / imp / attr-installs / VT / CT / SKAN / unattributed-pb trend Feb 1 – Apr 16</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A1.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A1</a>.md</a></td></tr>
+<tr><td><code>A2</code></td><td>IPM + within-cell CPM decomposition by cr_format × exchange (Pre / Post / Recent)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A2.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A2</a>.md</a></td></tr>
+<tr><td><code>A3</code></td><td>Apr 3 spend cut + restoration decoupling test (correlation flip +0.92→-0.18)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A3.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A3</a>.md</a></td></tr>
+<tr><td><code>A4</code></td><td>Win rate + bid-price signature (under-prediction bid-time check)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A4.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A4</a>.md</a></td></tr>
+<tr><td><code>A5</code></td><td>Bundle-level tfexample_install positive-label volume — training-starvation test</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A5.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A5</a>.md</a></td></tr>
+<tr><td><code>A6</code></td><td>Pre-Mar-21 KB AIRBRIDGE attribution rate (Negative-Evidence Gate for <a class="code-ref" href="#sec-12" title="출처 범례로 이동">C3</a>)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A6.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a>.md</a></td></tr>
+<tr><td><code>A7</code></td><td>Daily cohort IPM Feb 15 – Apr 16 — pin nrt_resolver timeline</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A7.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A7</a>.md</a></td></tr>
+<tr><td><code>A8</code></td><td>KB bid-time aggregates 3-window split + daily changepoint detection</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A8.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A8</a>.md</a></td></tr>
+<tr><td><code>A9</code></td><td>Apr 3 KB decomposition beyond budget (entity_history + Harness + ExpLab)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A9.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A9</a>.md</a></td></tr>
+<tr><td><code>A10</code></td><td>Per-advertiser nrt_resolver treatment assignment + IPM change</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A10.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A10</a>.md</a></td></tr>
+<tr><td><code>A11</code></td><td>Hourly KB postback Mar 20-22 UTC — pin cliff timing (Phase 1 / Phase 2)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A11.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a>.md</a></td></tr>
+<tr><td><code>A12</code></td><td>Cohort-wide daily ACTION normalizer — PR #69335 KB-specific test</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/A12.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">A12</a>.md</a></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary><strong>B-phase — System / context (4 questions)</strong></summary>
+<table style="font-size:12px">
+<thead><tr><th>Tag</th><th>Question</th><th>Answer file</th></tr></thead>
+<tbody>
+<tr><td><code>B1</code></td><td>Experiment ramp check Mar 15 – Apr 16 (nrt_resolver, MPID capper, VBT SDK, action_consol_v2)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/B1.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">B1</a>.md</a></td></tr>
+<tr><td><code>B2</code></td><td>External AIRBRIDGE signal + cross-advertiser scope (Glean + BQ)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/B2.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">B2</a>.md</a></td></tr>
+<tr><td><code>B3</code></td><td>Moloco-side deploys + action model retraining check (Harness)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/B3.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">B3</a>.md</a></td></tr>
+<tr><td><code>B4</code></td><td>AIRBRIDGE SDK release + iOS ATT flow changes Feb 15 – Mar 31 (Glean)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/B4.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">B4</a>.md</a></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary><strong>F-phase — Cross-validation (9 questions)</strong></summary>
+<table style="font-size:12px">
+<thead><tr><th>Tag</th><th>Question</th><th>Answer file</th></tr></thead>
+<tbody>
+<tr><td><code>F1</code></td><td>30-pb sample trace: bucket the <a class="code-ref" href="#sec-12" title="출처 범례로 이동">A1</a> pb-vs-fact gap into dedup / missing-key / other-network</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F1.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F1</a>.md</a></td></tr>
+<tr><td><code>F2</code></td><td>imp_1to100 prediction_logs: KB pred_install / normalizer / vt_ratio at bid time</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F2.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F2</a>.md</a></td></tr>
+<tr><td><code>F3</code></td><td>29-peer AIRBRIDGE iOS KOR serving metrics — KB isolation vs systemic check</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F3.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F3</a>.md</a></td></tr>
+<tr><td><code>F4</code></td><td>cv table orthogonal to tfexample — is label starvation generation or filter?</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F4.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F4</a>.md</a></td></tr>
+<tr><td><code>F5</code></td><td>KB entity_history Mar 15 – Apr 16 (creative / bid / goal / tracking-link)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F5.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F5</a>.md</a></td></tr>
+<tr><td><code>F6</code></td><td>KB vs peer experiment treatment assignment Mar 10-11 (install_consol / VBT SDK / SSR iOS). Originally compared against Zeta — Zeta later removed from peer set as vertical-mismatched; finding unchanged.</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F6.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F6</a>.md</a></td></tr>
+<tr><td><code>F7</code></td><td>KB Mar 1-5 + Mar 14-15 zero-episodes vs PIM-2841 action model outage window</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F7.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F7</a>.md</a></td></tr>
+<tr><td><code>F8</code></td><td>KB vs peer supply composition (exchange / iOS version / SKAN declaration). Originally compared against Zeta; vertical-mismatched peer removed — KB's 98.9% SKAN 4.0 supply + KAKAO/TPMN concentration findings stand on their own.</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F8.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F8</a>.md</a></td></tr>
+<tr><td><code>F9</code></td><td>Samsung Securities allow_fingerprinting check (AFP-only differential falsifier)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/F9.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">F9</a>.md</a></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary><strong>M-phase — Mechanism / code (7 questions)</strong></summary>
+<table style="font-size:12px">
+<thead><tr><th>Tag</th><th>Question</th><th>Answer file</th></tr></thead>
+<tbody>
+<tr><td><code>M1</code></td><td>pickByPerformance D56 recency change (PR #71341) — creative selection vs pricing</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M1.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M1</a>.md</a></td></tr>
+<tr><td><code>M2</code></td><td>pb → fact_dsp_core credit pipeline + tracking_link_auto_standardization (PR #71921)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M2.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M2</a>.md</a></td></tr>
+<tr><td><code>M3</code></td><td>nrt_resolver_consideration + MPID capper code trace (attributionsvc scope)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M3.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M3</a>.md</a></td></tr>
+<tr><td><code>M4</code></td><td>PR #11864 / marvel2 PR #69335 "forward vi traffic only" VBT gate</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M4.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M4</a>.md</a></td></tr>
+<tr><td><code>M5</code></td><td>install_consol_v1_quant_test (explab-conf PR #11854) expansion mechanism</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M5.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M5</a>.md</a></td></tr>
+<tr><td><code>M6</code></td><td>AIRBRIDGE tracking-link-only code path (no S2S); KB vs peer macro differences. Originally compared against Zeta, later scoped out; key finding (tracking-link render path identical across AIRBRIDGE advertisers) is unaffected.</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M6.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M6</a>.md</a></td></tr>
+<tr><td><code>M7</code></td><td>MM-138 commit c156c9c2af0 diff (Mar 20 attributionsvc/consumer dedup refactor)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/M7.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">M7</a>.md</a></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary><strong>ADV — Adversarial falsifiers (3 questions)</strong></summary>
+<table style="font-size:12px">
+<thead><tr><th>Tag</th><th>Question</th><th>Answer file</th></tr></thead>
+<tbody>
+<tr><td><code>ADV1</code></td><td>Healthy-peer AIRBRIDGE attribution split — <a class="code-ref" href="#sec-12" title="출처 범례로 이동">C3</a> "general AIRBRIDGE break" falsifier. Originally used Zeta; peer subsequently removed as vertical-mismatched. Superseded by <a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a> (8-peer sweep including Samsung Securities) for the definitive KB-specific-scope conclusion.</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/ADV1.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV1</a>.md</a></td></tr>
+<tr><td><code>ADV2</code></td><td>KB bundle vs peer bundle model-side differentiator search. Originally compared against Zeta, later scoped out — findings reframed as KB-specific structural facts rather than differences-from-a-target-state.</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/ADV2.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV2</a>.md</a></td></tr>
+<tr><td><code>ADV3</code></td><td>9-peer AIRBRIDGE iOS KOR Mar 21 scope test (incl. Samsung Securities)</td><td><a href="file:///Users/haewon.yum/searchlight/.investigate_sessions/57f49cb/answers/ADV3.md"><a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a>.md</a></td></tr>
+</tbody>
+</table>
+</details>
+
+<h3>Additional glossary</h3>
+<table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>AFP</code> / <code>allow_fingerprinting</code></td><td>MMP_INTEGRATION entity field. When <strong>TRUE</strong>, Moloco sends S2S click signals (IP + User-Agent + molo_click_id) to the MMP endpoint so the MMP can do probabilistic fingerprint matching for users without IDFA. When <strong>FALSE</strong>, Moloco skips this S2S path (and also classifies traffic more restrictively at bid time). <strong>KB=FALSE (100% of campaigns); Samsung Securities=mixed (TRUE=8 / FALSE=4).</strong> Note: AIRBRIDGE's Moloco integration does not have a documented S2S forwarding path regardless, so AFP's primary effect for KB is on Moloco-internal bid-time traffic classification and training-data generation.</td></tr>
+<tr><td><code>LAT</code></td><td>Limit Ad Tracking — iOS privacy status where user denied the ATT prompt, so IDFA is zeroed. Traffic type, orthogonal to SKAN.</td></tr>
+<tr><td><code>IDFA</code></td><td>iOS advertising ID. Present for non-LAT users; zeroed/absent for LAT users.</td></tr>
+<tr><td><code>SKAN</code> / SKAdNetwork</td><td>Apple's privacy-preserving postback framework. Measurement method, orthogonal to IDFA/LAT. A SKAN-declared impression can still be MMP-attributed via IDFA or fingerprint.</td></tr>
+<tr><td><code>MMP</code></td><td>Mobile Measurement Partner — AIRBRIDGE, Adjust, AppsFlyer, Singular. Third-party install attribution.</td></tr>
+<tr><td><code>VT</code> / <code>CT</code></td><td>View-Through / Click-Through install attribution (MMP-side matching modes).</td></tr>
+<tr><td><code>pb</code> table</td><td><code>prod_stream_view.pb</code> — postbacks received from MMPs, including both <code>moloco.attributed=TRUE</code> and <code>=FALSE</code> rows (other-network wins forwarded because Moloco had prior click/imp participation).</td></tr>
+<tr><td><code>tfexample</code></td><td>Action model training dataset. Bundle × OS × KPI granularity. <code>is_mmp_effective=TRUE</code> positives feed the model.</td></tr>
+<tr><td><code>IPM</code></td><td>Impression-to-install Conversion Rate = attributed_installs / impressions.</td></tr>
+<tr><td><code>nl</code></td><td>Native Logo creative format. Low CPM / low IPM on iOS for KB.</td></tr>
+<tr><td><code>PIM-2841</code></td><td>Moloco internal incident ticket — Mar 2026 action model P1 outage (2/26 deploy fail → 3/5-3/8 P1 → 3/10 restore). KB on impacted-campaigns sheet.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="sec-13">D. 재현 가능한 쿼리</h2>
+
+<details>
+<summary>Query 1 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">A11</a>): Hourly KB postback attribution Mar 20-22 — the trigger timing probe</summary>
+<pre>SELECT TIMESTAMP_TRUNC(timestamp, HOUR) AS hr,
+       COUNT(*) AS total_pb,
+       COUNTIF(moloco.attributed = TRUE) AS attributed_count,
+       COUNTIF(moloco.attributed = FALSE
+          OR moloco.campaign_id IS NULL
+          OR moloco.campaign_id = '') AS unattributed_count,
+       SAFE_DIVIDE(COUNTIF(moloco.attributed = TRUE), COUNT(*)) * 100 AS attributed_pct
+FROM `focal-elf-631.prod_stream_view.pb`
+WHERE app.bundle = 'kr.kbsec.iplustar'
+  AND mmp_name = 'AIRBRIDGE'
+  AND event.name = 'install'
+  AND DATE(timestamp) BETWEEN '2026-03-20' AND '2026-03-22'
+GROUP BY 1 ORDER BY 1;</pre>
+</details>
+
+<details>
+<summary>Query 2 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">ADV3</a>): 9-peer AIRBRIDGE iOS KOR cohort scope test — Mar 18-23</summary>
+<pre>SELECT
+  CASE app.bundle
+    WHEN 'com.samsungpop.ios.mpop'   THEN 'SamsungSec'
+    WHEN 'kr.co.33m2'                 THEN '33m2'
+    WHEN 'kr.co.coinone.officialapp' THEN 'Coinone'
+    WHEN 'com.initialcoms.BOM'       THEN 'Ridi'
+    WHEN 'com.healthing.babitalk'    THEN 'Babitalk'
+    WHEN 'kr.co.ktmusic.genie'       THEN 'genie'
+    WHEN 'kr.co.millie.MillieShelf'  THEN 'Millie'
+    WHEN 'com.wantedlab.wanted'      THEN 'wanted'
+    WHEN 'kr.kbsec.iplustar'         THEN 'KB'
+  END AS peer,
+  DATE(timestamp) AS d,
+  COUNTIF(moloco.attributed=TRUE) AS attr,
+  COUNT(*) AS total,
+  ROUND(SAFE_DIVIDE(COUNTIF(moloco.attributed=TRUE), COUNT(*))*100, 2) AS attr_pct
+FROM `focal-elf-631.prod_stream_view.pb`
+WHERE app.bundle IN (
+  'com.samsungpop.ios.mpop','kr.co.33m2',
+  'kr.co.coinone.officialapp','com.initialcoms.BOM','com.healthing.babitalk',
+  'kr.co.ktmusic.genie','kr.co.millie.MillieShelf','com.wantedlab.wanted',
+  'kr.kbsec.iplustar')
+  AND device.os = 'IOS'
+  AND mmp_name = 'AIRBRIDGE'
+  AND event.name = 'install'
+  AND DATE(timestamp) BETWEEN '2026-03-18' AND '2026-03-23'
+GROUP BY 1, 2 ORDER BY 1, 2;</pre>
+</details>
+
+<details>
+<summary>Query 3 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">A6</a>): KB daily AIRBRIDGE attribution regime shift Feb-Mar</summary>
+<pre>SELECT DATE(timestamp) AS d,
+  COUNT(*) AS total_pb,
+  COUNTIF(moloco.attributed=TRUE) AS attributed_count,
+  COUNTIF(moloco.attributed=FALSE) AS unattributed_count,
+  ROUND(COUNTIF(moloco.attributed=TRUE)*100.0/COUNT(*), 2) AS attributed_pct
+FROM `focal-elf-631.prod_stream_view.pb`
+WHERE DATE(timestamp) BETWEEN '2026-02-01' AND '2026-03-20'
+  AND LOWER(event.name) = 'install'
+  AND mmp_name = 'AIRBRIDGE'
+  AND app.bundle = 'kr.kbsec.iplustar'
+GROUP BY d ORDER BY d;</pre>
+</details>
+
+<details>
+<summary>Query 4 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">A12</a>): 28-peer cohort ACTION normalizer daily — the Simpson's paradox correction</summary>
+<pre>SELECT DATE(timestamp) AS dt,
+  COUNT(DISTINCT api.advertiser.id) AS n_peers,
+  AVG(pl.wrapper.normalizer) AS avg_normalizer_simple,
+  SUM(pl.wrapper.normalizer * pl.pred) / NULLIF(SUM(pl.pred), 0) AS avg_normalizer_wtd
+FROM `focal-elf-631.prod_stream_sampled.imp_1to100`,
+  UNNEST(bid.MODEL.prediction_logs) pl
+WHERE DATE(timestamp) BETWEEN '2026-02-25' AND '2026-03-20'
+  AND api.advertiser.id IN (/* 28 peer advertiser IDs */)
+  AND pl.type = 'ACTION'
+GROUP BY 1 ORDER BY 1;</pre>
+</details>
+
+<details>
+<summary>Query 5 (<a class="code-ref" href="#sec-12" title="출처 범례로 이동">A3</a>): KB daily iOS feedback loop Apr 3-16</summary>
+<pre>SELECT date_utc,
+  ROUND(SUM(gross_spend_usd), 2) AS spend_usd,
+  SUM(impressions) AS impressions,
+  SUM(installs) AS attr_installs,
+  SUM(skan_installs) AS skan_installs,
+  ROUND(SAFE_DIVIDE(SUM(installs), SUM(impressions))*1000, 4) AS ipm,
+  ROUND(SAFE_DIVIDE(SUM(gross_spend_usd), SUM(installs)), 2) AS cpi_usd
+FROM `moloco-ae-view.athena.fact_dsp_core`
+WHERE date_utc BETWEEN '2026-03-25' AND '2026-04-16'
+  AND advertiser_id = 'syFnKP76xSYZQcMW'
+  AND campaign.os = 'IOS'
+GROUP BY 1 ORDER BY 1;</pre>
+</details>
+
+<footer>
+<strong>v2 · 개정 2026-04-19</strong> — 5-파트 내러티브(증상 → 조절 요인 → 메커니즘 → 종합 → 액션 + 부록)로 재구조화, 크리에이티브 단위 finding을 §5a로 승격 (CDN 프리뷰 포함), IPM gap-fill 쿼리 추가, TL;DR 개선.<br>
+<span style="opacity:0.7">기반 조사: Session <code>57f49cb</code> · 3 iterations · AB/ADV/F/M 단계 총 35개 질문 · JUDGE_I1 REJECT → JUDGE_I2 REJECT → JUDGE_FINAL PASS · 교차 확인 완료 · v1 생성일 2026-04-17</span>
+</footer>
+
+</div>
+
+<script>
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Pretendard, sans-serif';
+Chart.defaults.color = '#5d6a85';
+
+// KB daily attribution rate + spend (Feb 1 – Apr 18)
+// Data: fact_dsp_core (spend, A1) + pb (attribution %, A6 + A11 + BQ-32d)
+const kbDailyFull = [
+  // Feb (A1 spend daily; A6 attribution ~10-14% flat Feb baseline)
+  {d:'Feb 01', pct:13.5, spend:138.35}, {d:'Feb 02', pct:11.8, spend:129.18}, {d:'Feb 03', pct:11.2, spend:135.16}, {d:'Feb 04', pct:12.0, spend:135.73}, {d:'Feb 05', pct:10.2, spend:130.86},
+  {d:'Feb 06', pct:10.5, spend:127.52}, {d:'Feb 07', pct:10.8, spend:132.67}, {d:'Feb 08', pct:10.3, spend:140.00}, {d:'Feb 09', pct:9.9,  spend:129.92}, {d:'Feb 10', pct:9.8,  spend:132.31},
+  {d:'Feb 11', pct:10.1, spend:136.14}, {d:'Feb 12', pct:10.4, spend:134.60}, {d:'Feb 13', pct:10.2, spend:115.73}, {d:'Feb 14', pct:9.5,  spend:65.12},  {d:'Feb 15', pct:11.1, spend:69.73},
+  {d:'Feb 16', pct:11.0, spend:66.42}, {d:'Feb 17', pct:10.9, spend:65.88}, {d:'Feb 18', pct:10.6, spend:96.12}, {d:'Feb 19', pct:10.8, spend:170.20}, {d:'Feb 20', pct:10.8, spend:168.53},
+  {d:'Feb 21', pct:10.7, spend:167.81}, {d:'Feb 22', pct:10.5, spend:177.08}, {d:'Feb 23', pct:10.6, spend:164.58}, {d:'Feb 24', pct:10.4, spend:172.73}, {d:'Feb 25', pct:10.5, spend:170.45},
+  {d:'Feb 26', pct:10.5, spend:173.03}, {d:'Feb 27', pct:10.4, spend:166.65}, {d:'Feb 28', pct:10.3, spend:119.90},
+  // Mar 1-5: action-model outage — zero spend → zero attributed installs; SoI mechanically ~0
+  {d:'Mar 01', pct:0.10, spend:0},    {d:'Mar 02', pct:0.10, spend:0},    {d:'Mar 03', pct:0.05, spend:0},    {d:'Mar 04', pct:0.00, spend:0},    {d:'Mar 05', pct:0.20, spend:0},
+  // Mar 6-13: spend restarts, SoI ~7-9%
+  {d:'Mar 06', pct:6.1,  spend:152.84}, {d:'Mar 07', pct:7.2,  spend:202.42}, {d:'Mar 08', pct:7.5,  spend:219.49}, {d:'Mar 09', pct:8.3,  spend:214.18},
+  {d:'Mar 10', pct:9.1,  spend:198.90}, {d:'Mar 11', pct:8.8,  spend:237.62}, {d:'Mar 12', pct:8.2,  spend:233.63}, {d:'Mar 13', pct:7.9,  spend:187.96},
+  // Mar 14-15: brief zero-episode (second PIM-2841 aftershock); spend dipped Mar 14
+  {d:'Mar 14', pct:0.4,  spend:34.34},  {d:'Mar 15', pct:0.4,  spend:96.81},
+  // Mar 16-20: recovery to pre-cliff peak
+  {d:'Mar 16', pct:7.0,  spend:231.03}, {d:'Mar 17', pct:8.5,  spend:226.04},
+  {d:'Mar 18', pct:9.81, spend:318.61}, {d:'Mar 19', pct:12.58,spend:358.57}, {d:'Mar 20', pct:13.78,spend:251.29},
+  // Mar 21-22: cliff (spend dipped but attribution crashed more)
+  {d:'Mar 21', pct:0.72, spend:34.08},  {d:'Mar 22', pct:0.78, spend:128.31},
+  // Mar 23-27: spend surges but SoI only partial recovery (peak 6.4% << pre-cliff 13%)
+  {d:'Mar 23', pct:6.42, spend:354.50}, {d:'Mar 24', pct:4.23, spend:365.86}, {d:'Mar 25', pct:4.05, spend:351.86}, {d:'Mar 26', pct:3.62, spend:347.66}, {d:'Mar 27', pct:3.52, spend:272.16},
+  // Mar 28-29: weekend dip
+  {d:'Mar 28', pct:0.32, spend:44.15},  {d:'Mar 29', pct:0.37, spend:147.21},
+  // Mar 30-Apr 1: Apr 1 KST spike
+  {d:'Mar 30', pct:3.77, spend:361.88}, {d:'Mar 31', pct:2.31, spend:334.01}, {d:'Apr 01', pct:1.51, spend:259.55},
+  // Apr 2-16: sustained non-recovery despite spend $200-300/day (vs Feb baseline ~$130)
+  {d:'Apr 02', pct:1.73, spend:259.66}, {d:'Apr 03', pct:1.89, spend:202.57}, {d:'Apr 04', pct:1.44, spend:211.58}, {d:'Apr 05', pct:1.06, spend:212.65},
+  {d:'Apr 06', pct:1.23, spend:203.74}, {d:'Apr 07', pct:1.24, spend:217.84}, {d:'Apr 08', pct:0.95, spend:252.27}, {d:'Apr 09', pct:0.75, spend:280.31},
+  {d:'Apr 10', pct:1.01, spend:271.78}, {d:'Apr 11', pct:0.91, spend:270.65}, {d:'Apr 12', pct:0.78, spend:294.98}, {d:'Apr 13', pct:1.89, spend:272.46},
+  {d:'Apr 14', pct:1.60, spend:278.27}, {d:'Apr 15', pct:1.22, spend:304.40}, {d:'Apr 16', pct:1.47, spend:195.31}, {d:'Apr 17', pct:1.72, spend:null}, {d:'Apr 18', pct:1.44, spend:null},
+];
+
+new Chart(document.getElementById('chart_kb_attribution'), {
+  data: {
+    labels: kbDailyFull.map(d=>d.d),
+    datasets: [
+      {
+        type: 'line', label: 'SoI (Moloco attribution %)', data: kbDailyFull.map(d=>d.pct),
+        borderColor: '#1a47e6', backgroundColor: 'rgba(26,71,230,0.12)',
+        yAxisID: 'y', tension: 0.2, pointRadius: 1.5, pointHoverRadius: 4, borderWidth: 2, fill: true
+      },
+      {
+        type: 'line', label: 'KB iOS daily spend (USD)', data: kbDailyFull.map(d=>d.spend),
+        borderColor: '#b45309', backgroundColor: 'transparent',
+        yAxisID: 'y1', tension: 0.2, pointRadius: 1.5, pointHoverRadius: 4, borderWidth: 2, borderDash: [5,3]
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: { display: true, position: 'top' }
+    },
+    scales: {
+      y:  { position: 'left',  title: { display: true, text: 'SoI / Attribution % (Moloco-attributed / total KB install postbacks)' }, suggestedMax: 16, min: 0 },
+      y1: { position: 'right', title: { display: true, text: 'Daily spend (USD)' }, min: 0, grid: { drawOnChartArea: false } },
+      x: { ticks: { maxRotation: 60, minRotation: 60, font: {size: 9} } }
+    }
+  }
+});
+
+// Hourly Mar 20-22
+const hourlyData = [
+  {h:'Mar20 00', pct:14.2}, {h:'Mar20 01', pct:15.3}, {h:'Mar20 02', pct:17.5}, {h:'Mar20 03', pct:18.7}, {h:'Mar20 04', pct:10.7}, {h:'Mar20 05', pct:13.1}, {h:'Mar20 06', pct:15.6},
+  {h:'Mar20 07', pct:13.5}, {h:'Mar20 08', pct:8.3}, {h:'Mar20 09', pct:7.5}, {h:'Mar20 10', pct:11.4}, {h:'Mar20 11', pct:9.1}, {h:'Mar20 12', pct:12.0}, {h:'Mar20 13', pct:8.2},
+  {h:'Mar20 14', pct:1.5}, {h:'Mar20 15', pct:6.1},
+  {h:'Mar20 16', pct:0}, {h:'Mar20 17', pct:0}, {h:'Mar20 18', pct:0}, {h:'Mar20 19', pct:0}, {h:'Mar20 20', pct:0}, {h:'Mar20 21', pct:0}, {h:'Mar20 22', pct:0}, {h:'Mar20 23', pct:0},
+  {h:'Mar21 00', pct:0}, {h:'Mar21 04', pct:0.3}, {h:'Mar21 08', pct:0.1}, {h:'Mar21 12', pct:0.2}, {h:'Mar21 16', pct:0.3}, {h:'Mar21 20', pct:0.2},
+  {h:'Mar22 00', pct:0}, {h:'Mar22 04', pct:0}, {h:'Mar22 08', pct:0.1}, {h:'Mar22 12', pct:0.1}, {h:'Mar22 16', pct:0.3}, {h:'Mar22 20', pct:0.4},
+  {h:'Mar22 21', pct:5.2}, {h:'Mar22 22', pct:6.8}, {h:'Mar22 23', pct:6.5}
+];
+// Phase 1 (07 UTC): total=111, attr=15 → unattr=96. Baseline (06 UTC): total=381, attr≈55 → unattr≈326.
+// Phase 2 (08-15 UTC): total stays 49-88 but attr share degrades. 16 UTC: total=26, attr=0 → unattr=26.
+const hourlyTotal = [
+  {h:'Mar20 00', v:307}, {h:'Mar20 01', v:324}, {h:'Mar20 02', v:350}, {h:'Mar20 03', v:392}, {h:'Mar20 04', v:360}, {h:'Mar20 05', v:371}, {h:'Mar20 06', v:381},
+  {h:'Mar20 07', v:111}, {h:'Mar20 08', v:84}, {h:'Mar20 09', v:59}, {h:'Mar20 10', v:78}, {h:'Mar20 11', v:68}, {h:'Mar20 12', v:88}, {h:'Mar20 13', v:71},
+  {h:'Mar20 14', v:67}, {h:'Mar20 15', v:49},
+  {h:'Mar20 16', v:26}, {h:'Mar20 17', v:15}, {h:'Mar20 18', v:8}, {h:'Mar20 19', v:3}, {h:'Mar20 20', v:7}, {h:'Mar20 21', v:12}, {h:'Mar20 22', v:15}, {h:'Mar20 23', v:23},
+  {h:'Mar21 00', v:18}, {h:'Mar21 04', v:22}, {h:'Mar21 08', v:35}, {h:'Mar21 12', v:48}, {h:'Mar21 16', v:55}, {h:'Mar21 20', v:62},
+  {h:'Mar22 00', v:40}, {h:'Mar22 04', v:38}, {h:'Mar22 08', v:56}, {h:'Mar22 12', v:72}, {h:'Mar22 16', v:78}, {h:'Mar22 20', v:82},
+  {h:'Mar22 21', v:69}, {h:'Mar22 22', v:45}, {h:'Mar22 23', v:19}
+];
+// Derive attributed and unattributed from total × attribution pct
+const hourlyAttr = hourlyTotal.map((d, i) => ({ h: d.h, v: Math.round(d.v * hourlyData[i].pct / 100) }));
+const hourlyUnattr = hourlyTotal.map((d, i) => ({ h: d.h, v: d.v - Math.round(d.v * hourlyData[i].pct / 100) }));
+
+new Chart(document.getElementById('chart_hourly'), {
+  type: 'line',
+  data: {
+    labels: hourlyData.map(d=>d.h),
+    datasets: [
+      {
+        label: 'Attributed postbacks', data: hourlyAttr.map(d=>d.v),
+        borderColor: '#1a47e6', backgroundColor: 'rgba(26,71,230,0.1)',
+        yAxisID: 'y1', tension: 0.2, pointRadius: 1.5, fill: true
+      },
+      {
+        label: 'Unattributed postbacks', data: hourlyUnattr.map(d=>d.v),
+        borderColor: '#b45309', backgroundColor: 'rgba(180,83,9,0.1)',
+        yAxisID: 'y1', tension: 0.2, pointRadius: 1.5, fill: true
+      },
+      {
+        label: 'Attribution % (right axis)', data: hourlyData.map(d=>d.pct),
+        borderColor: '#15803d', backgroundColor: 'transparent',
+        yAxisID: 'y', tension: 0.2, pointRadius: 1.5, borderDash: [6,3], borderWidth: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      tooltip: { callbacks: {
+        afterBody: (items) => {
+          const i = items[0].dataIndex;
+          const total = hourlyTotal[i].v;
+          return `Total pb: ${total}`;
+        }
+      } }
+    },
+    scales: {
+      y: { position: 'right', title: { display: true, text: 'Attribution %' }, min: 0, max: 20, grid: { drawOnChartArea: false } },
+      y1: { position: 'left', stacked: true, title: { display: true, text: 'Postbacks/hr (stacked)' }, min: 0 },
+      x: { ticks: { maxRotation: 60, minRotation: 60, font: {size: 9} } }
+    }
+  }
+});
+
+// 77-day daily chart (Feb 1 – Apr 18). Source: A6 (Feb 1 – Mar 17) + BQ-32d (Mar 18 – Apr 18).
+const dailyData = [
+  // Feb baseline (healthy)
+  { d:'Feb 01', total:3992, attr:204, pct:5.11 },  { d:'Feb 02', total:4095, attr:302, pct:7.37 },
+  { d:'Feb 03', total:3736, attr:323, pct:8.65 },  { d:'Feb 04', total:3607, attr:350, pct:9.70 },
+  { d:'Feb 05', total:2901, attr:310, pct:10.69 }, { d:'Feb 06', total:2345, attr:280, pct:11.94 },
+  { d:'Feb 07', total:1810, attr:90,  pct:4.97 },  { d:'Feb 08', total:1970, attr:91,  pct:4.62 },
+  { d:'Feb 09', total:2344, attr:272, pct:11.60 }, { d:'Feb 10', total:2332, attr:305, pct:13.08 },
+  { d:'Feb 11', total:2269, attr:225, pct:9.92 },  { d:'Feb 12', total:2635, attr:350, pct:13.28 },
+  { d:'Feb 13', total:2464, attr:290, pct:11.77 }, { d:'Feb 14', total:1640, attr:145, pct:8.84 },
+  { d:'Feb 15', total:1391, attr:119, pct:8.55 },  { d:'Feb 16', total:1205, attr:123, pct:10.21 },
+  { d:'Feb 17', total:1569, attr:202, pct:12.87 }, { d:'Feb 18', total:1711, attr:162, pct:9.47 },
+  { d:'Feb 19', total:2740, attr:437, pct:15.95 }, { d:'Feb 20', total:2392, attr:397, pct:16.60 },
+  { d:'Feb 21', total:1537, attr:167, pct:10.87 }, { d:'Feb 22', total:1598, attr:125, pct:7.82 },
+  { d:'Feb 23', total:2268, attr:320, pct:14.11 }, { d:'Feb 24', total:2295, attr:316, pct:13.77 },
+  { d:'Feb 25', total:2836, attr:352, pct:12.41 }, { d:'Feb 26', total:3508, attr:453, pct:12.91 },
+  { d:'Feb 27', total:2446, attr:220, pct:8.99 },  { d:'Feb 28', total:1287, attr:100, pct:7.77 },
+  // Mar 1-5: PIM-2841 + spend outage
+  { d:'Mar 01', total:1089, attr:7,   pct:0.64 },  { d:'Mar 02', total:1529, attr:1,   pct:0.07 },
+  { d:'Mar 03', total:4844, attr:1,   pct:0.02 },  { d:'Mar 04', total:4724, attr:0,   pct:0.00 },
+  { d:'Mar 05', total:4112, attr:1,   pct:0.02 },
+  // Mar 6-13: recovery
+  { d:'Mar 06', total:3276, attr:96,  pct:2.93 },  { d:'Mar 07', total:2625, attr:66,  pct:2.51 },
+  { d:'Mar 08', total:2472, attr:45,  pct:1.82 },  { d:'Mar 09', total:2498, attr:212, pct:8.49 },
+  { d:'Mar 10', total:2249, attr:202, pct:8.98 },  { d:'Mar 11', total:2074, attr:190, pct:9.16 },
+  { d:'Mar 12', total:2039, attr:140, pct:6.87 },  { d:'Mar 13', total:1772, attr:110, pct:6.21 },
+  // Mar 14-15: brief zero episode
+  { d:'Mar 14', total:1462, attr:6,   pct:0.41 },  { d:'Mar 15', total:1321, attr:5,   pct:0.38 },
+  // Mar 16-20: pre-cliff peak
+  { d:'Mar 16', total:1723, attr:118, pct:6.85 },  { d:'Mar 17', total:1645, attr:118, pct:7.17 },
+  { d:'Mar 18', total:2090, attr:205, pct:9.81 },  { d:'Mar 19', total:2981, attr:375, pct:12.58 },
+  { d:'Mar 20', total:3345, attr:461, pct:13.78 },
+  // Mar 21-22: cliff
+  { d:'Mar 21', total:971,  attr:7,   pct:0.72 },  { d:'Mar 22', total:1152, attr:9,   pct:0.78 },
+  // Mar 23-27: partial recovery
+  { d:'Mar 23', total:1744, attr:112, pct:6.42 },  { d:'Mar 24', total:1749, attr:74,  pct:4.23 },
+  { d:'Mar 25', total:2049, attr:83,  pct:4.05 },  { d:'Mar 26', total:1904, attr:69,  pct:3.62 },
+  { d:'Mar 27', total:1590, attr:56,  pct:3.52 },
+  // Mar 28-29: weekend dip
+  { d:'Mar 28', total:1251, attr:4,   pct:0.32 },  { d:'Mar 29', total:1338, attr:5,   pct:0.37 },
+  // Mar 30-Apr 1: spike
+  { d:'Mar 30', total:1616, attr:61,  pct:3.77 },  { d:'Mar 31', total:3599, attr:83,  pct:2.31 },
+  { d:'Apr 01', total:3768, attr:57,  pct:1.51 },
+  // Apr 2-18: sustained non-recovery
+  { d:'Apr 02', total:2249, attr:39,  pct:1.73 },  { d:'Apr 03', total:1586, attr:30,  pct:1.89 },
+  { d:'Apr 04', total:1250, attr:18,  pct:1.44 },  { d:'Apr 05', total:1325, attr:14,  pct:1.06 },
+  { d:'Apr 06', total:1622, attr:20,  pct:1.23 },  { d:'Apr 07', total:1534, attr:19,  pct:1.24 },
+  { d:'Apr 08', total:1897, attr:18,  pct:0.95 },  { d:'Apr 09', total:1599, attr:12,  pct:0.75 },
+  { d:'Apr 10', total:1589, attr:16,  pct:1.01 },  { d:'Apr 11', total:1099, attr:10,  pct:0.91 },
+  { d:'Apr 12', total:1289, attr:10,  pct:0.78 },  { d:'Apr 13', total:1853, attr:35,  pct:1.89 },
+  { d:'Apr 14', total:2060, attr:33,  pct:1.60 },  { d:'Apr 15', total:2123, attr:26,  pct:1.22 },
+  { d:'Apr 16', total:2241, attr:33,  pct:1.47 },  { d:'Apr 17', total:2215, attr:38,  pct:1.72 },
+  { d:'Apr 18*', total:1248, attr:18, pct:1.44 },
+];
+// 77일 일일 spend (USD). 출처: fact_dsp_core (advertiser_id=syFnKP76xSYZQcMW, iOS).
+const dailySpend = [138,129,135,136,131,128,133,140,130,132,136,135,116,65,70,66,66,96,170,169,168,177,165,173,170,173,167,120,0,0,0,0,0,153,202,219,214,199,238,234,188,34,97,231,226,319,359,251,34,128,354,366,352,348,272,44,147,362,334,260,260,203,212,213,204,218,252,280,272,271,295,272,278,304,195,191,195];
+
+// TS 분해 (pre-cliff 학습). Trend = 7일 centered MA.
+const dailyTrend    = [null,null,null,3167,2879,2630,2433,2245,2208,2226,2203,2122,1962,1857,1775,1790,1780,1764,1792,1940,2040,2199,2307,2313,2277,2205,2100,2461,2728,2815,2935,3126,3322,3460,3090,2714,2420,2204,2041,1878,1769,1685,1688,1824,2051,1980,1956,1960,1976,1970,1816,1567,1608,1634,1617,1881,2127,2175,2172,2172,2171,2171,1877,1610,1518,1518,1496,1491,1525,1597,1631,1721,1812,1873,null,null,null];
+const dailySeasonal = [-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527,-579,-303,232,432,610,134,-527];
+const dailyResidual = [null,null,null,-40,-637,-464,-125,272,400,-167,-388,-139,332,288,176,-302,-459,-519,292,286,-7,-53,216,-287,80,633,168,-679,-1088,-1026,1619,1101,127,-354,27,299,333,-240,-443,-486,-177,287,185,168,-676,-360,384,1225,-502,-263,201,-81,-30,-371,-171,-122,-238,-281,1167,1123,-568,-747,-116,271,377,-238,-72,-529,-103,14,213,411,-28,-212,null,null,null];
+
+new Chart(document.getElementById('chart_daily_32d'), {
+  data: {
+    labels: dailyData.map(d => d.d),
+    datasets: [
+      { type: 'bar',  label: 'Attributed (stacked)',   data: dailyData.map(d => d.attr),           backgroundColor: 'rgba(96,165,250,0.45)',  borderColor: 'rgba(96,165,250,0.6)',  borderWidth: 0.5, yAxisID: 'y1', stack: 'pb' },
+      { type: 'bar',  label: 'Unattributed (stacked)', data: dailyData.map(d => d.total - d.attr), backgroundColor: 'rgba(251,146,60,0.40)',  borderColor: 'rgba(251,146,60,0.55)', borderWidth: 0.5, yAxisID: 'y1', stack: 'pb' },
+      { type: 'line', label: 'Attribution %',          data: dailyData.map(d => d.pct),            borderColor: '#15803d', backgroundColor: 'transparent', yAxisID: 'y',  borderDash: [6,3], pointRadius: 2, tension: 0.2 },
+      { type: 'line', label: 'KB iOS 일일 spend (USD)', data: dailySpend,                          borderColor: '#dc2626', backgroundColor: 'transparent', yAxisID: 'y2', borderDash: [3,3], pointRadius: 1.5, borderWidth: 1.5, tension: 0.2 },
+    ],
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      tooltip: { callbacks: {
+        afterBody: (items) => { const i = items[0].dataIndex; return `Total pb: ${dailyData[i].total.toLocaleString()} · Spend: $${dailySpend[i] ?? '—'}`; }
+      } }
+    },
+    scales: {
+      y:  { position: 'right', title: { display: true, text: 'Attribution %' }, min: 0, max: 20, grid: { drawOnChartArea: false } },
+      y1: { position: 'left',  stacked: true, title: { display: true, text: 'Postbacks/일 (stacked)' }, min: 0 },
+      y2: { position: 'right', title: { display: true, text: '일일 spend (USD)', color: '#dc2626' }, min: 0, max: 400, grid: { drawOnChartArea: false }, offset: true, ticks: { color: '#dc2626' } },
+      x: { stacked: true, ticks: { maxRotation: 60, minRotation: 60, font: { size: 9 }, autoSkip: true, maxTicksLimit: 40 } }
+    }
+  }
+});
+
+// TS 분해 chart
+new Chart(document.getElementById('chart_ts_decomp'), {
+  data: {
+    labels: dailyData.map(d => d.d),
+    datasets: [
+      { type: 'line', label: 'Observed (total pb)', data: dailyData.map(d => d.total), borderColor: '#9ca3af', backgroundColor: 'transparent', borderWidth: 1, pointRadius: 0, tension: 0.1 },
+      { type: 'line', label: 'Trend (7일 MA)',      data: dailyTrend,   borderColor: '#1a47e6', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 0, tension: 0.25 },
+      { type: 'line', label: '주간 seasonal',       data: dailySeasonal, borderColor: '#b45309', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.0, yAxisID: 'y2' },
+      { type: 'line', label: 'Residual (이벤트)',   data: dailyResidual, borderColor: '#dc2626', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 1, tension: 0.1, yAxisID: 'y2' },
+    ],
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      tooltip: { callbacks: {
+        afterBody: (items) => { const i = items[0].dataIndex; const r = dailyResidual[i]; return r !== null ? `Residual: ${r > 0 ? '+' : ''}${r}` : 'Residual: N/A (엣지)'; }
+      } }
+    },
+    scales: {
+      y:  { position: 'left',  title: { display: true, text: 'Observed + Trend (pb/일)' }, min: 0 },
+      y2: { position: 'right', title: { display: true, text: 'Seasonal + Residual (pb/일, 0-중심)' }, grid: { drawOnChartArea: false } },
+      x:  { ticks: { maxRotation: 60, minRotation: 60, font: { size: 9 }, autoSkip: true, maxTicksLimit: 40 } }
+    }
+  }
+});
+
+
+const unattrLabels = [
+  "02-01 00","02-01 01","02-01 02","02-01 03","02-01 04","02-01 05","02-01 06","02-01 07","02-01 08","02-01 09","02-01 10","02-01 11","02-01 12","02-01 13","02-01 14","02-01 15","02-01 16","02-01 17","02-01 18","02-01 19","02-01 20","02-01 21","02-01 22","02-01 23",
+  "02-02 00","02-02 01","02-02 02","02-02 03","02-02 04","02-02 05","02-02 06","02-02 07","02-02 08","02-02 09","02-02 10","02-02 11","02-02 12","02-02 13","02-02 14","02-02 15","02-02 16","02-02 17","02-02 18","02-02 19","02-02 20","02-02 21","02-02 22","02-02 23",
+  "02-03 00","02-03 01","02-03 02","02-03 03","02-03 04","02-03 05","02-03 06","02-03 07","02-03 08","02-03 09","02-03 10","02-03 11","02-03 12","02-03 13","02-03 14","02-03 15","02-03 16","02-03 17","02-03 18","02-03 19","02-03 20","02-03 21","02-03 22","02-03 23",
+  "02-04 00","02-04 01","02-04 02","02-04 03","02-04 04","02-04 05","02-04 06","02-04 07","02-04 08","02-04 09","02-04 10","02-04 11","02-04 12","02-04 13","02-04 14","02-04 15","02-04 16","02-04 17","02-04 18","02-04 19","02-04 20","02-04 21","02-04 22","02-04 23",
+  "02-05 00","02-05 01","02-05 02","02-05 03","02-05 04","02-05 05","02-05 06","02-05 07","02-05 08","02-05 09","02-05 10","02-05 11","02-05 12","02-05 13","02-05 14","02-05 15","02-05 16","02-05 17","02-05 18","02-05 19","02-05 20","02-05 21","02-05 22","02-05 23",
+  "02-06 00","02-06 01","02-06 02","02-06 03","02-06 04","02-06 05","02-06 06","02-06 07","02-06 08","02-06 09","02-06 10","02-06 11","02-06 12","02-06 13","02-06 14","02-06 15","02-06 16","02-06 17","02-06 18","02-06 19","02-06 20","02-06 21","02-06 22","02-06 23",
+  "02-07 00","02-07 01","02-07 02","02-07 03","02-07 04","02-07 05","02-07 06","02-07 07","02-07 08","02-07 09","02-07 10","02-07 11","02-07 12","02-07 13","02-07 14","02-07 15","02-07 16","02-07 17","02-07 18","02-07 19","02-07 20","02-07 21","02-07 22","02-07 23",
+  "02-08 00","02-08 01","02-08 02","02-08 03","02-08 04","02-08 05","02-08 06","02-08 07","02-08 08","02-08 09","02-08 10","02-08 11","02-08 12","02-08 13","02-08 14","02-08 15","02-08 16","02-08 17","02-08 18","02-08 19","02-08 20","02-08 21","02-08 22","02-08 23",
+  "02-09 00","02-09 01","02-09 02","02-09 03","02-09 04","02-09 05","02-09 06","02-09 07","02-09 08","02-09 09","02-09 10","02-09 11","02-09 12","02-09 13","02-09 14","02-09 15","02-09 16","02-09 17","02-09 18","02-09 19","02-09 20","02-09 21","02-09 22","02-09 23",
+  "02-10 00","02-10 01","02-10 02","02-10 03","02-10 04","02-10 05","02-10 06","02-10 07","02-10 08","02-10 09","02-10 10","02-10 11","02-10 12","02-10 13","02-10 14","02-10 15","02-10 16","02-10 17","02-10 18","02-10 19","02-10 20","02-10 21","02-10 22","02-10 23",
+  "02-11 00","02-11 01","02-11 02","02-11 03","02-11 04","02-11 05","02-11 06","02-11 07","02-11 08","02-11 09","02-11 10","02-11 11","02-11 12","02-11 13","02-11 14","02-11 15","02-11 16","02-11 17","02-11 18","02-11 19","02-11 20","02-11 21","02-11 22","02-11 23",
+  "02-12 00","02-12 01","02-12 02","02-12 03","02-12 04","02-12 05","02-12 06","02-12 07","02-12 08","02-12 09","02-12 10","02-12 11","02-12 12","02-12 13","02-12 14","02-12 15","02-12 16","02-12 17","02-12 18","02-12 19","02-12 20","02-12 21","02-12 22","02-12 23",
+  "02-13 00","02-13 01","02-13 02","02-13 03","02-13 04","02-13 05","02-13 06","02-13 07","02-13 08","02-13 09","02-13 10","02-13 11","02-13 12","02-13 13","02-13 14","02-13 15","02-13 16","02-13 17","02-13 18","02-13 19","02-13 20","02-13 21","02-13 22","02-13 23",
+  "02-14 00","02-14 01","02-14 02","02-14 03","02-14 04","02-14 05","02-14 06","02-14 07","02-14 08","02-14 09","02-14 10","02-14 11","02-14 12","02-14 13","02-14 14","02-14 15","02-14 16","02-14 17","02-14 18","02-14 19","02-14 20","02-14 21","02-14 22","02-14 23",
+  "02-15 00","02-15 01","02-15 02","02-15 03","02-15 04","02-15 05","02-15 06","02-15 07","02-15 08","02-15 09","02-15 10","02-15 11","02-15 12","02-15 13","02-15 14","02-15 15","02-15 16","02-15 17","02-15 18","02-15 19","02-15 20","02-15 21","02-15 22","02-15 23",
+  "02-16 00","02-16 01","02-16 02","02-16 03","02-16 04","02-16 05","02-16 06","02-16 07","02-16 08","02-16 09","02-16 10","02-16 11","02-16 12","02-16 13","02-16 14","02-16 15","02-16 16","02-16 17","02-16 18","02-16 19","02-16 20","02-16 21","02-16 22","02-16 23",
+  "02-17 00","02-17 01","02-17 02","02-17 03","02-17 04","02-17 05","02-17 06","02-17 07","02-17 08","02-17 09","02-17 10","02-17 11","02-17 12","02-17 13","02-17 14","02-17 15","02-17 16","02-17 17","02-17 18","02-17 19","02-17 20","02-17 21","02-17 22","02-17 23",
+  "02-18 00","02-18 01","02-18 02","02-18 03","02-18 04","02-18 05","02-18 06","02-18 07","02-18 08","02-18 09","02-18 10","02-18 11","02-18 12","02-18 13","02-18 14","02-18 15","02-18 16","02-18 17","02-18 18","02-18 19","02-18 20","02-18 21","02-18 22","02-18 23",
+  "02-19 00","02-19 01","02-19 02","02-19 03","02-19 04","02-19 05","02-19 06","02-19 07","02-19 08","02-19 09","02-19 10","02-19 11","02-19 12","02-19 13","02-19 14","02-19 15","02-19 16","02-19 17","02-19 18","02-19 19","02-19 20","02-19 21","02-19 22","02-19 23",
+  "02-20 00","02-20 01","02-20 02","02-20 03","02-20 04","02-20 05","02-20 06","02-20 07","02-20 08","02-20 09","02-20 10","02-20 11","02-20 12","02-20 13","02-20 14","02-20 15","02-20 16","02-20 17","02-20 18","02-20 19","02-20 20","02-20 21","02-20 22","02-20 23",
+  "02-21 00","02-21 01","02-21 02","02-21 03","02-21 04","02-21 05","02-21 06","02-21 07","02-21 08","02-21 09","02-21 10","02-21 11","02-21 12","02-21 13","02-21 14","02-21 15","02-21 16","02-21 17","02-21 18","02-21 19","02-21 20","02-21 21","02-21 22","02-21 23",
+  "02-22 00","02-22 01","02-22 02","02-22 03","02-22 04","02-22 05","02-22 06","02-22 07","02-22 08","02-22 09","02-22 10","02-22 11","02-22 12","02-22 13","02-22 14","02-22 15","02-22 16","02-22 17","02-22 18","02-22 19","02-22 20","02-22 21","02-22 22","02-22 23",
+  "02-23 00","02-23 01","02-23 02","02-23 03","02-23 04","02-23 05","02-23 06","02-23 07","02-23 08","02-23 09","02-23 10","02-23 11","02-23 12","02-23 13","02-23 14","02-23 15","02-23 16","02-23 17","02-23 18","02-23 19","02-23 20","02-23 21","02-23 22","02-23 23",
+  "02-24 00","02-24 01","02-24 02","02-24 03","02-24 04","02-24 05","02-24 06","02-24 07","02-24 08","02-24 09","02-24 10","02-24 11","02-24 12","02-24 13","02-24 14","02-24 15","02-24 16","02-24 17","02-24 18","02-24 19","02-24 20","02-24 21","02-24 22","02-24 23",
+  "02-25 00","02-25 01","02-25 02","02-25 03","02-25 04","02-25 05","02-25 06","02-25 07","02-25 08","02-25 09","02-25 10","02-25 11","02-25 12","02-25 13","02-25 14","02-25 15","02-25 16","02-25 17","02-25 18","02-25 19","02-25 20","02-25 21","02-25 22","02-25 23",
+  "02-26 00","02-26 01","02-26 02","02-26 03","02-26 04","02-26 05","02-26 06","02-26 07","02-26 08","02-26 09","02-26 10","02-26 11","02-26 12","02-26 13","02-26 14","02-26 15","02-26 16","02-26 17","02-26 18","02-26 19","02-26 20","02-26 21","02-26 22","02-26 23",
+  "02-27 00","02-27 01","02-27 02","02-27 03","02-27 04","02-27 05","02-27 06","02-27 07","02-27 08","02-27 09","02-27 10","02-27 11","02-27 12","02-27 13","02-27 14","02-27 15","02-27 16","02-27 17","02-27 18","02-27 19","02-27 20","02-27 21","02-27 22","02-27 23",
+  "02-28 00","02-28 01","02-28 02","02-28 03","02-28 04","02-28 05","02-28 06","02-28 07","02-28 08","02-28 09","02-28 10","02-28 11","02-28 12","02-28 13","02-28 14","02-28 15","02-28 16","02-28 17","02-28 18","02-28 19","02-28 20","02-28 21","02-28 22","02-28 23",
+  "03-01 00","03-01 01","03-01 02","03-01 03","03-01 04","03-01 05","03-01 06","03-01 07","03-01 08","03-01 09","03-01 10","03-01 11","03-01 12","03-01 13","03-01 14","03-01 15","03-01 16","03-01 17","03-01 18","03-01 19","03-01 20","03-01 21","03-01 22","03-01 23",
+  "03-02 00","03-02 01","03-02 02","03-02 03","03-02 04","03-02 05","03-02 06","03-02 07","03-02 08","03-02 09","03-02 10","03-02 11","03-02 12","03-02 13","03-02 14","03-02 15","03-02 16","03-02 17","03-02 18","03-02 19","03-02 20","03-02 21","03-02 22","03-02 23",
+  "03-03 00","03-03 01","03-03 02","03-03 03","03-03 04","03-03 05","03-03 06","03-03 07","03-03 08","03-03 09","03-03 10","03-03 11","03-03 12","03-03 13","03-03 14","03-03 15","03-03 16","03-03 17","03-03 18","03-03 19","03-03 20","03-03 21","03-03 22","03-03 23",
+  "03-04 00","03-04 01","03-04 02","03-04 03","03-04 04","03-04 05","03-04 06","03-04 07","03-04 08","03-04 09","03-04 10","03-04 11","03-04 12","03-04 13","03-04 14","03-04 15","03-04 16","03-04 17","03-04 18","03-04 19","03-04 20","03-04 21","03-04 22","03-04 23",
+  "03-05 00","03-05 01","03-05 02","03-05 03","03-05 04","03-05 05","03-05 06","03-05 07","03-05 08","03-05 09","03-05 10","03-05 11","03-05 12","03-05 13","03-05 14","03-05 15","03-05 16","03-05 17","03-05 18","03-05 19","03-05 20","03-05 21","03-05 22","03-05 23",
+  "03-06 00","03-06 01","03-06 02","03-06 03","03-06 04","03-06 05","03-06 06","03-06 07","03-06 08","03-06 09","03-06 10","03-06 11","03-06 12","03-06 13","03-06 14","03-06 15","03-06 16","03-06 17","03-06 18","03-06 19","03-06 20","03-06 21","03-06 22","03-06 23",
+  "03-07 00","03-07 01","03-07 02","03-07 03","03-07 04","03-07 05","03-07 06","03-07 07","03-07 08","03-07 09","03-07 10","03-07 11","03-07 12","03-07 13","03-07 14","03-07 15","03-07 16","03-07 17","03-07 18","03-07 19","03-07 20","03-07 21","03-07 22","03-07 23",
+  "03-08 00","03-08 01","03-08 02","03-08 03","03-08 04","03-08 05","03-08 06","03-08 07","03-08 08","03-08 09","03-08 10","03-08 11","03-08 12","03-08 13","03-08 14","03-08 15","03-08 16","03-08 17","03-08 18","03-08 19","03-08 20","03-08 21","03-08 22","03-08 23",
+  "03-09 00","03-09 01","03-09 02","03-09 03","03-09 04","03-09 05","03-09 06","03-09 07","03-09 08","03-09 09","03-09 10","03-09 11","03-09 12","03-09 13","03-09 14","03-09 15","03-09 16","03-09 17","03-09 18","03-09 19","03-09 20","03-09 21","03-09 22","03-09 23",
+  "03-10 00","03-10 01","03-10 02","03-10 03","03-10 04","03-10 05","03-10 06","03-10 07","03-10 08","03-10 09","03-10 10","03-10 11","03-10 12","03-10 13","03-10 14","03-10 15","03-10 16","03-10 17","03-10 18","03-10 19","03-10 20","03-10 21","03-10 22","03-10 23",
+  "03-11 00","03-11 01","03-11 02","03-11 03","03-11 04","03-11 05","03-11 06","03-11 07","03-11 08","03-11 09","03-11 10","03-11 11","03-11 12","03-11 13","03-11 14","03-11 15","03-11 16","03-11 17","03-11 18","03-11 19","03-11 20","03-11 21","03-11 22","03-11 23",
+  "03-12 00","03-12 01","03-12 02","03-12 03","03-12 04","03-12 05","03-12 06","03-12 07","03-12 08","03-12 09","03-12 10","03-12 11","03-12 12","03-12 13","03-12 14","03-12 15","03-12 16","03-12 17","03-12 18","03-12 19","03-12 20","03-12 21","03-12 22","03-12 23",
+  "03-13 00","03-13 01","03-13 02","03-13 03","03-13 04","03-13 05","03-13 06","03-13 07","03-13 08","03-13 09","03-13 10","03-13 11","03-13 12","03-13 13","03-13 14","03-13 15","03-13 16","03-13 17","03-13 18","03-13 19","03-13 20","03-13 21","03-13 22","03-13 23",
+  "03-14 00","03-14 01","03-14 02","03-14 03","03-14 04","03-14 05","03-14 06","03-14 07","03-14 08","03-14 09","03-14 10","03-14 11","03-14 12","03-14 13","03-14 14","03-14 15","03-14 16","03-14 17","03-14 18","03-14 19","03-14 20","03-14 21","03-14 22","03-14 23",
+  "03-15 00","03-15 01","03-15 02","03-15 03","03-15 04","03-15 05","03-15 06","03-15 07","03-15 08","03-15 09","03-15 10","03-15 11","03-15 12","03-15 13","03-15 14","03-15 15","03-15 16","03-15 17","03-15 18","03-15 19","03-15 20","03-15 21","03-15 22","03-15 23",
+  "03-16 00","03-16 01","03-16 02","03-16 03","03-16 04","03-16 05","03-16 06","03-16 07","03-16 08","03-16 09","03-16 10","03-16 11","03-16 12","03-16 13","03-16 14","03-16 15","03-16 16","03-16 17","03-16 18","03-16 19","03-16 20","03-16 21","03-16 22","03-16 23",
+  "03-17 00","03-17 01","03-17 02","03-17 03","03-17 04","03-17 05","03-17 06","03-17 07","03-17 08","03-17 09","03-17 10","03-17 11","03-17 12","03-17 13","03-17 14","03-17 15","03-17 16","03-17 17","03-17 18","03-17 19","03-17 20","03-17 21","03-17 22","03-17 23",
+  "03-18 00","03-18 01","03-18 02","03-18 03","03-18 04","03-18 05","03-18 06","03-18 07","03-18 08","03-18 09","03-18 10","03-18 11","03-18 12","03-18 13","03-18 14","03-18 15","03-18 16","03-18 17","03-18 18","03-18 19","03-18 20","03-18 21","03-18 22","03-18 23",
+  "03-19 00","03-19 01","03-19 02","03-19 03","03-19 04","03-19 05","03-19 06","03-19 07","03-19 08","03-19 09","03-19 10","03-19 11","03-19 12","03-19 13","03-19 14","03-19 15","03-19 16","03-19 17","03-19 18","03-19 19","03-19 20","03-19 21","03-19 22","03-19 23",
+  "03-20 00","03-20 01","03-20 02","03-20 03","03-20 04","03-20 05","03-20 06","03-20 07","03-20 08","03-20 09","03-20 10","03-20 11","03-20 12","03-20 13","03-20 14","03-20 15","03-20 16","03-20 17","03-20 18","03-20 19","03-20 20","03-20 21","03-20 22","03-20 23",
+  "03-21 00","03-21 01","03-21 02","03-21 03","03-21 04","03-21 05","03-21 06","03-21 07","03-21 08","03-21 09","03-21 10","03-21 11","03-21 12","03-21 13","03-21 14","03-21 15","03-21 16","03-21 17","03-21 18","03-21 19","03-21 20","03-21 21","03-21 22","03-21 23",
+  "03-22 00","03-22 01","03-22 02","03-22 03","03-22 04","03-22 05","03-22 06","03-22 07","03-22 08","03-22 09","03-22 10","03-22 11","03-22 12","03-22 13","03-22 14","03-22 15","03-22 16","03-22 17","03-22 18","03-22 19","03-22 20","03-22 21","03-22 22","03-22 23",
+  "03-23 00","03-23 01","03-23 02","03-23 03","03-23 04","03-23 05","03-23 06","03-23 07","03-23 08","03-23 09","03-23 10","03-23 11","03-23 12","03-23 13","03-23 14","03-23 15","03-23 16","03-23 17","03-23 18","03-23 19","03-23 20","03-23 21","03-23 22","03-23 23",
+  "03-24 00","03-24 01","03-24 02","03-24 03","03-24 04","03-24 05","03-24 06","03-24 07","03-24 08","03-24 09","03-24 10","03-24 11","03-24 12","03-24 13","03-24 14","03-24 15","03-24 16","03-24 17","03-24 18","03-24 19","03-24 20","03-24 21","03-24 22","03-24 23",
+  "03-25 00","03-25 01","03-25 02","03-25 03","03-25 04","03-25 05","03-25 06","03-25 07","03-25 08","03-25 09","03-25 10","03-25 11","03-25 12","03-25 13","03-25 14","03-25 15","03-25 16","03-25 17","03-25 18","03-25 19","03-25 20","03-25 21","03-25 22","03-25 23",
+  "03-26 00","03-26 01","03-26 02","03-26 03","03-26 04","03-26 05","03-26 06","03-26 07","03-26 08","03-26 09","03-26 10","03-26 11","03-26 12","03-26 13","03-26 14","03-26 15","03-26 16","03-26 17","03-26 18","03-26 19","03-26 20","03-26 21","03-26 22","03-26 23",
+  "03-27 00","03-27 01","03-27 02","03-27 03","03-27 04","03-27 05","03-27 06","03-27 07","03-27 08","03-27 09","03-27 10","03-27 11","03-27 12","03-27 13","03-27 14","03-27 15","03-27 16","03-27 17","03-27 18","03-27 19","03-27 20","03-27 21","03-27 22","03-27 23",
+  "03-28 00","03-28 01","03-28 02","03-28 03","03-28 04","03-28 05","03-28 06","03-28 07","03-28 08","03-28 09","03-28 10","03-28 11","03-28 12","03-28 13","03-28 14","03-28 15","03-28 16","03-28 17","03-28 18","03-28 19","03-28 20","03-28 21","03-28 22","03-28 23",
+  "03-29 00","03-29 01","03-29 02","03-29 03","03-29 04","03-29 05","03-29 06","03-29 07","03-29 08","03-29 09","03-29 10","03-29 11","03-29 12","03-29 13","03-29 14","03-29 15","03-29 16","03-29 17","03-29 18","03-29 19","03-29 20","03-29 21","03-29 22","03-29 23",
+  "03-30 00","03-30 01","03-30 02","03-30 03","03-30 04","03-30 05","03-30 06","03-30 07","03-30 08","03-30 09","03-30 10","03-30 11","03-30 12","03-30 13","03-30 14","03-30 15","03-30 16","03-30 17","03-30 18","03-30 19","03-30 20","03-30 21","03-30 22","03-30 23",
+  "03-31 00","03-31 01","03-31 02","03-31 03","03-31 04","03-31 05","03-31 06","03-31 07","03-31 08","03-31 09","03-31 10","03-31 11","03-31 12","03-31 13","03-31 14","03-31 15","03-31 16","03-31 17","03-31 18","03-31 19","03-31 20","03-31 21","03-31 22","03-31 23",
+  "04-01 00","04-01 01","04-01 02","04-01 03","04-01 04","04-01 05","04-01 06","04-01 07","04-01 08","04-01 09","04-01 10","04-01 11","04-01 12","04-01 13","04-01 14","04-01 15","04-01 16","04-01 17","04-01 18","04-01 19","04-01 20","04-01 21","04-01 22","04-01 23",
+  "04-02 00","04-02 01","04-02 02","04-02 03","04-02 04","04-02 05","04-02 06","04-02 07","04-02 08","04-02 09","04-02 10","04-02 11","04-02 12","04-02 13","04-02 14","04-02 15","04-02 16","04-02 17","04-02 18","04-02 19","04-02 20","04-02 21","04-02 22","04-02 23",
+  "04-03 00","04-03 01","04-03 02","04-03 03","04-03 04","04-03 05","04-03 06","04-03 07","04-03 08","04-03 09","04-03 10","04-03 11","04-03 12","04-03 13","04-03 14","04-03 15","04-03 16","04-03 17","04-03 18","04-03 19","04-03 20","04-03 21","04-03 22","04-03 23",
+  "04-04 00","04-04 01","04-04 02","04-04 03","04-04 04","04-04 05","04-04 06","04-04 07","04-04 08","04-04 09","04-04 10","04-04 11","04-04 12","04-04 13","04-04 14","04-04 15","04-04 16","04-04 17","04-04 18","04-04 19","04-04 20","04-04 21","04-04 22","04-04 23",
+  "04-05 00","04-05 01","04-05 02","04-05 03","04-05 04","04-05 05","04-05 06","04-05 07","04-05 08","04-05 09","04-05 10","04-05 11","04-05 12","04-05 13","04-05 14","04-05 15","04-05 16","04-05 17","04-05 18","04-05 19","04-05 20","04-05 21","04-05 22","04-05 23",
+  "04-06 00","04-06 01","04-06 02","04-06 03","04-06 04","04-06 05","04-06 06","04-06 07","04-06 08","04-06 09","04-06 10","04-06 11","04-06 12","04-06 13","04-06 14","04-06 15","04-06 16","04-06 17","04-06 18","04-06 19","04-06 20","04-06 21","04-06 22","04-06 23",
+  "04-07 00","04-07 01","04-07 02","04-07 03","04-07 04","04-07 05","04-07 06","04-07 07","04-07 08","04-07 09","04-07 10","04-07 11","04-07 12","04-07 13","04-07 14","04-07 15","04-07 16","04-07 17","04-07 18","04-07 19","04-07 20","04-07 21","04-07 22","04-07 23",
+  "04-08 00","04-08 01","04-08 02","04-08 03","04-08 04","04-08 05","04-08 06","04-08 07","04-08 08","04-08 09","04-08 10","04-08 11","04-08 12","04-08 13","04-08 14","04-08 15","04-08 16","04-08 17","04-08 18","04-08 19","04-08 20","04-08 21","04-08 22","04-08 23",
+  "04-09 00","04-09 01","04-09 02","04-09 03","04-09 04","04-09 05","04-09 06","04-09 07","04-09 08","04-09 09","04-09 10","04-09 11","04-09 12","04-09 13","04-09 14","04-09 15","04-09 16","04-09 17","04-09 18","04-09 19","04-09 20","04-09 21","04-09 22","04-09 23",
+  "04-10 00","04-10 01","04-10 02","04-10 03","04-10 04","04-10 05","04-10 06","04-10 07","04-10 08","04-10 09","04-10 10","04-10 11","04-10 12","04-10 13","04-10 14","04-10 15","04-10 16","04-10 17","04-10 18","04-10 19","04-10 20","04-10 21","04-10 22","04-10 23",
+  "04-11 00","04-11 01","04-11 02","04-11 03","04-11 04","04-11 05","04-11 06","04-11 07","04-11 08","04-11 09","04-11 10","04-11 11","04-11 12","04-11 13","04-11 14","04-11 15","04-11 16","04-11 17","04-11 18","04-11 19","04-11 20","04-11 21","04-11 22","04-11 23",
+  "04-12 00","04-12 01","04-12 02","04-12 03","04-12 04","04-12 05","04-12 06","04-12 07","04-12 08","04-12 09","04-12 10","04-12 11","04-12 12","04-12 13","04-12 14","04-12 15","04-12 16","04-12 17","04-12 18","04-12 19","04-12 20","04-12 21","04-12 22","04-12 23",
+  "04-13 00","04-13 01","04-13 02","04-13 03","04-13 04","04-13 05","04-13 06","04-13 07","04-13 08","04-13 09","04-13 10","04-13 11","04-13 12","04-13 13","04-13 14","04-13 15","04-13 16","04-13 17","04-13 18","04-13 19","04-13 20","04-13 21","04-13 22","04-13 23",
+  "04-14 00","04-14 01","04-14 02","04-14 03","04-14 04","04-14 05","04-14 06","04-14 07","04-14 08","04-14 09","04-14 10","04-14 11","04-14 12","04-14 13","04-14 14","04-14 15","04-14 16","04-14 17","04-14 18","04-14 19","04-14 20","04-14 21","04-14 22","04-14 23",
+  "04-15 00","04-15 01","04-15 02","04-15 03","04-15 04","04-15 05","04-15 06","04-15 07","04-15 08","04-15 09","04-15 10","04-15 11","04-15 12","04-15 13","04-15 14","04-15 15","04-15 16","04-15 17","04-15 18","04-15 19","04-15 20","04-15 21","04-15 22","04-15 23",
+  "04-16 00","04-16 01","04-16 02","04-16 03","04-16 04","04-16 05","04-16 06","04-16 07","04-16 08","04-16 09","04-16 10","04-16 11","04-16 12","04-16 13","04-16 14","04-16 15","04-16 16","04-16 17","04-16 18","04-16 19","04-16 20","04-16 21","04-16 22","04-16 23",
+  "04-17 00","04-17 01","04-17 02","04-17 03","04-17 04","04-17 05","04-17 06","04-17 07","04-17 08","04-17 09","04-17 10","04-17 11","04-17 12","04-17 13","04-17 14","04-17 15","04-17 16","04-17 17","04-17 18","04-17 19","04-17 20","04-17 21","04-17 22","04-17 23",
+  "04-18 00","04-18 01","04-18 02","04-18 03","04-18 04","04-18 05","04-18 06","04-18 07","04-18 08","04-18 09","04-18 10","04-18 11","04-18 12","04-18 13","04-18 14","04-18 15","04-18 16",
+];
+const unattrUnattr = [
+  140,161,166,197,166,165,172,180,138,166,170,176,199,253,327,346,124,111,77,52,44,55,82,121,
+  190,219,215,234,211,218,183,150,167,157,160,178,224,265,273,207,109,77,58,46,39,46,62,105,
+  163,186,124,168,177,181,177,172,110,141,175,184,234,221,264,226,89,68,56,40,36,30,68,123,
+  151,158,162,162,172,170,203,197,168,143,139,173,184,191,229,180,104,58,41,35,30,34,79,94,
+  155,145,140,156,138,135,150,112,99,103,118,120,126,138,200,127,95,51,46,27,30,29,54,97,
+  128,127,144,122,110,126,102,95,89,80,89,99,97,115,128,100,93,44,30,31,15,21,37,43,
+  62,76,88,73,100,82,102,82,82,77,80,96,88,115,127,96,75,64,25,23,20,16,29,42,
+  58,82,74,102,70,85,87,89,84,81,96,107,116,124,134,108,87,54,42,30,15,29,40,85,
+  119,130,135,127,135,110,114,103,98,77,77,100,103,111,121,109,61,45,24,20,24,20,47,62,
+  126,125,119,124,104,99,101,98,92,102,100,108,128,123,114,79,58,32,25,16,24,27,37,66,
+  83,102,116,100,92,116,90,77,85,93,94,93,120,126,158,134,84,63,26,30,30,24,37,71,
+  109,110,136,125,125,105,145,112,88,85,94,102,119,168,183,112,71,52,39,23,37,25,41,79,
+  113,121,127,127,140,124,109,101,82,91,74,96,96,129,208,109,98,61,36,27,16,15,30,44,
+  49,68,62,76,73,75,76,70,76,58,72,91,85,101,142,89,66,51,27,13,17,10,21,27,
+  60,59,65,65,76,89,83,69,96,65,64,80,88,64,68,48,32,22,13,7,5,10,17,27,
+  47,51,44,60,55,68,82,61,57,64,54,74,72,71,62,32,18,25,16,12,6,11,12,28,
+  49,57,83,78,59,69,77,78,85,83,77,93,78,94,64,65,37,31,22,17,8,8,25,30,
+  47,57,77,84,88,82,74,72,89,83,82,101,99,101,87,86,41,26,15,13,17,14,39,75,
+  129,161,175,128,157,144,128,112,102,125,110,97,116,134,108,61,65,39,19,21,21,18,44,89,
+  151,144,157,127,143,154,131,98,91,96,97,85,87,93,94,62,55,31,23,13,9,17,15,22,
+  56,81,86,77,84,89,74,72,72,66,73,80,85,89,67,52,44,30,13,16,11,12,13,28,
+  49,53,59,49,86,77,75,96,73,71,89,110,87,109,93,51,50,28,17,17,13,16,31,74,
+  142,122,125,124,116,151,94,109,83,68,88,78,131,110,91,62,44,31,23,14,18,20,36,68,
+  106,103,121,115,141,129,118,102,86,79,115,112,119,112,95,67,45,30,11,8,12,21,34,98,
+  154,168,171,172,158,166,144,124,94,103,140,123,138,131,133,80,52,22,17,20,15,15,59,85,
+  152,187,190,177,190,193,166,178,132,154,171,193,178,196,151,94,59,36,25,23,19,28,45,118,
+  154,153,147,168,166,190,174,139,117,75,95,117,104,94,88,64,47,32,16,20,10,7,18,31,
+  55,70,61,55,69,56,79,73,65,66,61,61,85,75,69,49,30,25,14,6,6,12,10,35,
+  40,56,59,60,54,70,54,72,69,72,64,75,69,69,56,40,14,14,12,8,9,8,15,23,
+  37,62,69,72,99,102,74,81,84,90,86,93,102,97,99,54,28,15,12,10,6,17,40,99,
+  143,140,137,168,160,149,155,154,174,300,315,338,290,312,387,539,190,122,73,54,69,92,154,228,
+  262,248,207,296,261,207,216,197,174,209,215,213,261,279,355,314,140,77,58,40,50,87,129,229,
+  285,268,214,215,192,197,205,137,144,146,152,194,184,289,575,193,104,71,34,31,33,45,78,125,
+  171,171,182,152,139,159,119,143,140,132,133,149,159,261,386,189,102,69,40,28,17,30,41,68,
+  93,108,125,119,134,104,118,101,117,132,111,115,140,202,279,165,106,82,43,36,18,25,31,55,
+  82,102,126,106,94,121,129,126,119,106,114,129,150,164,238,120,89,47,29,22,13,26,50,125,
+  150,151,138,130,117,136,111,105,85,87,101,98,112,129,189,96,53,34,18,16,14,38,48,130,
+  135,117,128,120,107,109,92,100,100,101,84,99,116,128,147,81,44,21,25,15,14,32,48,84,
+  113,105,110,107,105,108,102,81,84,82,105,102,87,117,117,87,43,34,23,16,11,29,45,71,
+  88,99,72,106,98,96,111,75,82,78,91,91,115,141,188,98,57,28,22,13,17,16,50,67,
+  102,95,103,74,110,86,120,68,72,61,87,71,68,112,138,63,63,29,18,22,11,14,29,46,
+  54,64,68,71,75,80,76,77,69,72,82,87,105,105,163,46,35,25,16,17,8,8,19,34,
+  44,49,66,60,63,76,67,68,79,73,61,77,82,77,67,80,35,23,17,15,16,18,30,73,
+  99,102,99,96,97,111,122,87,67,82,103,82,69,77,59,47,30,18,15,11,7,17,33,75,
+  92,86,94,100,111,79,84,80,82,68,60,66,88,84,76,49,33,22,23,15,10,20,33,72,
+  104,111,103,97,116,121,106,98,97,80,73,97,121,108,86,55,27,28,16,9,16,19,60,137,
+  168,264,224,193,200,166,194,111,107,93,85,102,101,124,97,63,46,18,12,9,6,27,66,130,
+  326,321,272,274,314,299,316,96,77,63,66,77,54,68,66,46,26,19,28,10,6,3,20,37,
+  36,53,62,50,51,68,64,45,48,44,61,49,52,58,59,42,29,24,10,10,8,5,13,23,
+  39,52,65,57,54,48,58,52,61,56,62,62,84,79,70,47,29,22,12,8,11,18,33,64,
+  98,128,104,86,101,113,95,84,85,72,92,77,84,81,69,56,35,19,14,11,18,11,29,70,
+  88,93,84,91,91,87,98,92,61,55,86,77,91,103,134,80,46,23,15,17,5,19,59,80,
+  87,137,98,109,117,109,116,102,91,92,100,85,87,129,139,65,51,40,13,22,10,27,63,77,
+  111,102,105,100,90,92,90,102,77,79,85,82,109,138,140,61,57,26,16,20,14,20,49,70,
+  102,110,101,75,98,86,91,87,67,67,58,85,64,78,110,48,53,35,9,9,9,20,26,46,
+  67,65,54,46,65,79,67,59,51,61,65,60,68,79,88,61,49,38,30,17,18,12,21,27,
+  43,50,68,54,59,63,67,72,57,65,79,63,91,98,110,58,50,26,12,14,8,19,41,66,
+  104,105,85,82,96,89,86,75,89,67,79,76,77,78,79,47,28,25,20,12,9,18,39,90,
+  129,141,112,102,103,109,101,109,77,81,85,90,110,106,90,704,260,116,94,88,101,170,225,213,
+  237,220,195,187,206,197,185,208,184,175,172,213,214,237,113,264,145,50,26,23,31,50,76,103,
+  119,133,125,109,128,108,119,95,94,76,86,106,107,146,170,112,69,42,29,22,26,43,61,85,
+  83,93,83,71,100,73,94,86,89,70,70,69,88,94,106,78,49,30,19,11,16,22,27,35,
+  54,62,54,64,54,61,50,62,53,60,65,63,67,69,97,79,49,39,17,19,10,17,28,39,
+  59,59,60,63,62,55,61,64,62,57,77,68,73,81,109,53,51,31,13,9,14,16,38,76,
+  78,72,86,90,76,71,122,98,86,72,75,72,67,106,95,71,47,23,17,13,11,21,45,88,
+  82,109,88,83,71,95,84,78,70,57,70,65,70,79,88,57,37,29,16,12,9,18,56,92,
+  129,126,106,108,137,114,88,90,83,85,69,92,91,110,124,66,45,32,31,16,16,20,35,66,
+  89,93,89,83,70,120,101,77,64,59,58,82,67,120,122,68,45,22,11,15,10,19,38,65,
+  91,104,96,88,87,100,124,95,84,79,81,84,68,81,81,62,33,24,9,16,11,26,26,23,
+  46,47,57,54,70,41,69,66,57,52,45,49,52,66,68,49,50,31,20,25,9,8,20,38,
+  39,40,52,65,61,63,64,62,64,62,54,74,71,90,90,54,47,25,25,16,9,15,47,90,
+  88,109,96,96,97,103,121,106,88,86,60,96,83,109,107,73,50,33,24,16,16,26,52,83,
+  113,160,118,109,104,119,114,106,93,76,80,112,104,105,129,86,37,38,20,18,22,35,40,89,
+  139,146,123,124,132,126,123,118,89,84,89,99,93,116,99,81,45,35,24,12,23,33,50,94,
+  110,149,141,114,118,106,121,114,118,79,96,107,109,142,172,84,56,36,32,20,18,23,67,76,
+  126,135,205,158,139,138,115,136,108,92,96,96,100,103,110,65,66,28,27,19,11,13,40,51,
+  72,63,70,69,59,67,73,70,86,87,60,101,89,103,141,72,23,
+];
+const unattrPct = [
+  4.11,3.01,2.35,2.48,9.78,9.34,7.53,7.69,12.66,7.78,4.49,8.33,7.01,5.24,2.39,0.57,3.88,1.77,0.0,0.0,0.0,1.79,4.65,8.33,
+  8.21,5.19,7.73,7.87,10.59,11.74,14.49,15.25,10.7,7.65,10.11,10.55,3.86,4.68,4.21,0.48,2.68,1.28,1.69,2.13,2.5,4.17,3.12,4.55,
+  6.86,7.92,9.49,7.69,16.9,15.02,18.43,11.79,20.29,9.03,9.79,5.64,7.51,5.56,4.35,2.16,2.2,2.86,1.75,4.76,2.7,6.25,1.45,3.91,
+  7.36,14.13,8.47,10.0,7.53,15.84,15.06,19.59,20.38,13.86,12.03,7.98,4.17,3.54,2.14,2.7,1.89,4.92,4.65,2.78,0.0,2.86,4.82,10.48,
+  7.19,9.94,9.68,13.81,20.23,15.62,22.28,18.84,15.38,9.65,9.92,13.04,8.7,7.38,3.85,1.55,2.06,5.56,2.13,0.0,3.23,0.0,6.9,8.49,
+  11.72,11.81,11.66,14.69,16.67,19.23,22.14,14.41,19.09,19.19,12.75,8.33,11.01,6.5,8.57,4.76,2.11,4.35,0.0,3.12,0.0,0.0,2.63,8.51,
+  1.59,10.59,3.3,5.19,10.71,2.38,4.67,6.82,1.2,6.1,8.05,8.57,7.37,4.17,5.93,0.0,2.6,0.0,0.0,4.17,0.0,0.0,6.45,2.33,
+  1.69,0.0,6.33,0.97,5.41,7.61,6.45,8.25,2.33,5.81,4.95,4.46,7.94,6.06,4.29,4.42,3.33,3.57,0.0,0.0,0.0,0.0,4.76,6.59,
+  4.03,13.33,13.46,12.41,11.76,15.38,18.57,20.77,19.67,17.2,14.44,11.5,14.17,6.72,3.2,4.39,3.17,4.26,4.0,0.0,4.0,4.76,7.84,8.82,
+  8.7,11.35,15.6,13.89,19.38,19.51,23.48,15.52,15.6,20.93,13.04,12.9,7.25,13.38,12.31,2.47,4.92,3.03,0.0,0.0,4.0,3.57,2.63,10.81,
+  9.78,12.07,12.12,12.28,15.6,12.12,15.89,17.2,15.84,9.71,11.32,10.58,6.25,7.35,9.71,4.29,3.45,0.0,3.7,0.0,0.0,7.69,15.91,4.05,
+  17.42,14.06,13.92,18.3,21.88,19.23,18.08,21.68,15.38,22.73,16.07,14.29,9.16,6.67,6.15,3.45,1.39,1.89,2.5,4.17,0.0,3.85,4.65,14.13,
+  13.08,8.33,13.61,15.33,14.63,24.39,22.7,14.41,19.61,16.51,20.43,9.43,6.8,9.79,2.35,1.8,2.97,4.69,2.7,0.0,0.0,6.25,3.23,4.35,
+  5.77,6.85,8.82,5.0,12.05,10.71,15.56,15.66,17.39,15.94,17.24,8.08,7.61,4.72,5.33,4.3,2.94,3.77,3.57,7.14,0.0,0.0,0.0,3.57,
+  1.64,4.84,4.41,13.33,10.59,6.32,15.31,13.75,8.57,10.96,11.11,10.11,5.38,11.11,9.33,4.0,0.0,8.33,0.0,22.22,0.0,9.09,0.0,0.0,
+  4.08,5.56,6.38,7.69,5.17,13.92,14.58,15.28,21.92,16.88,14.29,7.5,7.69,11.25,8.82,3.03,0.0,0.0,0.0,0.0,0.0,0.0,7.69,12.5,
+  7.55,13.64,11.7,15.22,19.18,17.86,22.22,15.22,19.05,15.31,21.43,11.43,10.34,4.08,12.33,10.96,0.0,0.0,4.35,0.0,0.0,0.0,0.0,0.0,
+  7.84,3.39,4.94,7.69,12.0,15.46,10.84,14.29,15.24,10.75,11.83,9.82,9.17,5.61,8.42,3.37,2.38,3.7,0.0,0.0,10.53,0.0,7.14,16.67,
+  16.23,15.26,17.45,23.35,17.8,18.18,23.81,18.25,20.31,12.59,16.03,17.8,15.33,11.84,11.48,14.08,7.14,2.5,9.52,0.0,0.0,5.26,8.33,13.59,
+  13.22,15.29,14.67,24.4,21.86,21.03,24.28,19.67,24.79,18.64,10.19,15.84,12.12,12.26,9.62,7.46,6.78,11.43,0.0,0.0,0.0,5.56,11.76,12.0,
+  6.67,10.0,12.24,10.47,14.29,14.42,15.91,12.2,19.1,19.51,10.98,9.09,6.59,5.32,5.63,8.77,6.38,6.25,7.14,0.0,0.0,14.29,7.14,3.45,
+  3.92,8.62,4.84,7.55,6.52,4.94,13.79,4.0,15.12,12.35,11.0,6.78,6.45,9.17,4.12,7.27,0.0,3.45,5.56,5.56,7.14,5.88,13.89,9.76,
+  12.35,13.48,13.79,15.07,22.67,17.93,27.13,19.26,20.19,9.33,10.2,14.29,10.27,6.78,11.65,13.89,6.38,3.12,0.0,0.0,0.0,4.76,10.0,8.11,
+  10.92,10.43,14.79,17.86,18.5,18.87,22.88,17.07,18.1,24.76,9.45,6.67,7.03,10.4,5.0,9.46,13.46,9.09,8.33,0.0,14.29,12.5,12.82,6.67,
+  12.5,16.42,12.31,14.0,11.73,14.43,13.77,17.33,12.15,11.97,11.95,12.77,10.97,9.03,9.52,6.98,3.7,21.43,0.0,4.76,0.0,6.25,9.23,16.67,
+  16.02,14.61,13.64,10.15,21.16,17.17,23.15,17.97,20.96,9.41,5.0,9.39,8.72,7.55,6.79,10.48,9.23,7.69,0.0,4.17,0.0,12.5,6.25,7.81,
+  9.41,8.38,11.45,8.2,10.27,5.94,10.77,11.46,8.59,10.71,6.86,8.59,8.77,9.62,7.37,5.88,11.32,3.03,11.11,0.0,9.09,0.0,18.18,8.82,
+  3.51,4.11,8.96,9.84,8.0,12.5,14.13,6.41,10.96,13.16,3.17,8.96,6.59,7.41,10.39,0.0,6.25,3.85,0.0,14.29,0.0,0.0,0.0,2.78,
+  0.0,0.0,1.67,0.0,0.0,1.41,1.82,0.0,0.0,1.37,4.48,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,0.0,0.0,1.33,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,0.0,0.67,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.35,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,4.79,3.64,11.85,4.67,7.28,5.71,7.64,3.25,1.85,4.04,1.03,0.0,0.97,2.82,2.44,0.0,5.56,0.0,0.0,2.86,
+  5.1,1.82,2.34,4.03,3.6,2.8,0.0,6.48,4.1,2.22,2.63,2.54,0.71,1.46,2.11,1.79,1.85,1.2,2.27,2.7,5.26,3.85,3.12,1.79,
+  1.2,0.0,1.56,2.75,3.09,0.0,0.77,3.08,1.65,2.75,0.0,3.01,3.23,1.8,0.83,0.83,1.11,2.08,0.0,0.0,0.0,0.0,5.66,4.58,
+  5.06,6.79,12.1,3.7,14.6,13.92,17.16,13.22,15.0,8.42,9.01,8.41,7.44,7.86,3.57,4.0,1.85,0.0,0.0,11.11,6.67,5.0,7.69,3.7,
+  7.53,10.69,9.86,9.09,10.08,14.17,17.86,10.71,9.09,12.17,10.64,7.48,5.69,10.49,3.92,3.57,6.38,8.7,0.0,6.25,0.0,5.88,4.0,6.67,
+  9.6,8.7,5.17,10.08,14.63,18.8,10.53,18.18,20.0,7.87,4.55,10.53,7.45,3.31,4.1,3.33,0.0,0.0,0.0,0.0,8.33,3.33,8.16,8.97,
+  9.28,10.0,11.11,7.83,8.41,12.73,9.76,21.05,12.77,2.5,5.21,6.19,4.96,4.08,0.53,0.0,1.72,3.45,0.0,13.33,0.0,11.11,3.85,1.47,
+  8.11,11.21,8.85,6.33,10.57,10.42,9.09,5.56,5.26,8.96,2.25,8.97,4.23,3.45,3.5,1.56,3.08,0.0,5.26,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,1.39,0.0,0.0,0.0,0.0,1.43,1.37,0.0,2.25,0.0,0.0,0.0,0.0,0.0,3.85,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.78,0.0,0.0,0.0,0.0,0.0,3.23,3.95,
+  6.6,5.56,3.88,2.04,7.62,10.48,4.69,9.38,11.84,5.75,7.21,13.68,8.0,3.75,10.61,4.08,3.23,5.26,0.0,0.0,0.0,0.0,8.33,6.25,
+  8.0,6.52,9.62,3.85,9.02,16.84,8.7,13.98,3.53,2.86,4.76,8.33,5.38,6.67,3.8,2.0,2.94,4.35,4.17,6.25,9.09,0.0,2.94,8.86,
+  7.14,10.48,13.45,11.01,11.45,9.7,13.11,10.09,12.61,13.04,10.98,7.62,10.37,12.2,9.47,0.0,6.9,3.45,0.0,10.0,0.0,5.0,4.76,8.05,
+  14.72,18.01,16.73,12.27,15.97,13.54,11.42,11.9,12.3,13.08,16.67,12.07,6.48,10.14,3.96,4.55,6.12,10.0,0.0,18.18,14.29,3.57,2.94,9.09,
+  16.84,13.01,16.82,10.75,18.65,16.94,17.06,13.51,8.33,7.35,9.59,12.5,8.47,8.11,1.49,6.12,0.0,5.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,1.85,0.0,3.85,3.77,2.86,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  2.5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5.26,5.71,7.25,
+  4.85,5.19,7.14,4.44,11.4,7.38,12.84,6.67,9.57,1.37,7.07,8.33,5.62,6.9,1.43,3.45,0.0,5.0,0.0,8.33,0.0,15.38,6.45,2.78,
+  9.28,4.12,6.67,1.09,4.21,5.43,1.01,5.15,8.96,5.17,3.37,4.94,7.14,0.96,2.9,2.44,0.0,4.17,0.0,0.0,0.0,9.52,6.35,2.44,
+  5.43,4.2,4.85,0.91,4.88,6.03,10.08,5.56,3.19,5.15,3.85,2.3,4.4,4.44,1.42,1.52,0.0,0.0,7.14,0.0,0.0,6.9,1.56,3.75,
+  2.63,2.86,3.67,1.96,8.16,2.13,6.25,1.92,4.94,3.66,5.56,3.53,4.39,2.13,2.1,4.69,0.0,3.7,11.11,0.0,12.5,0.0,2.0,5.41,
+  4.67,7.56,2.88,3.85,4.85,3.37,2.15,5.43,0.0,4.29,4.92,0.0,5.88,6.02,1.79,5.88,1.85,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  1.47,1.52,0.0,2.13,0.0,0.0,1.47,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.69,0.0,0.0,0.0,6.67,0.0,5.0,0.0,2.94,
+  3.7,3.67,5.56,0.0,5.88,2.2,6.52,7.41,2.2,4.29,1.25,1.3,0.0,2.5,1.25,4.08,0.0,3.85,4.76,0.0,10.0,5.26,2.5,10.89,
+  3.73,5.37,4.27,6.42,2.83,10.66,2.88,3.54,2.53,0.0,0.0,4.26,2.65,4.5,5.26,0.42,0.38,0.85,2.08,1.12,0.0,0.0,0.88,2.74,
+  2.87,1.35,3.94,3.11,0.96,2.48,4.15,0.95,1.08,0.57,1.15,0.93,0.0,1.66,1.74,0.0,0.68,0.0,0.0,0.0,0.0,0.0,1.3,0.96,
+  0.83,2.21,3.1,0.0,5.19,3.57,1.65,0.0,1.05,2.56,3.37,1.85,0.93,0.68,1.16,0.0,1.43,2.33,0.0,0.0,0.0,2.27,4.69,0.0,
+  4.6,6.06,2.35,0.0,1.96,2.67,0.0,2.27,4.3,5.41,0.0,1.43,0.0,0.0,0.93,0.0,0.0,3.23,0.0,0.0,0.0,0.0,0.0,2.78,
+  0.0,3.12,1.82,1.54,0.0,3.17,3.85,3.12,5.36,1.64,1.52,0.0,0.0,0.0,0.0,1.25,0.0,2.5,0.0,5.0,0.0,0.0,0.0,0.0,
+  1.67,3.28,0.0,0.0,0.0,1.79,0.0,0.0,1.59,1.72,2.53,0.0,1.35,1.22,0.0,1.85,0.0,0.0,0.0,0.0,0.0,0.0,2.56,2.56,
+  2.5,1.37,2.27,2.17,2.56,0.0,0.81,0.0,2.27,1.37,1.32,0.0,2.9,0.93,1.04,0.0,0.0,0.0,0.0,7.14,0.0,0.0,0.0,1.12,
+  0.0,0.91,2.22,0.0,4.05,0.0,1.18,0.0,0.0,3.39,1.41,7.14,0.0,2.47,1.12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.08,
+  1.53,0.79,0.0,0.92,0.72,0.87,1.12,1.1,1.19,1.16,2.82,0.0,2.15,0.9,0.0,0.0,0.0,0.0,0.0,5.88,0.0,4.76,0.0,1.49,
+  0.0,0.0,1.11,2.35,1.41,2.44,0.98,0.0,1.54,0.0,0.0,0.0,0.0,0.83,0.81,1.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  2.15,0.95,2.04,0.0,1.14,0.99,0.8,0.0,1.18,3.66,0.0,0.0,2.86,1.22,1.22,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.49,1.72,3.7,2.17,2.0,1.89,1.49,0.0,2.0,0.0,0.0,0.0,3.85,0.0,0.0,0.0,0.0,
+  0.0,0.0,0.0,2.99,0.0,1.56,1.54,0.0,0.0,1.59,0.0,0.0,0.0,2.17,0.0,0.0,4.08,0.0,3.85,0.0,0.0,0.0,0.0,0.0,
+  1.12,3.54,3.03,4.0,1.02,0.96,1.63,4.5,1.12,2.27,1.64,1.03,2.35,0.91,1.83,0.0,1.96,0.0,0.0,0.0,0.0,3.7,1.89,1.19,
+  1.74,2.44,1.67,0.91,1.89,0.83,0.87,1.85,0.0,3.8,1.23,0.88,2.8,1.87,1.53,0.0,0.0,2.56,13.04,0.0,0.0,0.0,0.0,2.2,
+  0.71,1.35,0.81,0.8,2.22,1.56,0.81,2.48,1.11,2.33,3.26,1.0,0.0,0.85,1.0,1.22,0.0,0.0,0.0,0.0,0.0,0.0,1.96,1.05,
+  0.0,0.0,2.76,0.0,0.84,3.64,3.2,0.87,1.67,3.66,1.03,0.0,4.39,0.7,0.58,1.18,1.75,5.26,0.0,0.0,0.0,0.0,0.0,2.56,
+  0.79,2.17,0.49,0.63,1.42,2.82,4.17,0.0,2.7,3.16,0.0,4.0,0.99,1.9,1.79,2.99,1.49,3.45,0.0,5.0,0.0,7.14,0.0,0.0,
+  1.37,1.56,2.78,1.43,0.0,1.47,1.35,1.41,0.0,1.14,3.23,0.0,1.11,3.74,1.4,0.0,0.0,
+];
+
+
+// Unattributed-only hourly trend chart Feb 1 - Apr 18 (1841 hours)
+new Chart(document.getElementById('chart_unattr_hourly'), {
+  data: {
+    labels: unattrLabels,
+    datasets: [
+      {
+        type: 'line', label: 'Unattributed pb/hr', data: unattrUnattr,
+        borderColor: '#1a47e6', backgroundColor: 'rgba(26,71,230,0.08)',
+        yAxisID: 'y', tension: 0.15, pointRadius: 0, borderWidth: 1.2, fill: true
+      },
+      {
+        type: 'line', label: 'Attribution % (right axis)', data: unattrPct,
+        borderColor: '#15803d', backgroundColor: 'transparent',
+        yAxisID: 'y1', tension: 0.15, pointRadius: 0, borderWidth: 1, borderDash: [3,2]
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    animation: false, spanGaps: true,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: { legend: { display: true, position: 'top' } },
+    scales: {
+      y:  { position: 'left', title: { display: true, text: 'Unattributed pb/hr' }, min: 0 },
+      y1: { position: 'right', title: { display: true, text: 'Attribution %' }, min: 0, max: 30, grid: { drawOnChartArea: false } },
+      x: { ticks: { maxRotation: 60, minRotation: 60, font: { size: 8 }, autoSkip: true, maxTicksLimit: 30 } }
+    }
+  }
+});
+
+// Peer cohort comparison
+const peerData = {
+  labels: ['Mar 18', 'Mar 19', 'Mar 20', 'Mar 21', 'Mar 22', 'Mar 23'],
+  datasets: [
+    { label: 'KB Securities', data: [9.99, 12.71, 13.89, 0.74, 0.80, 6.53], borderColor: '#b91c1c', backgroundColor: 'rgba(185,28,28,0.1)', borderWidth: 3, tension: 0.2 },
+    { label: 'Samsung Securities', data: [6.59, 5.81, 4.87, 5.88, 4.04, 5.77], borderColor: '#1a47e6', tension: 0.2 },
+    { label: 'Coinone', data: [21.08, 17.85, 16.36, 10.78, 14.19, 24.08], borderColor: '#b45309', tension: 0.2 },
+    { label: 'Babitalk', data: [6.27, 6.68, 5.91, 6.04, 4.33, 7.23], borderColor: '#7c3aed', tension: 0.2 },
+    { label: 'genie', data: [22.1, 19.8, 21.1, 17.4, 19.0, 20.5], borderColor: '#0ea5e9', tension: 0.2 },
+    { label: 'Millie', data: [5.68, 6.48, 6.36, 7.45, 6.65, 6.9], borderColor: '#ec4899', tension: 0.2 },
+    { label: '33m2', data: [8.93, 9.62, 7.71, 6.99, 7.44, 8.78], borderColor: '#6b7280', tension: 0.2 },
+    { label: 'Ridi', data: [1.27, 1.45, 1.1, 1.22, 1.25, 1.4], borderColor: '#84cc16', tension: 0.2 },
+    { label: 'wanted', data: [16.3, 16.4, 16.4, 16.5, 16.6, 16.4], borderColor: '#14b8a6', tension: 0.2 }
+  ]
+};
+
+new Chart(document.getElementById('chart_peers'), {
+  type: 'line',
+  data: peerData,
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
+    scales: {
+      y: { title: { display: true, text: 'Attribution % (AIRBRIDGE install)' }, min: 0 },
+      x: { }
+    }
+  }
+});
+
+// nl creative format shift
+
+// === Section 5 daily cr_format + exchange mix data (Feb 1 - Apr 18) ===
+const crLabels = ["02-01","02-02","02-03","02-04","02-05","02-06","02-07","02-08","02-09","02-10","02-11","02-12","02-13","02-14","02-15","02-16","02-17","02-18","02-19","02-20","02-21","02-22","02-23","02-24","02-25","02-26","02-27","02-28","03-01","03-02","03-03","03-04","03-05","03-06","03-07","03-08","03-09","03-10","03-11","03-12","03-13","03-14","03-15","03-16","03-17","03-18","03-19","03-20","03-21","03-22","03-23","03-24","03-25","03-26","03-27","03-28","03-29","03-30","03-31","04-01","04-02","04-03","04-04","04-05","04-06","04-07","04-08","04-09","04-10","04-11","04-12","04-13","04-14","04-15","04-16","04-17","04-18"];
+const cr_ib = [65.3,64.4,64.5,63.2,60.8,60.5,61.9,61.5,60.0,67.4,70.8,71.0,69.5,67.6,71.6,68.2,65.2,66.6,72.1,75.3,77.7,75.1,74.4,73.9,77.4,77.0,77.2,78.7,0.0,0.0,0.0,0.0,0.0,59.2,55.1,56.8,60.3,58.0,62.6,61.2,75.8,29.2,82.6,81.7,83.8,86.9,87.6,92.3,29.7,84.4,84.2,83.0,84.5,87.5,91.6,26.4,87.2,89.3,90.5,87.8,87.3,63.4,50.6,48.5,44.6,41.8,39.1,36.4,35.6,35.2,35.7,33.7,33.0,36.2,37.8,36.9,37.6];
+const cr_ii = [0.0,0.0,0.1,0.1,0.1,0.3,0.3,0.3,0.5,0.1,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.2,0.2,0.2,0.3,0.0,2.1,0.1,0.2,0.1,0.0,0.0,0.0,2.2,0.0,0.0,0.0,0.0,0.0,0.0,1.9,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1];
+const cr_ni = [24.9,25.6,24.2,25.5,29.0,28.4,25.8,26.5,28.1,22.8,19.4,18.8,18.6,20.3,19.4,23.8,24.6,24.1,20.6,18.0,14.9,16.3,18.0,21.1,18.6,18.8,18.9,16.4,0.0,0.0,0.0,0.0,0.0,34.0,39.6,38.3,33.8,35.6,31.8,31.4,18.9,68.7,13.0,13.9,12.1,9.5,9.0,6.2,68.1,12.3,11.7,12.8,11.7,9.4,6.7,71.7,10.6,8.4,7.2,8.7,8.6,4.6,4.0,4.0,4.9,5.9,4.5,3.6,2.9,3.2,3.1,5.2,5.3,5.0,5.0,4.1,3.6];
+const cr_nl = [9.8,10.0,11.2,11.2,10.1,10.8,12.1,11.6,11.4,9.7,9.8,10.2,11.9,12.1,9.0,8.0,10.2,9.2,7.3,6.7,7.5,8.6,7.5,5.0,4.0,4.2,4.0,4.9,0.0,0.0,0.0,0.0,0.0,6.6,5.2,4.9,5.7,6.2,5.3,7.1,5.2,0.0,4.3,4.3,4.0,3.5,3.4,1.5,0.0,3.3,4.1,4.2,3.8,3.1,1.7,0.0,2.1,2.3,2.4,3.5,4.1,32.0,45.3,47.4,50.3,52.3,56.3,60.0,61.5,61.5,61.2,61.1,61.6,58.6,57.0,59.0,58.7];
+
+const exLabels = ["02-01","02-02","02-03","02-04","02-05","02-06","02-07","02-08","02-09","02-10","02-11","02-12","02-13","02-14","02-15","02-16","02-17","02-18","02-19","02-20","02-21","02-22","02-23","02-24","02-25","02-26","02-27","02-28","03-01","03-02","03-03","03-04","03-05","03-06","03-07","03-08","03-09","03-10","03-11","03-12","03-13","03-14","03-15","03-16","03-17","03-18","03-19","03-20","03-21","03-22","03-23","03-24","03-25","03-26","03-27","03-28","03-29","03-30","03-31","04-01","04-02","04-03","04-04","04-05","04-06","04-07","04-08","04-09","04-10","04-11","04-12","04-13","04-14","04-15","04-16","04-17","04-18"];
+const ex_KAKAO = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,19.3,25.4,24.8,21.8,13.0,28.0,21.7,12.4,17.7,28.2,33.9,35.4,27.7,32.3,34.3,39.6,32.3,30.1,32.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,35.6,0.0,53.7,52.8,54.5,59.3,61.1,76.1,0.0,56.2,59.4,56.3,56.7,61.2,74.3,0.0,60.5,69.2,68.0,57.1,56.7,75.6,69.5,68.1,69.1,70.8,73.9,77.5,82.8,80.5,83.6,78.9,79.7,78.9,77.5,80.0,81.2];
+const ex_MOLOCOSDKMAX = [29.9,31.8,29.2,25.9,24.7,26.4,26.1,25.8,27.7,21.1,21.2,22.4,24.3,29.2,23.3,25.5,28.2,24.7,21.5,21.8,22.5,24.2,24.5,21.7,17.6,21.8,24.8,24.3,0.0,0.0,0.0,0.0,0.0,32.4,26.7,26.2,29.4,29.1,25.3,23.7,17.9,0.0,13.2,15.4,14.7,14.0,13.4,8.0,0.0,11.5,12.7,13.5,13.8,12.7,8.5,0.0,11.8,10.9,9.5,13.4,14.1,8.7,11.8,12.2,12.2,10.3,8.6,8.5,6.2,6.6,5.7,8.0,7.2,6.8,7.8,7.1,6.7];
+const ex_OTHER = [23.9,25.2,22.1,22.6,25.3,22.6,19.1,20.8,22.6,16.5,13.0,13.4,11.3,10.5,7.1,8.2,7.6,9.9,10.2,9.0,7.4,8.1,10.2,12.4,13.9,14.4,11.7,8.5,0.0,0.0,0.0,0.0,0.0,15.2,24.0,22.6,23.1,26.2,26.9,28.8,14.7,6.7,8.9,9.6,8.9,7.3,7.2,5.6,8.5,11.0,9.4,10.5,10.1,7.2,4.6,7.1,8.4,7.0,6.5,8.6,8.6,4.3,4.5,4.5,4.6,5.1,4.2,2.8,2.2,2.4,2.2,2.8,3.1,3.4,3.8,3.2,2.5];
+const ex_INMOBI = [15.7,16.0,19.7,20.9,20.7,21.1,23.7,22.9,21.1,19.1,18.8,18.7,21.3,22.9,17.2,16.5,20.7,18.8,16.6,15.0,15.9,18.6,14.4,11.8,9.5,9.6,10.1,12.9,0.0,0.0,0.0,0.0,0.0,14.0,12.5,13.5,15.0,12.9,13.1,15.2,11.1,0.0,9.1,9.3,8.2,7.3,6.8,3.2,0.0,6.2,6.5,6.8,6.7,6.1,3.8,0.0,5.2,4.4,4.7,6.6,7.7,3.7,4.7,5.3,5.4,4.2,4.8,4.1,2.8,2.8,2.7,4.1,3.8,4.2,4.2,4.8,4.8];
+const ex_VUNGLE = [16.5,13.3,14.7,14.8,15.0,14.7,15.6,16.4,15.2,14.0,12.8,12.3,13.6,16.0,18.1,20.7,21.6,19.4,14.8,12.6,11.8,13.0,10.7,11.9,10.9,11.1,11.2,10.3,0.0,0.0,0.0,0.0,0.0,15.1,16.6,16.4,11.6,11.2,9.5,8.2,6.8,0.0,4.8,5.1,4.6,3.6,3.0,1.5,0.0,3.1,2.8,3.1,3.0,2.7,1.8,0.0,2.5,1.8,1.8,1.9,1.9,1.2,1.0,1.1,1.1,1.4,1.2,1.4,1.2,1.4,1.2,1.9,1.9,1.7,1.9,1.3,1.3];
+const ex_APPLOVIN = [5.3,5.0,5.1,5.5,5.2,4.8,5.5,4.9,4.5,3.3,2.8,2.6,2.5,2.8,2.4,2.5,2.8,2.8,3.0,2.9,3.1,3.4,2.6,2.9,3.0,3.1,3.5,3.8,0.0,0.0,0.0,0.0,0.0,9.3,8.9,9.2,7.5,8.2,8.2,7.0,4.0,0.0,3.9,3.1,3.9,3.4,2.4,1.7,0.0,3.9,2.9,3.6,3.1,3.2,2.1,0.0,3.9,2.1,3.5,4.5,4.1,2.8,4.2,3.9,2.6,2.7,2.5,1.7,1.7,2.7,2.0,1.7,1.7,2.1,2.2,1.6,1.9];
+const ex_APPODEAL = [4.2,4.5,4.9,5.5,5.4,6.1,6.1,5.7,5.5,3.7,3.8,3.8,3.7,4.3,2.8,3.9,5.2,5.5,3.9,3.4,3.0,3.5,3.2,3.4,3.5,4.7,5.9,5.8,0.0,0.0,0.0,0.0,0.0,6.1,4.7,5.4,4.9,4.5,5.4,5.8,3.2,0.0,1.8,1.9,1.8,1.9,1.9,0.7,0.0,1.5,1.3,1.4,1.2,1.0,0.6,0.0,1.1,0.8,0.6,0.9,1.7,1.3,2.1,1.8,1.6,1.4,1.1,1.3,0.9,0.8,0.7,1.1,1.0,1.1,0.8,0.6,0.4];
+const ex_ADPIE = [4.0,4.0,3.7,4.5,3.3,3.5,3.4,3.0,2.9,2.5,2.0,1.9,1.3,1.2,0.9,0.9,1.3,1.2,1.5,1.2,1.0,1.3,1.9,1.3,1.1,1.9,2.0,2.0,0.0,0.0,0.0,0.0,0.0,4.9,4.5,4.6,4.8,4.6,9.2,8.9,4.6,0.8,2.2,1.8,2.5,2.4,3.4,2.5,0.6,4.8,4.0,3.3,4.2,4.7,3.1,1.2,4.5,2.7,4.7,5.9,4.0,1.5,1.8,2.6,2.4,3.0,3.0,2.2,1.8,2.4,1.6,1.2,1.1,1.3,1.2,0.8,0.7];
+const exLegend = ["KAKAO","MOLOCO_SDK_MAX","OTHER","INMOBI","VUNGLE","APPLOVIN","APPODEAL","ADPIE"];
+// formats: ['ib', 'ii', 'ni', 'nl']
+
+// Daily cr_format mix stacked area
+new Chart(document.getElementById('chart_cr_daily'), {
+  data: {
+    labels: crLabels,
+    datasets: [
+      { type: 'line', label: 'ib', data: cr_ib, backgroundColor: 'rgba(26,71,230,0.6)', borderColor: '#1a47e6', fill: 'origin', pointRadius: 0, tension: 0.15 },
+      { type: 'line', label: 'ni', data: cr_ni, backgroundColor: 'rgba(180,83,9,0.6)', borderColor: '#b45309', fill: '-1', pointRadius: 0, tension: 0.15 },
+      { type: 'line', label: 'nl', data: cr_nl, backgroundColor: 'rgba(185,28,28,0.75)', borderColor: '#b91c1c', fill: '-1', pointRadius: 0, tension: 0.15, borderWidth: 2 },
+      { type: 'line', label: 'ii', data: cr_ii, backgroundColor: 'rgba(124,58,237,0.6)', borderColor: '#7c3aed', fill: '-1', pointRadius: 0, tension: 0.15 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { stacked: true, title: { display: true, text: 'iOS impression share %' }, min: 0, max: 100 },
+      x: { stacked: true, ticks: { autoSkip: true, maxTicksLimit: 24, font: { size: 9 }, maxRotation: 60 } }
+    }
+  }
+});
+// Daily exchange mix stacked area
+const exColors = ['#1a47e6','#b45309','#15803d','#b91c1c','#7c3aed','#0ea5e9','#ec4899','#14b8a6'];
+const exDatasets = [
+  {type:'line', label:'KAKAO', data: ex_KAKAO, backgroundColor:'rgba(185,28,28,0.65)', borderColor:'#b91c1c', fill: 'origin', pointRadius:0, tension:0.15, borderWidth:1.5},
+  {type:'line', label:'MOLOCO_SDK_MAX', data: ex_MOLOCOSDKMAX, backgroundColor:'rgba(26,71,230,0.6)', borderColor:'#1a47e6', fill:'-1', pointRadius:0, tension:0.15},
+  {type:'line', label:'INMOBI', data: ex_INMOBI, backgroundColor:'rgba(180,83,9,0.6)', borderColor:'#b45309', fill:'-1', pointRadius:0, tension:0.15},
+  {type:'line', label:'OTHER', data: ex_OTHER, backgroundColor:'rgba(107,114,128,0.45)', borderColor:'#6b7280', fill:'-1', pointRadius:0, tension:0.15},
+  {type:'line', label:'VUNGLE', data: ex_VUNGLE, backgroundColor:'rgba(124,58,237,0.5)', borderColor:'#7c3aed', fill:'-1', pointRadius:0, tension:0.15},
+  {type:'line', label:'APPLOVIN', data: ex_APPLOVIN, backgroundColor:'rgba(14,165,233,0.5)', borderColor:'#0ea5e9', fill:'-1', pointRadius:0, tension:0.15},
+  {type:'line', label:'APPODEAL', data: ex_APPODEAL, backgroundColor:'rgba(236,72,153,0.5)', borderColor:'#ec4899', fill:'-1', pointRadius:0, tension:0.15},
+  {type:'line', label:'ADPIE', data: ex_ADPIE, backgroundColor:'rgba(20,184,166,0.5)', borderColor:'#14b8a6', fill:'-1', pointRadius:0, tension:0.15},
+];
+new Chart(document.getElementById('chart_ex_daily'), {
+  data: { labels: exLabels, datasets: exDatasets },
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+    scales: {
+      y: { stacked: true, title: { display: true, text: 'iOS impression share %' }, min: 0, max: 100 },
+      x: { stacked: true, ticks: { autoSkip: true, maxTicksLimit: 24, font: { size: 9 }, maxRotation: 60 } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart_nl'), {
+  type: 'bar',
+  data: {
+    labels: ['Pre (Mar 1-20)', 'Post (Mar 21-Apr 6)', 'Recent (Apr 7-16)'],
+    datasets: [
+      { label: 'nl (Native Logo)', data: [4.99, 14.70, 59.38], backgroundColor: '#b91c1c' },
+      { label: 'Other formats', data: [95.01, 85.30, 40.62], backgroundColor: '#1a47e6' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: { stacked: true, title: { display: true, text: 'iOS impression share %' }, max: 100 },
+      y: { stacked: true }
+    }
+  }
+});
+
+// Feedback loop — win rate vs bid price
+new Chart(document.getElementById('chart_feedback'), {
+  type: 'bar',
+  data: {
+    labels: ['Win Rate %', 'Demand CPM (USD)', 'Bid Volume (×)'],
+    datasets: [
+      { label: 'Pre-cut (Mar 22-Apr 2)', data: [29.0, 0.237, 1.0], backgroundColor: '#15803d' },
+      { label: 'Post-cut (Apr 3-16)', data: [13.9, 0.157, 2.8], backgroundColor: '#b91c1c' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: { title: { display: true, text: 'Value' }, type: 'logarithmic' }
+    },
+    plugins: { tooltip: { callbacks: {
+      label: (ctx) => {
+        const v = ctx.parsed.y;
+        if (ctx.label === 'Demand CPM (USD)') return `${ctx.dataset.label}: $${v.toFixed(3)}`;
+        if (ctx.label === 'Bid Volume (×)') return `${ctx.dataset.label}: ${v.toFixed(1)}×`;
+        return `${ctx.dataset.label}: ${v.toFixed(1)}%`;
+      }
+    } } }
+  }
+});
+
+// --- Sidebar scrollspy ---
+(function() {
+  const links = document.querySelectorAll('.sidebar-nav a');
+  const sections = Array.from(links).map(a => {
+    const id = a.getAttribute('href').slice(1);
+    return { id, el: document.getElementById(id), link: a };
+  }).filter(s => s.el);
+
+  function updateActive() {
+    const scrollPos = window.scrollY + 100;
+    let current = sections[0];
+    for (const s of sections) {
+      if (s.el.offsetTop <= scrollPos) current = s;
+    }
+    links.forEach(a => a.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  window.addEventListener('load', updateActive);
+  updateActive();
+
+  // Close sidebar on mobile after clicking a link
+  links.forEach(a => a.addEventListener('click', () => {
+    if (window.innerWidth <= 1000) {
+      document.querySelector('.sidebar').classList.remove('open');
+    }
+  }));
+})();
+
+</script>
+</body>
+</html>

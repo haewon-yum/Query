@@ -1,0 +1,39 @@
+SKIP	action_consol_v1_ifa_cont	last=2025-10-21 (>14d stale)
+SKIP	action_consol_v1_lat_cont	last=2025-10-21 (>14d stale)
+SKIP	action_consol_v1a_ifa_cont	last=2026-02-19 (>14d stale)
+SKIP	action_consol_v1a_lat_cont	last=2026-02-19 (>14d stale)
+ACTIVE	action_consol_v2_ifa_cont	1776747479	gs://tfserving-us/action_consol_v2_ifa_cont/serving_gpu/1776747479/	2026-04-21 04:57 UTC
+ACTIVE	action_consol_v2_ifa_cpu_cont	1776747638	gs://tfserving-us/action_consol_v2_ifa_cpu_cont/1776747638/	2026-04-21 05:00 UTC
+ACTIVE	action_consol_v2_lat_cont	1776746703	gs://tfserving-us/action_consol_v2_lat_cont/serving_gpu/1776746703/	2026-04-21 04:45 UTC
+ACTIVE	action_consol_v2_lat_cpu_cont	1776747188	gs://tfserving-us/action_consol_v2_lat_cpu_cont/1776747188/	2026-04-21 04:53 UTC
+SKIP	action_general_v0_cont	last=2025-01-31 (>14d stale)
+SKIP	action_lat_v3_cont_daily	last=2023-09-20 (>14d stale)
+SKIP	action_lat_v4_2_idfv	last=2023-12-22 (>14d stale)
+SKIP	action_lat_v4_cont_daily_2	last=2024-02-21 (>14d stale)
+SKIP	action_lat_v5_1	last=2024-07-13 (>14d stale)
+SKIP	action_lat_v5_2	last=2024-01-08 (>14d stale)
+SKIP	action_lat_v6_alat_tpu_cont	last=2025-05-06 (>14d stale)
+SKIP	action_lat_v6_prop3_tpu_cont	last=2024-10-07 (>14d stale)
+SKIP	action_lat_v6_tpu_cont	last=2025-02-18 (>14d stale)
+SKIP	action_lat_v7_cont	last=2025-08-14 (>14d stale)
+SKIP	action_lat_v8_ppv2_df_cont	last=2025-04-21 (>14d stale)
+SKIP	action_merged_tuner_v1_daily_v5_daily_finetune_beta3_cont	no version folders
+SKIP	action_merged_v1_daily_cont	no version folders
+SKIP	action_tpu_v6_ws_finetune_cpl_cont	last=2024-06-13 (>14d stale)
+SKIP	action_tpu_v6_ws_pretrain_cpl_imp_cont	last=2024-11-15 (>14d stale)
+SKIP	action_tpu_v7_cont	last=2025-01-31 (>14d stale)
+SKIP	action_tpu_v8_multi_cursor_cont	last=2025-06-20 (>14d stale)
+SKIP	action_tpu_v8_multi_cursor_general_cont	last=2025-06-19 (>14d stale)
+SKIP	action_tpu_v9_ltv_cont	last=2025-08-11 (>14d stale)
+SKIP	action_v3_cold_started_cont	last=2023-08-17 (>14d stale)
+SKIP	action_v3_cont	last=2023-10-04 (>14d stale)
+SKIP	action_v5_daily_finetune_beta1_cont	last=2023-08-17 (>14d stale)
+SKIP	action_v5_daily_finetune_beta3_cont	last=2024-06-05 (>14d stale)
+SKIP	action_v5_daily_finetune_beta3_cont_with_tuner_v1	last=2024-04-18 (>14d stale)
+SKIP	action_v5_expand_request_daily_finetune_beta3_cont	last=2023-10-19 (>14d stale)
+SKIP	action_v6_alpha2_daily_finetune_cont	last=2024-10-29 (>14d stale)
+SKIP	ctv_action_v1_cont	last=2024-06-04 (>14d stale)
+ACTIVE	ctv_action_v1a	1776776795	gs://tfserving-us/ctv_action_v1a/1776776795/	2026-04-21 13:06 UTC
+SKIP	re_action_v7_1_cont	last=2025-04-23 (>14d stale)
+ACTIVE	re_action_v8	1776755686	gs://tfserving-us/re_action_v8/1776755686/	2026-04-21 07:14 UTC
+SKIP	ua_lat_action_v6	last=2024-05-06 (>14d stale)

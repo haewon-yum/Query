@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Seller Insight → Blueprint Integration Plan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; font-size: 14px; color: #212529; background: #f8f9fa; display: flex; }
+
+  /* ── Sidebar ── */
+  nav {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+    background: #1a1d23; color: #adb5bd; padding: 24px 0;
+    overflow-y: auto; z-index: 100;
+  }
+  nav .logo { font-size: 12px; font-weight: 700; color: #fff; padding: 0 20px 20px; border-bottom: 1px solid #2d3139; margin-bottom: 12px; line-height: 1.4; }
+  nav a { display: block; padding: 7px 20px; color: #adb5bd; text-decoration: none; font-size: 12px; transition: color 0.15s, background 0.15s; }
+  nav a:hover { color: #fff; background: #2d3139; }
+  nav .nav-section { font-size: 10px; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 0.07em; padding: 12px 20px 4px; }
+
+  /* ── Main ── */
+  main { margin-left: 220px; padding: 40px 48px; max-width: 960px; width: 100%; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: #6c757d; font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 17px; font-weight: 700; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid #e9ecef; }
+  h3 { font-size: 14px; font-weight: 700; margin: 22px 0 8px; color: #343a40; }
+  p { line-height: 1.7; margin-bottom: 10px; color: #495057; }
+  ul, ol { padding-left: 20px; margin-bottom: 10px; }
+  li { line-height: 1.8; color: #495057; }
+  code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; background: #f1f3f5; padding: 2px 6px; border-radius: 4px; color: #c0392b; }
+  pre { background: #1a1d23; color: #abb2bf; border-radius: 8px; padding: 16px 20px; overflow-x: auto; font-size: 12px; font-family: 'JetBrains Mono', monospace; margin: 12px 0; line-height: 1.6; }
+
+  /* ── Cards ── */
+  .card { background: #fff; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+
+  /* ── Option cards ── */
+  .option { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; }
+  .option.recommended { border-color: #0d6efd; border-width: 2px; }
+  .option-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .option-label { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .label-recommended { background: #0d6efd; color: #fff; }
+  .label-complex { background: #6c757d; color: #fff; }
+  .label-quickwin { background: #198754; color: #fff; }
+  .option h3 { margin-top: 0; }
+
+  /* ── Pros/cons ── */
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+  .pros, .cons { border-radius: 6px; padding: 10px 14px; font-size: 12px; }
+  .pros { background: #d1e7dd; }
+  .cons { background: #f8d7da; }
+  .pros-title, .cons-title { font-weight: 700; margin-bottom: 4px; }
+  .pros li, .cons li { color: #212529; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { background: #f1f3f5; text-align: left; padding: 9px 14px; font-weight: 600; border: 1px solid #dee2e6; }
+  td { padding: 9px 14px; border: 1px solid #dee2e6; vertical-align: top; line-height: 1.5; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  /* ── Phase timeline ── */
+  .phase { display: flex; gap: 16px; margin-bottom: 20px; }
+  .phase-num { min-width: 36px; height: 36px; background: #0d6efd; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .phase-body { flex: 1; }
+  .phase-body strong { display: block; font-size: 14px; margin-bottom: 4px; }
+
+  /* ── Callout ── */
+  .callout { border-left: 4px solid #0d6efd; background: #e8f0fe; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; line-height: 1.6; }
+  .callout.warning { border-color: #fd7e14; background: #fff3e0; }
+  .callout.success { border-color: #198754; background: #d1e7dd; }
+
+  /* ── Badge ── */
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; vertical-align: middle; }
+  .badge-blue { background: #cfe2ff; color: #0a3a7a; }
+  .badge-green { background: #d1e7dd; color: #0a3622; }
+  .badge-red { background: #f8d7da; color: #58151c; }
+  .badge-gray { background: #e9ecef; color: #495057; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Blueprint<br/>Seller Insight Integration</div>
+  <div class="nav-section">Overview</div>
+  <a href="#current-state">Current State</a>
+  <a href="#key-challenge">Key Challenge</a>
+  <div class="nav-section">Options</div>
+  <a href="#option-a">A — iframe Embed</a>
+  <a href="#option-b">B — WSGI Mount</a>
+  <a href="#option-c">C — Full Port</a>
+  <a href="#recommendation">Recommendation</a>
+  <div class="nav-section">Implementation</div>
+  <a href="#phase1">Phase 1 — iframe</a>
+  <a href="#phase2">Phase 2 — Unified Auth</a>
+  <a href="#phase3">Phase 3 — Full Merge</a>
+  <div class="nav-section">Reference</div>
+  <a href="#open-questions">Open Questions</a>
+</nav>
+
+<main>
+  <h1>Seller Insight → Blueprint Integration</h1>
+  <p class="subtitle">Plan doc · 2026-04-23 · Haewon Yum</p>
+
+  <!-- ── CURRENT STATE ── -->
+  <h2 id="current-state">Current State</h2>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div class="card">
+      <div class="card-title">Blueprint Dashboard <span class="badge badge-blue">FastAPI + Vanilla JS</span></div>
+      <ul>
+        <li>2 tabs: Scores, Activation Guide</li>
+        <li>BQ queries run as <strong>Service Account</strong> (cached)</li>
+        <li>Auth: <code>itsdangerous</code> signed cookie, Google OAuth scopes: <code>openid email profile</code></li>
+        <li>Data source: <code>moloco-ods.alaricjames.*</code></li>
+        <li>Deployed: <code>gds-apac / asia-northeast3</code></li>
+        <li>Repo: <code>moloco/gds → projects/google_cloud_run/blueprint/</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Seller Insight <span class="badge badge-green">Plotly Dash + Flask</span></div>
+      <ul>
+        <li>3 sub-tabs: Overall &amp; Pillar Scores, Pillar Drill-Down, Peer Leaderboard</li>
+        <li>BQ queries run as <strong>logged-in user</strong> (user-delegated credentials)</li>
+        <li>Auth: Flask session + Google OAuth scopes: <code>openid email profile bigquery</code></li>
+        <li>Data source: <code>ads-bpd-guard-china.blueprint.*</code></li>
+        <li>Deployed: Google Cloud (separate service)</li>
+        <li>Reactive UI: Plotly charts, Dash callbacks</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── KEY CHALLENGE ── -->
+  <h2 id="key-challenge">Key Challenge: Auth Is Fundamentally Different</h2>
+
+  <div class="callout warning">
+    <strong>Critical difference:</strong> Seller Insight uses <strong>user-delegated BQ credentials</strong> — OAuth requests the <code>bigquery</code> scope and executes queries as the logged-in user. This is not an accident: the SA used by Blueprint-dash does not have access to <code>ads-bpd-guard-china</code>. Seller Insight was built specifically to bypass this SA permission gap.<br/><br/>
+    Any integration strategy must preserve user-level BQ execution for Seller Insight queries, or separately resolve the SA permission issue on <code>ads-bpd-guard-china</code>.
+  </div>
+
+  <table>
+    <tr>
+      <th>Dimension</th>
+      <th>Blueprint Dash</th>
+      <th>Seller Insight</th>
+    </tr>
+    <tr>
+      <td>Framework</td>
+      <td>FastAPI (ASGI) + Vanilla JS</td>
+      <td>Plotly Dash (WSGI) + Plotly charts</td>
+    </tr>
+    <tr>
+      <td>Auth scope</td>
+      <td><code>openid email profile</code></td>
+      <td><code>openid email profile bigquery</code></td>
+    </tr>
+    <tr>
+      <td>BQ executor</td>
+      <td>Service Account (<code>gds-apac</code>)</td>
+      <td>Logged-in user</td>
+    </tr>
+    <tr>
+      <td>BQ project</td>
+      <td><code>moloco-ods</code></td>
+      <td><code>ads-bpd-guard-china</code></td>
+    </tr>
+    <tr>
+      <td>Data freshness</td>
+      <td>Cached, TTL 6h (scores) / 1h (activation)</td>
+      <td>Live per-query (no cache)</td>
+    </tr>
+    <tr>
+      <td>Session storage</td>
+      <td>Signed cookie (<code>itsdangerous</code>)</td>
+      <td>Flask server-side session</td>
+    </tr>
+    <tr>
+      <td>UI interaction</td>
+      <td>Static render, client-side JS filters</td>
+      <td>Reactive callbacks, server-side compute</td>
+    </tr>
+  </table>
+
+  <!-- ── OPTIONS ── -->
+  <h2>Integration Options</h2>
+
+  <div class="option" id="option-a">
+    <div class="option-header">
+      <span class="option-label label-quickwin">Option A</span>
+      <h3>iframe Embed — Separate Services</h3>
+    </div>
+    <p>Add a "Seller Insight" tab to Blueprint-dash's <code>index.html</code> that renders the existing Seller Insight Cloud Run URL inside an <code>&lt;iframe&gt;</code>. Both services continue running independently.</p>
+    <div class="pros-cons">
+      <div class="pros">
+        <div class="pros-title">Pros</div>
+        <ul>
+          <li>Zero code change to Seller Insight</li>
+          <li>1–2 hour implementation</li>
+          <li>Independent deployments</li>
+          <li>No framework conflict</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <div class="cons-title">Cons</div>
+        <ul>
+          <li>User logs in twice (separate cookies)</li>
+          <li>iframe UX friction (double scrollbar, sizing)</li>
+          <li>Two separate Cloud Run services to maintain</li>
+          <li>No shared state (can't pass filters from Scores tab)</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:10px;"><strong>Effort:</strong> ~2h · <strong>Auth:</strong> double login · <strong>Maintenance:</strong> 2 services</p>
+  </div>
+
+  <div class="option recommended" id="option-b">
+    <div class="option-header">
+      <span class="option-label label-recommended">Option B — Recommended</span>
+      <h3>Mount Dash as WSGI Sub-App Inside Blueprint-dash</h3>
+    </div>
+    <p>Mount the Seller Insight Dash/Flask app at <code>/seller-insight</code> inside Blueprint-dash using <code>WSGIMiddleware</code>. Blueprint-dash's FastAPI handles <code>/</code>, <code>/api/*</code>, and <code>/auth/*</code>; Seller Insight handles <code>/seller-insight/*</code>. Both share the same OAuth callback but maintain separate session storage.</p>
+    <pre>FastAPI (port 8080)
+├── /                   → Blueprint-dash (scores, activation)
+├── /api/*              → Blueprint-dash BQ endpoints (SA-level)
+├── /auth/*             → Unified OAuth (requests bigquery scope)
+└── /seller-insight/*   → Dash app (WSGIMiddleware, user-level BQ)</pre>
+    <div class="callout">
+      <strong>Auth flow:</strong> Upgrade Blueprint-dash's OAuth to request the <code>bigquery</code> scope. On login, store the user's access token in an httpOnly cookie or extend the existing signed session. Seller Insight reads the token from the shared session to instantiate its BQ client. One login covers both.
+    </div>
+    <div class="pros-cons">
+      <div class="pros">
+        <div class="pros-title">Pros</div>
+        <ul>
+          <li>Single login, single URL</li>
+          <li>Single Cloud Run deployment</li>
+          <li>No rewrite of Seller Insight callbacks/charts</li>
+          <li>User-level BQ preserved (no SA permission needed)</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <div class="cons-title">Cons</div>
+        <ul>
+          <li>ASGI/WSGI bridging requires care (path stripping)</li>
+          <li>Auth refactor: Blueprint-dash must request <code>bigquery</code> scope</li>
+          <li>Dash's <code>/_dash-*</code> internal routes need allow-listing in <code>require_auth</code></li>
+          <li>Seller Insight's <code>server.before_request</code> hook conflicts with FastAPI auth — must be removed</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:10px;"><strong>Effort:</strong> ~2 days · <strong>Auth:</strong> single login · <strong>Maintenance:</strong> 1 service</p>
+  </div>
+
+  <div class="option" id="option-c">
+    <div class="option-header">
+      <span class="option-label label-complex">Option C</span>
+      <h3>Full Port — Seller Insight to FastAPI + Plotly.js</h3>
+    </div>
+    <p>Port Seller Insight's Dash callbacks to FastAPI endpoints. Replace Plotly Dash charts with Plotly.js in the vanilla JS frontend. Eliminates the Dash dependency entirely.</p>
+    <div class="pros-cons">
+      <div class="pros">
+        <div class="pros-title">Pros</div>
+        <ul>
+          <li>Single framework, cleanest architecture</li>
+          <li>Full control over UI/UX consistency</li>
+          <li>No WSGI/ASGI bridging</li>
+        </ul>
+      </div>
+      <div class="cons">
+        <div class="cons-title">Cons</div>
+        <ul>
+          <li>~1–2 week effort to port all callbacks + charts</li>
+          <li>Box plot + leaderboard logic is non-trivial in vanilla JS</li>
+          <li>High regression risk on complex peer group logic</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:10px;"><strong>Effort:</strong> ~1–2 weeks · <strong>Auth:</strong> single login · <strong>Maintenance:</strong> 1 service</p>
+  </div>
+
+  <!-- ── RECOMMENDATION ── -->
+  <h2 id="recommendation">Recommendation: Phased Approach (A → B)</h2>
+
+  <div class="callout success">
+    Start with <strong>Option A (iframe)</strong> to unblock users immediately. Migrate to <strong>Option B (WSGI mount)</strong> to fix the double-login UX and consolidate to a single service. Option C is a future consideration once the integration is stable.
+  </div>
+
+  <!-- ── PHASE 1 ── -->
+  <h2 id="phase1">Phase 1 — iframe Embed <span class="badge badge-green">~2 hours</span></h2>
+
+  <div class="phase">
+    <div class="phase-num">1</div>
+    <div class="phase-body">
+      <strong>Add Seller Insight tab to Blueprint-dash's <code>index.html</code></strong>
+      <p>Add a fourth tab button "Seller Insight" to the nav bar. On click, hide the current content pane and show an <code>&lt;iframe&gt;</code> pointing to the Seller Insight Cloud Run URL. The iframe fills the main content area.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">2</div>
+    <div class="phase-body">
+      <strong>Handle iframe sizing</strong>
+      <p>Set <code>height: 100%; border: none</code> on the iframe. Blueprint-dash's main content div should switch to <code>overflow: hidden</code> when the Seller Insight tab is active (Dash handles its own scrolling internally).</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">3</div>
+    <div class="phase-body">
+      <strong>Deploy &amp; verify</strong>
+      <p>Run <code>bash deploy.sh</code> from <code>~/gds/projects/google_cloud_run/blueprint/</code>. User will be prompted to log in to Seller Insight separately on first click — note this in a tooltip or banner: "Opens in embedded view — sign in with your @moloco.com account."</p>
+    </div>
+  </div>
+
+  <h3>Files changed (Phase 1)</h3>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>app/templates/index.html</code></td><td>Add 4th tab button, iframe pane, tab-switching JS</td></tr>
+  </table>
+
+  <!-- ── PHASE 2 ── -->
+  <h2 id="phase2">Phase 2 — Unified Auth + WSGI Mount <span class="badge badge-blue">~2 days</span></h2>
+
+  <div class="phase">
+    <div class="phase-num">1</div>
+    <div class="phase-body">
+      <strong>Upgrade Blueprint-dash OAuth to request <code>bigquery</code> scope</strong>
+      <p>In <code>app/auth.py</code>, add <code>https://www.googleapis.com/auth/bigquery</code> to the OAuth scope. Store the returned <code>access_token</code> and <code>refresh_token</code> in the existing <code>itsdangerous</code> session alongside <code>email</code> and <code>name</code>. Add a token-refresh helper.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">2</div>
+    <div class="phase-body">
+      <strong>Strip Seller Insight's standalone auth</strong>
+      <p>Remove <code>server.before_request(auth.require_auth)</code> from <code>app.py</code>. Remove the Flask <code>/auth/*</code> routes — Blueprint-dash's <code>/auth/*</code> now handles login for both. Seller Insight's <code>queries.py</code> reads the token from the shared cookie/session.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">3</div>
+    <div class="phase-body">
+      <strong>Mount Dash app via <code>WSGIMiddleware</code></strong>
+<pre>from starlette.middleware.wsgi import WSGIMiddleware
+from seller_insight.app import server as dash_server
+
+app.mount("/seller-insight", WSGIMiddleware(dash_server))</pre>
+      <p>Move the <code>seller_insight/</code> directory into the Blueprint-dash repo. Update all internal Dash asset paths to be prefixed with <code>/seller-insight</code> (set <code>requests_pathname_prefix="/seller-insight/"</code> and <code>routes_pathname_prefix="/seller-insight/"</code> in the Dash constructor).</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">4</div>
+    <div class="phase-body">
+      <strong>Update token injection in <code>queries.py</code></strong>
+      <p>Replace Seller Insight's <code>get_current_access_token()</code> (which reads from Flask session) with a version that reads from Blueprint-dash's shared session cookie.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">5</div>
+    <div class="phase-body">
+      <strong>Update requirements.txt and Dockerfile</strong>
+      <p>Add Dash and Plotly dependencies to Blueprint-dash's <code>requirements.txt</code>. Verify memory limit (512 MiB → may need 1 GiB due to Plotly + pandas at query time).</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">6</div>
+    <div class="phase-body">
+      <strong>Replace iframe with direct tab navigation</strong>
+      <p>Update <code>index.html</code> to navigate to <code>/seller-insight</code> instead of rendering an iframe. Or embed as a true in-page section by keeping the iframe but pointing it at the local <code>/seller-insight</code> path (same domain = no second login).</p>
+    </div>
+  </div>
+
+  <h3>Files changed (Phase 2)</h3>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>app/auth.py</code></td><td>Add <code>bigquery</code> scope, store tokens, add refresh helper</td></tr>
+    <tr><td><code>app/main.py</code></td><td>Mount Dash via <code>WSGIMiddleware</code> at <code>/seller-insight</code></td></tr>
+    <tr><td><code>app/templates/index.html</code></td><td>Update tab to navigate to <code>/seller-insight</code></td></tr>
+    <tr><td><code>seller_insight/app.py</code></td><td>Set <code>requests_pathname_prefix</code>, remove standalone auth registration</td></tr>
+    <tr><td><code>seller_insight/queries.py</code></td><td>Read token from Blueprint-dash shared session</td></tr>
+    <tr><td><code>requirements.txt</code></td><td>Add <code>dash==2.17.1 plotly==5.22.0 gunicorn==22.0.0</code></td></tr>
+    <tr><td><code>deploy.sh</code></td><td>Bump memory to <code>1Gi</code> (Plotly + live BQ at runtime)</td></tr>
+  </table>
+
+  <!-- ── PHASE 3 ── -->
+  <h2 id="phase3">Phase 3 — Full Port (Future) <span class="badge badge-gray">~1–2 weeks</span></h2>
+  <p>Once Phase 2 is stable, evaluate porting Seller Insight's Dash callbacks + Plotly charts to vanilla Plotly.js + FastAPI endpoints. The box-plot peer distribution and leaderboard ranking logic are the most complex parts to port. Treat this as a separate project with its own plan doc.</p>
+
+  <!-- ── OPEN QUESTIONS ── -->
+  <h2 id="open-questions">Open Questions</h2>
+
+  <ul>
+    <li><strong>SA permission on <code>ads-bpd-guard-china</code>:</strong> If the SA is ever granted access to this project, Seller Insight could drop user-level BQ execution and use the SA like Blueprint-dash. This would simplify Phase 2 significantly. Worth tracking.</li>
+    <li><strong>Memory limit:</strong> Dash + Plotly adds substantial runtime memory (Plotly chart objects, pandas DataFrames per live query). Current Cloud Run limit is 512 MiB — likely needs 1 GiB minimum for Phase 2.</li>
+    <li><strong>Seller Insight's Dash app path in the repo:</strong> Does seller_insight live as a sibling service in <code>moloco/gds</code> or is it merged into the Blueprint blueprint path? Decide before Phase 2 to avoid repo restructure mid-implementation.</li>
+    <li><strong>Cookie size:</strong> Adding <code>access_token</code> + <code>refresh_token</code> to the <code>itsdangerous</code> signed cookie increases it by ~500–800 bytes. Signed cookies are fine up to ~4 KB; should be within limit but worth verifying.</li>
+    <li><strong>Session secret sharing:</strong> Phase 2 requires that the token stored by Blueprint-dash's OAuth is readable by the Dash app's query layer. Confirm whether <code>itsdangerous</code> cookie or a server-side KV store is the right carrier.</li>
+  </ul>
+
+</main>
+</body>
+</html>

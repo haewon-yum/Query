@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blueprint</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════════════════
+   DESIGN TOKENS & RESET
+══════════════════════════════════════════════════════ */
+:root {
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-300:#cbd5e1;
+  --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569; --slate-700:#334155;
+  --slate-800:#1e293b; --slate-900:#0f172a;
+  --indigo:#6366f1; --blue:#3b82f6; --green:#10b981; --amber:#f59e0b;
+  --red:#ef4444; --purple:#8b5cf6; --cyan:#06b6d4;
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--slate-100);font-family:var(--font);color:var(--slate-900)}
+button{cursor:pointer;font-family:var(--font);transition:opacity .15s,transform .1s}
+button:hover{opacity:.85} button:active{transform:scale(.97)}
+a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
+::selection{background:#bfdbfe}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid var(--slate-200);border-top-color:var(--indigo);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+.section-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:60px;color:var(--slate-400);font-size:13px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--slate-400);font-size:13px}
+
+/* ── SHARED COMPONENTS ── */
+.section{background:#fff;border-radius:14px;padding:18px 22px;border:1px solid #e5e7eb;margin-bottom:14px}
+.section-title{font-size:14px;font-weight:700;color:var(--slate-900);margin-bottom:3px;display:flex;align-items:center;gap:7px}
+.section-sub{font-size:11px;color:var(--slate-400);margin-bottom:12px}
+.card{background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #e5e7eb;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--indigo))}
+.card-label{font-size:10px;font-weight:600;color:var(--slate-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.card-value{font-size:22px;font-weight:800;color:var(--slate-900);line-height:1.1}
+.card-sub{font-size:11px;color:var(--slate-400);margin-top:3px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.btn{padding:5px 14px;border-radius:18px;font-size:12px;font-weight:600;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-500)}
+.btn.active{background:#eff6ff;border-color:var(--blue);color:#2563eb}
+.btn-sm{padding:3px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-500)}
+.btn-sm.active{background:#1e293b;border-color:#1e293b;color:#fff}
+.btn-ghost{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--slate-200);background:transparent;color:var(--slate-500)}
+.btn-primary{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;background:var(--indigo);color:#fff}
+.select{padding:5px 10px;border-radius:8px;font-size:12px;font-weight:500;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);outline:none;cursor:pointer;font-family:var(--font)}
+.search-input{padding:5px 10px;border-radius:8px;font-size:12px;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);outline:none;width:180px;font-family:var(--font)}
+.search-input:focus{border-color:var(--indigo)}
+.pill{display:inline-block;padding:2px 7px;border-radius:14px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill-green{background:#dcfce7;color:#166534}.pill-blue{background:#dbeafe;color:#1e40af}
+.pill-amber{background:#fef3c7;color:#92400e}.pill-gray{background:var(--slate-100);color:var(--slate-500)}
+.pill-red{background:#fee2e2;color:#991b1b}.pill-purple{background:#f3e8ff;color:#7e22ce}
+.pill-slate{background:var(--slate-100);color:var(--slate-600)}
+.footer{text-align:center;padding:16px 0 6px;font-size:11px;color:var(--slate-400)}
+
+/* ── TAB BAR ── */
+.tab-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;background:#1e293b;padding:0 20px;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow-x:auto}
+.tab-bar-brand{display:flex;align-items:center;gap:8px;margin-right:24px;padding:10px 0;flex-shrink:0;cursor:pointer}
+.tab-bar-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:.3px}
+.tab-bar-badge{font-size:10px;font-weight:600;background:rgba(99,102,241,.4);color:#c7d2fe;padding:2px 7px;border-radius:8px}
+.tab-btn{padding:16px 18px;font-size:13px;font-weight:600;color:var(--slate-400);background:transparent;border:none;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer;font-family:var(--font);transition:color .15s,border-color .15s}
+.tab-btn:hover{color:var(--slate-200)}
+.tab-btn.active{color:#fff;border-bottom-color:var(--indigo)}
+.tab-panel{display:none;padding:20px 14px 40px}
+.tab-panel.active{display:block}
+.tab-panel .wrap{max-width:1400px;margin:0 auto}
+
+/* ── HOME ── */
+.home-hero{text-align:center;padding:36px 20px 24px}
+.home-hero h1{font-size:24px;font-weight:800;color:var(--slate-900);margin-bottom:8px}
+.home-hero p{font-size:14px;color:var(--slate-500);max-width:520px;display:inline-block}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding-bottom:32px}
+.home-card{background:#fff;border:1px solid var(--slate-200);border-radius:12px;padding:20px;cursor:pointer;transition:box-shadow .2s,transform .15s,border-color .2s;position:relative;overflow:hidden}
+.home-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px);border-color:var(--indigo)}
+.home-card-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.home-card h3{font-size:14px;font-weight:700;color:var(--slate-900);margin-bottom:4px}
+.home-card p{font-size:12px;color:var(--slate-500);line-height:1.5}
+.home-card-arrow{position:absolute;top:20px;right:18px;color:var(--slate-300);font-size:14px;transition:color .2s}
+.home-card:hover .home-card-arrow{color:var(--indigo)}
+.home-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--slate-400);margin:20px 0 10px;padding-left:2px}
+.home-wrap{max-width:1000px;margin:0 auto}
+
+/* ══════════════════════════════════════════════════════
+   SCORES TAB
+══════════════════════════════════════════════════════ */
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.page-title{font-size:18px;font-weight:800;color:var(--slate-900)}
+.page-meta{font-size:11px;color:var(--slate-400);margin-top:2px}
+
+/* Filter bar */
+.filter-bar{background:#fff;border:1px solid var(--slate-200);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filter-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-400);flex-shrink:0}
+.filter-sep{width:1px;height:16px;background:var(--slate-200)}
+/* Multi-select dropdown */
+.ms-wrap{position:relative;display:inline-block}
+.ms-btn{padding:5px 10px;border-radius:8px;font-size:12px;font-weight:500;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-700);cursor:pointer;font-family:var(--font);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.ms-btn.active{border-color:var(--indigo);background:#eff6ff;color:var(--indigo)}
+.ms-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:#fff;border:1.5px solid var(--slate-200);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:220px;max-width:300px}
+.ms-search{width:100%;padding:7px 10px;font-size:12px;border:none;border-bottom:1px solid var(--slate-100);border-radius:10px 10px 0 0;outline:none;font-family:var(--font);color:var(--slate-700)}
+.ms-list{max-height:240px;overflow-y:auto;padding:4px 0}
+.ms-item{display:flex;align-items:center;gap:6px;padding:4px 10px;cursor:default;user-select:none}
+.ms-item:hover{background:var(--slate-50)}
+.ms-item input[type=checkbox]{cursor:pointer;accent-color:var(--indigo);width:13px;height:13px;flex-shrink:0}
+.ms-item-label{flex:1;font-size:12px;color:var(--slate-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-only-btn{padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid var(--slate-200);background:#fff;color:var(--slate-500);cursor:pointer;font-family:var(--font);flex-shrink:0;opacity:0}
+.ms-item:hover .ms-only-btn{opacity:1}
+.ms-only-btn:hover{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+/* Sub-index info popup */
+.sub-info-popup{position:fixed;z-index:500;background:#fff;border:1.5px solid var(--slate-200);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);width:360px;max-width:90vw;max-height:70vh;overflow-y:auto}
+.sub-info-popup-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid var(--slate-100)}
+.sub-info-popup-title{font-size:13px;font-weight:700;color:var(--slate-900)}
+.sub-info-popup-close{background:none;border:none;font-size:16px;color:var(--slate-400);cursor:pointer;padding:0 2px;line-height:1}
+.sub-info-popup-close:hover{color:var(--slate-700)}
+.sub-info-popup-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.sub-info-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-400);margin-bottom:3px}
+.sub-info-section-text{font-size:12px;color:var(--slate-700);line-height:1.6;white-space:pre-wrap}
+.sub-info-section-text.rec{color:#166534;background:#f0fdf4;border-radius:6px;padding:6px 8px}
+/* (?) button on sub-index rows */
+.sub-info-btn{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;font-size:9px;font-weight:700;border:1.5px solid var(--slate-300);background:#fff;color:var(--slate-400);cursor:pointer;flex-shrink:0;line-height:1;padding:0;margin-left:4px;vertical-align:middle}
+.sub-info-btn:hover{border-color:var(--indigo);color:var(--indigo);background:#eff6ff}
+
+/* Pillar pills */
+.pillar-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.pillar-bar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-400);margin-right:2px}
+.pillar-btn{padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-500);cursor:pointer;font-family:var(--font);white-space:nowrap}
+.pillar-btn.active{color:#fff;border-color:transparent}
+.pb-all{}.pb-all.active{background:var(--slate-700)}
+.pb-data.active{background:#0ea5e9}
+.pb-optim.active{background:#8b5cf6}
+.pb-supply.active{background:#10b981}
+.pb-creative.active{background:#f59e0b}
+.pb-dup.active{background:#ef4444}
+
+.breadcrumb{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--slate-500)}
+.breadcrumb-item{cursor:pointer;color:var(--blue);font-weight:600}
+.breadcrumb-item:hover{text-decoration:underline}
+.breadcrumb-item.current{color:var(--slate-700);cursor:default;font-weight:700}
+.breadcrumb-item.current:hover{text-decoration:none}
+.breadcrumb-sep{color:var(--slate-300);font-size:10px}
+
+/* Heatmap table */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--slate-200);margin-bottom:14px}
+.ht{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+.ht th{background:var(--slate-800);color:#fff;padding:7px 10px;font-size:10px;font-weight:600;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:2}
+.ht th.c{text-align:center}
+.ht th.r{text-align:right}
+.ht th.grp{text-align:center;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.2)}
+.ht td{padding:7px 10px;border-bottom:1px solid var(--slate-100);vertical-align:middle}
+.ht td.c{text-align:center;padding:7px 5px}
+.ht td.r{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:11px}
+.ht tr:hover td{background:var(--slate-50)}
+.ht tr.drillable{cursor:pointer}
+.ht tr.drillable td:first-child::after{content:' ›';color:var(--slate-300);font-size:13px}
+.ht tr.drillable:hover td:first-child::after{color:var(--indigo)}
+.ht tr.camp-row{cursor:pointer}
+.ht tr.camp-row.detail-open td{background:#f5f3ff}
+.ht tr.camp-row.detail-open td:first-child{border-left:3px solid var(--indigo)}
+.ht .name-cell{font-weight:600;color:var(--slate-900);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ht .sub-cell{color:var(--slate-500);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ht .mono{font-family:var(--mono);font-size:10px;color:var(--slate-500)}
+.ht .grp-hd{background:var(--slate-700) !important}
+.ht th.pillar-sep{border-left:2px solid rgba(255,255,255,.15)}
+.ht td.pillar-sep{border-left:2px solid var(--slate-200)}
+
+/* Score chips */
+.sc{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:20px;border-radius:4px;font-size:11px;font-weight:700;padding:0 4px;font-variant-numeric:tabular-nums}
+.sc-g{background:#dcfce7;color:#166534}
+.sc-y{background:#fef9c3;color:#854d0e}
+.sc-r{background:#fee2e2;color:#991b1b}
+.sc-n{background:var(--slate-100);color:var(--slate-400)}
+
+/* ── CAMPAIGN DETAIL DRAWER ── */
+.detail-drawer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--indigo);box-shadow:0 -4px 30px rgba(0,0,0,.15);z-index:80;transform:translateY(100%);transition:transform .22s ease;max-height:55vh;overflow-y:auto}
+.detail-drawer.open{transform:translateY(0)}
+.drawer-inner{max-width:1400px;margin:0 auto;padding:18px 20px 24px}
+.drawer-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.drawer-title{font-size:15px;font-weight:700;color:var(--slate-900)}
+.drawer-meta{font-size:11px;color:var(--slate-400);margin-top:2px}
+.drawer-close{padding:4px 10px;border-radius:6px;border:1.5px solid var(--slate-200);background:#fff;font-size:12px;font-weight:600;color:var(--slate-500);cursor:pointer}
+.pillar-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:14px}
+.pillar-card{border:1px solid var(--slate-200);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+.pillar-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc-color,var(--indigo))}
+.pc-title{font-size:11px;font-weight:700;color:var(--slate-600);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.pc-score{font-size:22px;font-weight:800;margin-bottom:8px}
+.sub-index-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.sub-index-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--slate-600)}
+.sub-index-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:6px}
+.detail-section{margin-top:8px;padding-top:8px;border-top:1px solid var(--slate-100)}
+.detail-section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-400);margin-bottom:3px}
+.detail-section-text{font-size:11px;color:var(--slate-600);line-height:1.5}
+.rec-text{color:#4f46e5;font-weight:500}
+
+/* AI Summary */
+.ai-summary{background:linear-gradient(135deg,#f5f3ff,#eff6ff);border:1px solid #c4b5fd;border-radius:10px;padding:14px 16px}
+.ai-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7c3aed;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.ai-text{font-size:12px;color:var(--slate-700);line-height:1.6}
+
+/* ══════════════════════════════════════════════════════
+   ACTIVATION TAB
+══════════════════════════════════════════════════════ */
+.region-pills{display:flex;gap:6px;margin-bottom:12px}
+.region-btn{padding:4px 14px;border-radius:16px;font-size:12px;font-weight:600;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-500);cursor:pointer;font-family:var(--font);transition:all .15s}
+.region-btn.active{background:#1e293b;border-color:#1e293b;color:#fff}
+.at{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+.at th{background:var(--slate-800);color:#fff;padding:8px 10px;font-size:10px;font-weight:600;text-align:left;white-space:nowrap;position:sticky;top:0}
+.at th.r{text-align:right}
+.at td{padding:8px 10px;border-bottom:1px solid var(--slate-100);vertical-align:middle}
+.at td.r{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:11px}
+.at tr:hover td{background:var(--slate-50)}
+.at tr.adv-row{cursor:pointer}
+.at tr.adv-row.open td{background:#f8fff4}
+.at tr.camp-sub td{background:var(--slate-50);font-size:11px;padding:6px 10px}
+.at tr.camp-sub td:first-child{padding-left:30px}
+.at tr.camp-sub:hover td{background:#f0f7ff}
+.at tr.camp-sub.sub-flag td{background:#fff7ed}
+.at tr.camp-sub.sub-flag:hover td{background:#ffedd5}
+.at .adv-cell{font-weight:600;color:var(--slate-900);max-width:220px;display:flex;align-items:flex-start;gap:4px}
+.exp-icon{display:inline-block;transition:transform .15s;font-size:9px;color:var(--slate-400);margin-right:3px;flex-shrink:0}
+.open .exp-icon{transform:rotate(90deg)}
+.delta-pos{color:#059669;font-weight:600}
+.delta-neg{color:var(--red);font-weight:600}
+.delta-zero{color:var(--slate-400)}
+.cs-resolved{background:#dcfce7;color:#166534}
+.cs-still{background:#fee2e2;color:#991b1b}
+.cs-new-issue{background:#fef3c7;color:#92400e}
+.cs-new-camp{background:#dbeafe;color:#1e40af}
+.cs-paused{background:var(--slate-100);color:var(--slate-500)}
+.cs-no-issue{background:#f0fdf4;color:#15803d}
+.note-badge{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;background:var(--slate-100);color:var(--slate-500);cursor:pointer;border:1px solid var(--slate-200);white-space:nowrap}
+.note-badge:hover{background:var(--slate-200)}
+.note-badge.has-note{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd}
+.note-status-not-started{background:var(--slate-100);color:var(--slate-500)}
+.note-status-discussion{background:#dbeafe;color:#1e40af}
+.note-status-partly{background:#fef3c7;color:#92400e}
+.note-status-fully{background:#dcfce7;color:#166534}
+.note-status-blocked{background:#fee2e2;color:#991b1b}
+.note-status-temp-blocked{background:#ede9fe;color:#5b21b6}
+.note-status-pso-validated{background:#f0fdf4;color:#15803d}
+/* note card left-border accent by status */
+.nc-bar-none{border-left:3px solid var(--slate-200)}
+.nc-bar-not-started{border-left:3px solid #94a3b8}
+.nc-bar-discussion{border-left:3px solid #3b82f6}
+.nc-bar-partly{border-left:3px solid #f59e0b}
+.nc-bar-fully{border-left:3px solid #22c55e}
+.nc-bar-blocked{border-left:3px solid #ef4444}
+.nc-bar-temp-blocked{border-left:3px solid #8b5cf6}
+.nc-bar-pso-validated{border-left:3px solid #16a34a}
+.at tr.camp-resolved td{opacity:.55}
+.at tr.camp-resolved:hover td{opacity:.8}
+.act-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--slate-400);padding:5px 12px 3px 30px;background:var(--slate-50)}
+.note-card{border-radius:8px;padding:8px 10px 8px 13px;cursor:pointer;border:1px solid var(--slate-200);background:#fff;position:relative;transition:box-shadow .15s,border-color .15s}
+.note-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);border-color:var(--slate-300)}
+.note-card.nc-empty{border-style:dashed;background:var(--slate-50)}
+.note-card .nc-top{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.note-card .nc-preview{font-size:11px;color:var(--slate-500);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.note-card .nc-preview-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-400);margin-right:4px}
+.note-card .nc-preview-gds{color:#7c3aed}
+.note-card .nc-edit{position:absolute;bottom:7px;right:9px;font-size:10px;color:var(--slate-400);font-weight:600}
+.note-card:hover .nc-edit{color:var(--indigo)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:22px 26px;width:460px;max-width:calc(100vw - 32px);box-shadow:0 16px 48px rgba(0,0,0,.2)}
+.modal h3{font-size:15px;font-weight:700;color:var(--slate-900);margin-bottom:3px}
+.modal-sub{font-size:11px;color:var(--slate-400);margin-bottom:14px}
+.modal label{display:block;font-size:10px;font-weight:600;color:var(--slate-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.modal textarea{width:100%;padding:9px 11px;border-radius:8px;border:1.5px solid var(--slate-200);font-family:var(--font);font-size:13px;color:var(--slate-800);resize:vertical;min-height:80px;outline:none;line-height:1.5}
+.modal textarea:focus{border-color:var(--indigo)}
+.modal select{width:100%;padding:7px 11px;border-radius:8px;border:1.5px solid var(--slate-200);font-family:var(--font);font-size:13px;color:var(--slate-800);outline:none;background:#fff;cursor:pointer;margin-bottom:14px}
+.modal select:focus{border-color:var(--indigo)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+/* ── DOWNLOAD POPUP ── */
+.download-popup{position:absolute;top:calc(100% + 6px);right:0;z-index:300;background:#fff;border:1.5px solid var(--slate-200);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:230px;padding:6px}
+.download-popup-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-400);padding:4px 8px 6px}
+.download-popup-item{display:block;width:100%;text-align:left;padding:8px 10px;border:none;background:none;font-size:13px;cursor:pointer;border-radius:6px;font-family:var(--font);color:var(--slate-700)}
+.download-popup-item:hover{background:var(--slate-50)}
+</style>
+</head>
+<body>
+
+<!-- ── TAB BAR ── -->
+<nav class="tab-bar">
+  <div class="tab-bar-brand" onclick="switchTab('scores')" title="Scores">
+    <span class="tab-bar-title">Blueprint</span>
+    <span class="tab-bar-badge">GDS</span>
+  </div>
+  <button class="tab-btn" data-tab="scores" onclick="switchTab('scores')">Scores</button>
+  <button class="tab-btn" data-tab="activation" onclick="switchTab('activation')" style="display:none">Activation Guide</button>
+</nav>
+
+<!-- ── SCORES TAB ── -->
+<div id="tab-scores" class="tab-panel active">
+  <div class="wrap">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Blueprint Scores</div>
+        <div class="page-meta" id="scores-meta">Loading…</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <a href="https://docs.google.com/document/d/19ejEpoXFW0rKGVR_SaXkuiC2KVGNZMrfRlGJnChj9UI/edit?tab=t.hey984ggzew2" target="_blank" class="btn-ghost" style="font-size:11px;text-decoration:none">📄 Playbook ↗</a>
+        <a href="https://docs.google.com/presentation/d/1-a8YCFrtP4tFmMHM0d-YRSMFCq9tI3_hb7KoijQPx4s/edit?slide=id.g3cab9f2303e_0_929#slide=id.g3cab9f2303e_0_929" target="_blank" class="btn-ghost" style="font-size:11px;text-decoration:none">📑 Ext. Pitch Deck ↗</a>
+      </div>
+    </div>
+
+    <!-- ── EXPLAINER ── -->
+    <div id="scores-explainer" style="background:#fff;border:1px solid var(--slate-200);border-radius:14px;margin-bottom:14px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;user-select:none" onclick="toggleExplainer()">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">📐</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--slate-900)">How Blueprint Scores Work</div>
+            <div style="font-size:11px;color:var(--slate-400);margin-top:1px">How to navigate this dashboard · Scoring methodology · Pillar composition</div>
+          </div>
+        </div>
+        <span id="explainer-chevron" style="font-size:12px;color:var(--slate-400);transition:transform .2s">▼</span>
+      </div>
+
+      <div id="explainer-body" style="display:none;padding:0 18px 20px;border-top:1px solid var(--slate-100)">
+
+        <!-- How to navigate -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px">
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">① Filter</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">Use the dropdowns to narrow by <strong>region, office, pod, GM</strong> or <strong>vertical</strong>. The search box matches advertiser, app, or campaign name. All scores in the table update instantly.</p>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">② Roll-up level</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">Choose your level of aggregation: <strong>Region → Office → Pod → Advertiser → App → Campaign</strong>. Scores roll up as a <em>spend-weighted average</em> — a $1M campaign with a score of 20 will drag a region down more than a $10k campaign with a score of 100.</p>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">③ Drill down</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">Click any row to drill into it — the breadcrumb trail at the top left shows where you are. Click any step in the breadcrumb to jump back up. At <strong>Campaign level</strong>, click a row to open the detail drawer with sub-index scores, detail text, recommendations, and an AI summary.</p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:10px">
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">④ Pillar filter</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">The coloured pill buttons below the filters let you focus on one pillar at a time. In <strong>All Pillars</strong> mode the table shows the five pillar-level scores. Selecting a pillar replaces those columns with its individual sub-index scores.</p>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">⑤ Score colours</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--slate-600)"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:20px;border-radius:4px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534">90+</span> Healthy</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--slate-600)"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:20px;border-radius:4px;font-size:11px;font-weight:700;background:#fef9c3;color:#854d0e">70+</span> Needs attention</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--slate-600)"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:20px;border-radius:4px;font-size:11px;font-weight:700;background:#fee2e2;color:#991b1b">&lt;70</span> At risk</div>
+            </div>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Overall Score</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">The overall Blueprint score is an <strong>equal-weighted average of the 5 pillars</strong> (each worth 20%). A campaign must perform well across all pillars to achieve a high overall score — a single strong pillar cannot compensate for a failing one.</p>
+            <div style="margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--slate-500);background:var(--slate-100);border-radius:6px;padding:6px 8px">
+              Overall = (Data + Optim + Supply + Creative + Duplication) ÷ 5
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar methodology -->
+        <div style="margin-top:16px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:10px">Pillar Composition</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+
+            <!-- Data & Signals -->
+            <div style="border:1px solid #bae6fd;border-radius:10px;padding:14px 16px;background:#f0f9ff">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+                <span style="width:10px;height:10px;border-radius:50%;background:#0ea5e9;flex-shrink:0"></span>
+                <span style="font-size:12px;font-weight:700;color:#0369a1">Data &amp; Signals</span>
+                <span style="margin-left:auto;font-size:10px;font-weight:600;color:#0369a1;background:#e0f2fe;padding:2px 6px;border-radius:8px">×0.2</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>1. Signal Quality</strong> — Composite of iOS signal completeness: % IDFA postbacks + fill rates for IDFV, IP, OS version, language, and device model across non-IDFA traffic.<br>
+                  <span style="font-family:var(--mono);font-size:10px;color:#0369a1">score = IDFA% + (1 − IDFA%) × ScoreLAT</span><br>
+                  <em>IDFA%</em> = fraction of postbacks (last 3 days, major MMPs only) where the device has a valid IDFA.<br>
+                  <em>ScoreLAT</em> = average of 5 availability rates among LAT postbacks: OSV, IDFV, IP, device language, device model.<br>
+                  Intuition: IDFA is the best signal. If you have it X% of the time, the remaining (100−X)% gets scored on how good the fallback LAT signals are.<br>
+                  <span style="color:#ef4444;font-weight:600">DEPRECATED SOON — will be removed from all dashboards.</span>
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>2. Unattributed Installs</strong> — Binary (0 or 100). Is Moloco receiving unattributed (non-Moloco) postbacks? Required for full-funnel signal.<br>
+                  Score: 100 if there is at least 1 unattributed install in the last 3 days of postbacks, 0 otherwise.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>3. Probabilistic Attribution</strong> — Binary (0 or 100). Is probabilistic/fingerprint attribution enabled for iOS? (Android auto-scores 100.)<br>
+                  Score: 100 if any postback in the last 3 days has <span style="font-family:var(--mono);font-size:10px">attribution_method IN ('probabilistic', 'fingerprint')</span>, otherwise 0. Android always scores 100 (exempt).
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:10px;font-family:var(--mono);color:#0369a1;background:#e0f2fe;border-radius:5px;padding:5px 7px">Pillar = (Signal + Unattrib + ProbAttr) ÷ 3</div>
+            </div>
+
+            <!-- Optimisation -->
+            <div style="border:1px solid #ddd6fe;border-radius:10px;padding:14px 16px;background:#faf5ff">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+                <span style="width:10px;height:10px;border-radius:50%;background:#8b5cf6;flex-shrink:0"></span>
+                <span style="font-size:12px;font-weight:700;color:#6d28d9">Optimisation Strategy</span>
+                <span style="margin-left:auto;font-size:10px;font-weight:600;color:#6d28d9;background:#ede9fe;padding:2px 6px;border-radius:8px">×0.2</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>4. Budget Mode</strong> — Binary (0 or 100). Campaign should be on weekly flexible budget. tKPI campaigns auto-score 100 as an exception.<br>
+                  Score: 100 if the campaign uses weekly flexible budget or <span style="font-family:var(--mono);font-size:10px">daily_custom</span>, or is a tKPI campaign. 0 if it uses fixed daily (<span style="font-family:var(--mono);font-size:10px">is_flexible_budget_spending = false</span> and budget mode is not <span style="font-family:var(--mono);font-size:10px">daily_custom</span>).
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>5. KPI Event Volume</strong> — Scored 0 / 50 / 100. Average daily KPI events at bundle level. Higher event volume gives the model stronger optimisation signal.<br>
+                  CPA/ROAS goals: uses <span style="font-family:var(--mono);font-size:10px">avg_daily_kpi_users_d7</span> (D7-attributed users per day at bundle level). CPI goals: uses <span style="font-family:var(--mono);font-size:10px">avg_daily_installs</span>.<br>
+                  Thresholds: &lt;5/day → 0 · 5–9/day → 50 · ≥10/day → 100. If fewer than 7 days of baked data exist → defaults to 100 (not penalised).
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:10px;font-family:var(--mono);color:#6d28d9;background:#ede9fe;border-radius:5px;padding:5px 7px">Pillar = (BudgetMode × 0.2) + (KPIEvents × 0.8)</div>
+            </div>
+
+            <!-- Supply -->
+            <div style="border:1px solid #a7f3d0;border-radius:10px;padding:14px 16px;background:#f0fdf4">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+                <span style="width:10px;height:10px;border-radius:50%;background:#10b981;flex-shrink:0"></span>
+                <span style="font-size:12px;font-weight:700;color:#065f46">Supply Maximisation</span>
+                <span style="margin-left:auto;font-size:10px;font-weight:600;color:#065f46;background:#d1fae5;padding:2px 6px;border-radius:8px">×0.2</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>6. Target Supply</strong> — Measures the share of accessible bid requests vs total potential. Penalises unnecessary exchange/publisher blocks. Score &lt;95 triggers a supply block flag.<br>
+                  <span style="font-family:var(--mono);font-size:10px">score = accessible_bids / total_bids_in_target_countries × 100</span><br>
+                  Pulls 3 days of raw bid requests grouped by (country, OS, is_lat, app_bundle, exchange, device_type). A bid is accessible if it passes ALL of: app allowlist/blocklist, exchange allowlist/blocklist, country allowlist/blocklist, device type allowlist/blocklist.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>7. Traffic Supply (IFA+LAT)</strong> — Measures the share of accessible bid requests vs total potential on missing IFA+LAT traffic.<br>
+                  <span style="font-family:var(--mono);font-size:10px">score = tracking_eligible_bids / total_bids</span><br>
+                  Same dataset of raw bid requests, assessing only the LAT policy filter: DO_NOT_CARE → all bids eligible → Score 100 · NON_LAT_ONLY → only non-LAT bids · LAT_ONLY → only LAT bids.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>8. OS Coverage</strong> — Measures whether the advertiser runs campaigns across both iOS and Android. Scored at the advertiser level, then inherited by all campaigns of that advertiser.<br>
+                  The advertiser's iOS/Android spend split is compared to the DSP-wide market benchmark per country (last 3 days).<br>
+                  <span style="font-family:var(--mono);font-size:10px">country_score = 100 × (1 − 0.5 × (|adv_iOS_ratio − mkt_iOS_ratio| + |adv_Android_ratio − mkt_Android_ratio|))</span><br>
+                  Final score = spend-weighted average across all countries. Intuition: score is 0 if advertiser spends 100% iOS in a 100% Android market.<br>
+                  <em>OS Coverage is informational only — not factored into the supply pillar's overall score.</em>
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:10px;font-family:var(--mono);color:#065f46;background:#d1fae5;border-radius:5px;padding:5px 7px">Pillar = (TargetSupply × TrafficSupply) ÷ 100</div>
+            </div>
+
+            <!-- Creative -->
+            <div style="border:1px solid #fde68a;border-radius:10px;padding:14px 16px;background:#fffbeb">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+                <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;flex-shrink:0"></span>
+                <span style="font-size:12px;font-weight:700;color:#92400e">Creative Coverage</span>
+                <span style="margin-left:auto;font-size:10px;font-weight:600;color:#92400e;background:#fef3c7;padding:2px 6px;border-radius:8px">×0.2</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>9. Creative Format Adoption</strong> — Coverage across video, native image, native video, and HTML formats, weighted by DSP spend share. <em>(×0.30)</em><br>
+                  For each of 4 formats (VI, NI, NV, RI), compute DSP-wide spend share as weights. Score = 100 × Σ(binary campaign coverage × DSP spend weight). Penalises missing the formats that matter most on DSP.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>10. Video Length Mix</strong> — Coverage across ≤30s, 31–60s, 61–90s, and 90s+ video buckets. <em>(video sub-score ×0.40)</em><br>
+                  Same pattern: DSP spend split into 4 buckets; binary per bucket × DSP weight. Only scored if campaign has video spend; else 0.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>11. Video Orientation Mix</strong> — Coverage of portrait, landscape, and square orientations. <em>(video sub-score ×0.30)</em><br>
+                  Same pattern across 3 orientation buckets using DSP spend weights.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>12. Video End Cards</strong> — IEC and SEC coverage. Gaming campaigns only — non-gaming auto-scores 100. <em>(video sub-score ×0.30)</em><br>
+                  Same pattern across IEC/SEC. DSP spend weight computed only over gaming campaigns.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>13. Image Dimension Mix</strong> — Coverage of 300×250, 320×50, and 728×90 banner sizes. Only scored if campaign runs image creatives. <em>(×0.25)</em><br>
+                  Same pattern for 3 banner sizes.
+                </div>
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>14. Creative Fatigue</strong> — % of active creatives not flagged as low-performing or stale for &gt;28 days. Draws data from PSO Creative tool. <em>(×0.20)</em><br>
+                  <span style="font-family:var(--mono);font-size:10px">score = (total_active − creatives_Rotate_AND_launched_&gt;28d) / total_active × 100</span><br>
+                  "Active" = had spend in last 7 days. "Rotate" = status is Rotate (Inactive) or Rotate (Low Perf).
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:10px;font-family:var(--mono);color:#92400e;background:#fef3c7;border-radius:5px;padding:5px 7px">Pillar = (0.30 × Format + 0.20 × Fatigue + 0.25 × (0.40 × Length + 0.30 × Orientation + 0.30 × EndCards) + 0.25 × ImageDims) ÷ sum_active_weights</div>
+            </div>
+
+            <!-- Duplication -->
+            <div style="border:1px solid #fecaca;border-radius:10px;padding:14px 16px;background:#fff5f5">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+                <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>
+                <span style="font-size:12px;font-weight:700;color:#991b1b">Campaign Duplication</span>
+                <span style="margin-left:auto;font-size:10px;font-weight:600;color:#991b1b;background:#fee2e2;padding:2px 6px;border-radius:8px">×0.2</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:11px;color:var(--slate-700);line-height:1.6">
+                  <strong>15. Duplication</strong> — Score 0–100 based on overlap with other campaigns from the same advertiser.<br><br>
+                  <strong>Step 1 — Pair candidates:</strong> All pairs of UA campaigns from the same app bundle (product_id) with the same optimisation goal, matching target action, and overlapping active spend dates (last 7 days).<br><br>
+                  <strong>Step 2 — Classify overlap</strong> across: countries, audience targets, ad tracking allowance, creative formats, creative groups (full / partial / none).<br><br>
+                  <strong>Step 3 — Assign subtype:</strong>
+                  <table style="margin-top:4px;border-collapse:collapse;width:100%;font-size:10px;font-family:var(--mono)">
+                    <tr style="background:#fee2e2"><td style="padding:2px 5px;font-weight:700">1.1</td><td style="padding:2px 5px">Countries + audience + ad_tracking + formats + creative groups match</td></tr>
+                    <tr><td style="padding:2px 5px;font-weight:700">1.2</td><td style="padding:2px 5px">Same as 1.1 except creative groups differ</td></tr>
+                    <tr style="background:#fee2e2"><td style="padding:2px 5px;font-weight:700">1.3</td><td style="padding:2px 5px">Same as 1.2 except creative formats are partial match</td></tr>
+                    <tr><td style="padding:2px 5px;font-weight:700">2.1</td><td style="padding:2px 5px">Any country + formats partial + audience not match + ad_tracking match</td></tr>
+                    <tr style="background:#fee2e2"><td style="padding:2px 5px;font-weight:700">2.2</td><td style="padding:2px 5px">Any country + formats partial + audience match + ad_tracking partial</td></tr>
+                    <tr><td style="padding:2px 5px;font-weight:700">2.3</td><td style="padding:2px 5px">Any country + formats partial + audience not match + ad_tracking partial</td></tr>
+                  </table><br>
+                  <strong>Step 4 — Bid overlap validation (Type I/II only):</strong> For each pair, look at internal auctions where either campaign was in the global top 5 bidders by in_cpm. Bid overlap A→B = fraction of A's top-5 appearances where B was also top-5. If max(overlap_a, overlap_b) &lt;1% → downgraded to subtype 3.4 (false positive).<br><br>
+                  <strong>Step 5 — Score per campaign</strong> (worst pair wins):<br>
+                  Type I → 0 · Type II → 25 · Type III → 75 · None → 100.<br>
+                  RE campaigns are exempt, auto-score 100.
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:10px;font-family:var(--mono);color:#991b1b;background:#fee2e2;border-radius:5px;padding:5px 7px">Pillar = Duplication score</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /explainer-body -->
+    </div><!-- /explainer -->
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter</span>
+      <span class="filter-sep"></span>
+      <select class="select" id="f-region"   onchange="applyFilters()"><option value="">All Regions</option></select>
+      <select class="select" id="f-office"   onchange="applyFilters()"><option value="">All Offices</option></select>
+      <select class="select" id="f-pod"      onchange="applyFilters()"><option value="">All Pods</option></select>
+      <select class="select" id="f-vertical" onchange="applyFilters()"><option value="">All Verticals</option></select>
+      <select class="select" id="f-os"       onchange="applyFilters()"><option value="">All OS</option></select>
+      <div class="ms-wrap" id="ms-wrap-platform">
+        <button class="ms-btn" id="ms-btn-platform" onclick="toggleMs(event,'platform')">All Platforms ▾</button>
+        <div class="ms-panel" id="ms-panel-platform" style="display:none">
+          <input class="ms-search" type="text" placeholder="Search…" oninput="filterMsItems('platform',this.value)">
+          <div class="ms-list" id="ms-list-platform"></div>
+        </div>
+      </div>
+      <div class="ms-wrap" id="ms-wrap-advertiser">
+        <button class="ms-btn" id="ms-btn-advertiser" onclick="toggleMs(event,'advertiser')">All Advertisers ▾</button>
+        <div class="ms-panel" id="ms-panel-advertiser" style="display:none">
+          <input class="ms-search" type="text" placeholder="Search…" oninput="filterMsItems('advertiser',this.value)">
+          <div class="ms-list" id="ms-list-advertiser"></div>
+        </div>
+      </div>
+      <div class="ms-wrap" id="ms-wrap-app">
+        <button class="ms-btn" id="ms-btn-app" onclick="toggleMs(event,'app')">All Apps ▾</button>
+        <div class="ms-panel" id="ms-panel-app" style="display:none">
+          <input class="ms-search" type="text" placeholder="Search…" oninput="filterMsItems('app',this.value)">
+          <div class="ms-list" id="ms-list-app"></div>
+        </div>
+      </div>
+      <span class="filter-sep"></span>
+      <div class="ms-wrap" id="ms-wrap-campaign">
+        <button class="ms-btn" id="ms-btn-campaign" onclick="toggleMs(event,'campaign')">All Campaigns ▾</button>
+        <div class="ms-panel" id="ms-panel-campaign" style="display:none">
+          <input class="ms-search" type="text" placeholder="Search…" oninput="filterMsItems('campaign',this.value)">
+          <div class="ms-list" id="ms-list-campaign"></div>
+        </div>
+      </div>
+      <span class="filter-sep"></span>
+      <button class="btn-ghost" onclick="clearFilters()" style="font-size:11px">Clear</button>
+    </div>
+
+    <!-- Pillar selector -->
+    <div class="pillar-bar">
+      <span class="pillar-bar-label">Pillar</span>
+      <button class="pillar-btn pb-all active" data-pillar="all"         onclick="setPillar('all')">All Pillars</button>
+      <button class="pillar-btn pb-data"       data-pillar="data"        onclick="setPillar('data')">Data &amp; Signals</button>
+      <button class="pillar-btn pb-optim"      data-pillar="optim"       onclick="setPillar('optim')">Optimisation</button>
+      <button class="pillar-btn pb-supply"     data-pillar="supply"      onclick="setPillar('supply')">Supply</button>
+      <button class="pillar-btn pb-creative"   data-pillar="creative"    onclick="setPillar('creative')">Creative</button>
+      <button class="pillar-btn pb-dup"        data-pillar="dup"         onclick="setPillar('dup')">Duplication</button>
+    </div>
+
+    <!-- Breadcrumb + roll-up + download -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="scores-back-btn" onclick="drillBackTo(S.drillPath.length-2)" style="display:none;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--slate-200);background:#fff;color:var(--slate-600);cursor:pointer;font-family:var(--font)">← Back</button>
+        <div class="breadcrumb" id="breadcrumb">
+          <span class="breadcrumb-item current">All</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="level-btns" style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-400);margin-right:4px">Roll-up</span>
+          <button class="btn-sm active" data-lvl="0" onclick="setLevel(0)">Region</button>
+          <button class="btn-sm" data-lvl="1" onclick="setLevel(1)">Office</button>
+          <button class="btn-sm" data-lvl="2" onclick="setLevel(2)">Pod</button>
+          <button class="btn-sm" data-lvl="3" onclick="setLevel(3)">Advertiser</button>
+          <button class="btn-sm" data-lvl="4" onclick="setLevel(4)">App</button>
+          <button class="btn-sm" data-lvl="5" onclick="setLevel(5)">Campaign</button>
+        </div>
+        <div class="dl-wrap" style="position:relative">
+          <button class="btn-ghost" onclick="toggleDownloadPopup(event)" title="Download data" style="padding:3px 10px;font-size:13px">📥</button>
+          <div id="download-popup" class="download-popup" style="display:none">
+            <div class="download-popup-title">Download</div>
+            <button class="download-popup-item" onclick="downloadQuery()">📄 Download Query (.sql)</button>
+            <button class="download-popup-item" onclick="downloadCSV()">📊 Download Full Data (.csv)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stat-row" id="scores-stats" style="display:none"></div>
+
+    <!-- Table -->
+    <div id="scores-table">
+      <div class="section-loading"><span class="spinner"></span> Loading scores…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACTIVATION TAB ── -->
+<div id="tab-activation" class="tab-panel">
+  <div class="wrap">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Activation Guide</div>
+        <div class="page-meta" id="act-meta">Loading…</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <a href="https://docs.google.com/document/d/19ejEpoXFW0rKGVR_SaXkuiC2KVGNZMrfRlGJnChj9UI/edit?tab=t.hey984ggzew2" target="_blank" class="btn-ghost" style="font-size:11px;text-decoration:none">📄 Playbook ↗</a>
+        <a href="https://docs.google.com/presentation/d/1-a8YCFrtP4tFmMHM0d-YRSMFCq9tI3_hb7KoijQPx4s/edit?slide=id.g3cab9f2303e_0_929#slide=id.g3cab9f2303e_0_929" target="_blank" class="btn-ghost" style="font-size:11px;text-decoration:none">📑 Ext. Pitch Deck ↗</a>
+        <button class="btn-ghost" onclick="reloadActivation()">&#8635; Refresh</button>
+      </div>
+    </div>
+
+    <!-- ── ACTIVATION EXPLAINER ── -->
+    <div id="act-explainer" style="background:#fff;border:1px solid var(--slate-200);border-radius:14px;margin-bottom:14px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;user-select:none" onclick="toggleActExplainer()">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">📋</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--slate-900)">About the Activation Tracker</div>
+            <div style="font-size:11px;color:var(--slate-400);margin-top:1px">What this is · How to use it · What's expected</div>
+          </div>
+        </div>
+        <span id="act-explainer-chevron" style="font-size:12px;color:var(--slate-400);transition:transform .2s">▼</span>
+      </div>
+      <div id="act-explainer-body" style="display:none;padding:0 18px 20px;border-top:1px solid var(--slate-100)">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px">
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Activation Overview</div>
+            <div style="font-size:12px;color:var(--slate-600);line-height:1.6">
+              <p style="margin:0 0 8px">Targeted lead list of <strong>top advertisers per region</strong> based on total campaign spend with suboptimal setups:</p>
+              <ul style="margin:0 0 8px;padding-left:16px">
+                <li><strong>Campaign duplication</strong> — high rates of internal bid overlap</li>
+                <li><strong>Excessive supply constraints</strong></li>
+              </ul>
+              <p style="margin:0 0 8px"><strong>1:1 PSO &amp; GDS client support</strong> for lead list customers to resolve and consolidate campaign setups and unblock supply. Salesforce Recommendations will be sent per account with supporting evidence and specific campaign detail.</p>
+              <p style="margin:0;font-style:italic;color:var(--slate-400)">PSO to collate advertiser product feedback and rationale for campaign duplication and surface to PM. Aim: resolve <strong>~100% of suboptimal setups</strong> across the lead list by end of H1 2026.</p>
+            </div>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">What you're tracking</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">For each advertiser the table shows the <strong>current state</strong> — how many UA campaigns are still suboptimal today, the total spend behind them, and what percentage of their total L7 spend that represents. The objective is to drive that number down to zero.</p>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">How to use this tab</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">Filter by region at the top. Click any advertiser row to expand the campaign-level breakdown with issue detail and MCP links. Use the <strong>Note</strong> button to log Sales/GDS context, status, and action items — these persist across sessions. The AI Summary tells you at a glance what issues are present and what's recommended.</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:10px">
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Issue types</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--slate-600);line-height:1.5">
+              <div><strong>Type I / II Duplication</strong> — Two or more campaigns from the same advertiser bidding on significantly overlapping supply (≥10% bid overlap). Causes self-competition and inflated CPAs.</div>
+              <div><strong>Supply Block</strong> — Campaign has a target accessible supply score below 95, typically caused by unnecessary publisher/exchange blocks or missing IFA+LAT traffic.</div>
+            </div>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Note statuses</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--slate-600)"><span class="pill note-status-not-started">Not Started</span> Issue identified, no action yet</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--slate-600)"><span class="pill note-status-discussion">In Discussion</span> Seller conversation underway</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--slate-600)"><span class="pill note-status-partly">Partly Resolved</span> Some campaigns fixed, others pending</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--slate-600)"><span class="pill note-status-fully">Fully Resolved</span> All issues fixed</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--slate-600)"><span class="pill note-status-blocked">Blocked</span> Waiting on seller / external dependency</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--slate-600)"><span class="pill note-status-temp-blocked">Temporarily Blocked - Product Need</span> Known product gap; use PSO Validated checkbox</div>
+            </div>
+          </div>
+          <div style="background:var(--slate-50);border-radius:10px;padding:14px 16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Expectations</div>
+            <p style="font-size:12px;color:var(--slate-600);line-height:1.6">GDS should review the tracker weekly with the account's GM. Notes should be kept up to date — log what was discussed, what was agreed, and when it's expected to be resolved. Target: <strong>all activated advertisers reach 0% suboptimal spend within 60 days</strong> of their activation date.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="region-pills">
+      <button class="region-btn active" onclick="setRegion('ALL')">All</button>
+      <button class="region-btn" onclick="setRegion('AMER')">AMER</button>
+      <button class="region-btn" onclick="setRegion('EMEA')">EMEA</button>
+      <button class="region-btn" onclick="setRegion('APAC')">APAC</button>
+    </div>
+    <div class="stat-row" id="act-stats" style="display:none"></div>
+    <div id="activation-table">
+      <div class="section-loading"><span class="spinner"></span> Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CAMPAIGN DETAIL DRAWER ── -->
+<div class="detail-drawer" id="detail-drawer">
+  <div class="drawer-inner">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawer-title">Campaign Detail</div>
+        <div class="drawer-meta" id="drawer-meta"></div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
+    </div>
+    <div id="drawer-body"></div>
+  </div>
+</div>
+
+<!-- ── NOTE MODAL ── -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal" style="width:620px">
+    <h3 id="modal-title">Notes</h3>
+    <div class="modal-sub" id="modal-sub"></div>
+
+    <label>Status</label>
+    <select id="modal-status">
+      <option value="Not Started">Not Started</option>
+      <option value="In Discussion">In Discussion</option>
+      <option value="Partly Resolved">Partly Resolved</option>
+      <option value="Fully Resolved">Fully Resolved</option>
+      <option value="Blocked">Blocked</option>
+      <option value="Temporarily Blocked - Product Need">Temporarily Blocked - Product Need</option>
+    </select>
+
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px">
+      <div>
+        <label style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0"></span>
+          Sales / GM Notes
+        </label>
+        <textarea id="modal-sales-note" placeholder="Seller context, commercial discussion, account relationship notes…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1.5px solid var(--slate-200);font-family:var(--font);font-size:13px;color:var(--slate-800);resize:vertical;min-height:130px;outline:none;line-height:1.6"></textarea>
+      </div>
+      <div>
+        <label style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#8b5cf6;flex-shrink:0"></span>
+          PSO / GDS Notes
+        </label>
+        <textarea id="modal-gds-note" placeholder="Technical findings, recommended actions, implementation status…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1.5px solid var(--slate-200);font-family:var(--font);font-size:13px;color:var(--slate-800);resize:vertical;min-height:130px;outline:none;line-height:1.6"></textarea>
+      </div>
+    </div>
+
+    <label>VOTM Jira Tickets <span style="font-size:10px;color:var(--slate-400);font-weight:400">comma-separated, e.g. VOTM-123, VOTM-456</span></label>
+    <input id="modal-jira" type="text" placeholder="VOTM-123, VOTM-456" style="width:100%;padding:8px 11px;border-radius:8px;border:1.5px solid var(--slate-200);font-family:var(--font);font-size:12px;color:var(--slate-800);outline:none;margin-bottom:14px;box-sizing:border-box">
+
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:14px">
+      <input type="checkbox" id="modal-pso-validated" style="cursor:pointer;margin-top:2px;flex-shrink:0">
+      <label for="modal-pso-validated" style="cursor:pointer;font-size:12px;color:var(--slate-700);line-height:1.5">
+        <strong>PSO Validated Product Need</strong> — confirmed product limitation; this issue is considered resolved for activation tracking purposes
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeNoteModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">GDS · Blueprint</div>
+
+<!-- Sub-index info popup -->
+<div id="sub-info-popup" class="sub-info-popup" style="display:none">
+  <div class="sub-info-popup-header">
+    <span class="sub-info-popup-title" id="sub-info-title"></span>
+    <button class="sub-info-popup-close" onclick="closeSubInfo()">✕</button>
+  </div>
+  <div class="sub-info-popup-body" id="sub-info-body"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// EXPLAINER TOGGLE
+// ══════════════════════════════════════════════════════
+function toggleExplainer(){
+  var body = document.getElementById('explainer-body');
+  var chev = document.getElementById('explainer-chevron');
+  var open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chev.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+// ══════════════════════════════════════════════════════
+// PILLAR & SUB-INDEX CONFIG
+// ══════════════════════════════════════════════════════
+var PILLARS = [
+  {
+    id: 'data',  key: 'pillar_data_signals', label: 'Data & Signals', color: '#0ea5e9',
+    subs: [
+      { key: 'score_signal_quality', label: 'Signal Quality',        detailKey: 'detail_signal',   recKey: 'rec_signal' },
+      { key: 'score_unattrib',       label: 'Unattrib Installs',     detailKey: 'detail_unattrib', recKey: 'rec_unattrib' },
+      { key: 'score_prob_attr',      label: 'Prob Attribution',      detailKey: 'detail_prob_attr',recKey: 'rec_prob_attr' }
+    ]
+  },
+  {
+    id: 'optim', key: 'pillar_opt_strategy', label: 'Optimisation', color: '#8b5cf6',
+    subs: [
+      { key: 'score_budget_mode', label: 'Budget Mode',     detailKey: 'detail_budget_mode', recKey: 'rec_budget_mode' },
+      { key: 'score_kpi_events',  label: 'KPI Event Volume',detailKey: 'detail_kpi_events',  recKey: 'rec_kpi_events' }
+    ]
+  },
+  {
+    id: 'supply', key: 'pillar_supply', label: 'Supply', color: '#10b981',
+    subs: [
+      { key: 'score_target_supply',  label: 'Target Supply (IFA+LAT)', detailKey: 'detail_target_supply', recKey: 'rec_target_supply' },
+      { key: 'score_traffic_supply', label: 'Traffic Supply',          detailKey: null, recKey: null },
+      { key: 'score_os_coverage',    label: 'OS Coverage',             detailKey: null, recKey: null }
+    ]
+  },
+  {
+    id: 'creative', key: 'pillar_creative', label: 'Creative', color: '#f59e0b',
+    subs: [
+      { key: 'score_creative_format',  label: 'Format Adoption',    detailKey: 'detail_creative_format',  recKey: 'rec_creative_format' },
+      { key: 'score_video_length',     label: 'Video Length Mix',   detailKey: null, recKey: null },
+      { key: 'score_video_orient',     label: 'Video Orientation',  detailKey: null, recKey: null },
+      { key: 'score_video_endcards',   label: 'End Cards',          detailKey: null, recKey: null },
+      { key: 'score_image_dims',       label: 'Image Dimensions',   detailKey: null, recKey: null },
+      { key: 'score_creative_fatigue', label: 'Creative Fatigue',   detailKey: 'detail_creative_fatigue', recKey: 'rec_creative_fatigue' }
+    ]
+  },
+  {
+    id: 'dup', key: 'pillar_duplication', label: 'Duplication', color: '#ef4444',
+    subs: [
+      { key: 'score_duplication', label: 'Campaign Duplication', detailKey: 'detail_duplication', recKey: 'rec_duplication' }
+    ]
+  }
+];
+
+var PILLAR_MAP = {};
+PILLARS.forEach(function(p){ PILLAR_MAP[p.id] = p; });
+
+// Drill-down level config
+var LEVELS = [
+  { id: 'region',     label: 'Region',     dim: 'office_region' },
+  { id: 'office',     label: 'Office',     dim: 'office' },
+  { id: 'pod',        label: 'Pod',        dim: 'growth_pod' },
+  { id: 'advertiser', label: 'Advertiser', dim: 'advertiser_title' },
+  { id: 'app',        label: 'App',        dim: 'app_name' },
+  { id: 'campaign',   label: 'Campaign',   dim: 'campaign_id' }
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+var S = {
+  raw: null,        // full campaign array from BQ
+  filtered: null,   // after filters
+  levelIdx: 0,      // current roll-up level
+  drillPath: [],    // [{levelIdx, dim, value, label}]
+  pillar: 'all',    // active pillar filter
+  openCampaign: null,  // campaign_id of open detail drawer
+  act: { summary: null, campaigns: null, notes: {}, region: 'ALL', expanded: {}, showNoIssue: {} },
+  noteModal: { advertiserId: null, advertiserTitle: null }
+};
+
+// ══════════════════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════════════════
+var _loaded = {};
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.tab === id); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('active', p.id === 'tab-' + id); });
+  if (id === 'scores'     && !_loaded.scores)     { _loaded.scores = true;     loadScores(); }
+  if (id === 'activation' && !_loaded.activation) { _loaded.activation = true; loadActivation(); }
+  if (id !== 'scores') closeDrawer();
+}
+switchTab('scores');
+
+// ══════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════
+function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt$(v){ var n=parseFloat(v); if(isNaN(n))return '—'; if(Math.abs(n)>=1e6)return '$'+(n/1e6).toFixed(1)+'M'; if(Math.abs(n)>=1e3)return '$'+Math.round(n/1e3)+'k'; return '$'+Math.round(n); }
+function fmtD$(v){ var n=parseFloat(v); if(isNaN(n))return '<span class="delta-zero">—</span>'; var s=fmt$(Math.abs(n)); if(n>0)return '<span class="delta-neg">+'+s+'</span>'; if(n<0)return '<span class="delta-pos">−'+s+'</span>'; return '<span class="delta-zero">$0</span>'; }
+function fmtDpp(v){ var n=parseFloat(v); if(isNaN(n))return '<span class="delta-zero">—</span>'; var s=Math.abs(n).toFixed(1)+'pp'; if(n>0)return '<span class="delta-neg">+'+s+'</span>'; if(n<0)return '<span class="delta-pos">−'+s+'</span>'; return '<span class="delta-zero">0pp</span>'; }
+function fmtPct(v){ var n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1)+'%'; }
+function unique(arr){ return arr.filter(function(v,i,a){ return v&&v.trim()&&a.indexOf(v)===i; }).sort(); }
+function showError(id,e){ var el=document.getElementById(id); if(el)el.innerHTML='<div class="empty-state" style="color:var(--red)">Error: '+h(e.message||String(e))+'</div>'; }
+
+function scChip(val){
+  var v=parseFloat(val);
+  if(isNaN(v)||val===null||val==='')return '<span class="sc sc-n">—</span>';
+  var c=v>=90?'sc-g':v>=70?'sc-y':'sc-r';
+  return '<span class="sc '+c+'">'+Math.round(v)+'</span>';
+}
+
+// Spend-weighted average score for a group of campaigns.
+// Denominator is the total spend of ALL campaigns in the group — not just
+// those that have a score — so high-spend unscored campaigns dilute the
+// average correctly rather than inflating low-spend scored campaigns.
+function wAvg(camps, key){
+  var valid = camps.filter(function(c){ var v=parseFloat(c[key]); return !isNaN(v) && v >= 0; });
+  if(!valid.length) return null;
+  var totalSpend = camps.reduce(function(s,c){ return s+(parseFloat(c.spend_l7)||0); }, 0);
+  if(totalSpend === 0){
+    // No spend data at all — fall back to simple average of scored campaigns
+    return valid.reduce(function(s,c){ return s+parseFloat(c[key]); }, 0) / valid.length;
+  }
+  return valid.reduce(function(s,c){ return s + parseFloat(c[key]) * (parseFloat(c.spend_l7)||0); }, 0) / totalSpend;
+}
+
+function statCard(label, value, sub, accent){
+  return '<div class="card" style="--accent:'+accent+'"><div class="card-label">'+h(label)+'</div><div class="card-value">'+h(String(value))+'</div>'+(sub?'<div class="card-sub">'+sub+'</div>':'')+'</div>';
+}
+
+// ══════════════════════════════════════════════════════
+// SCORES — LOAD
+// ══════════════════════════════════════════════════════
+function loadScores(){
+  fetch('/api/scores')
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP '+r.status)); })
+    .then(onScoresLoaded)
+    .catch(function(e){ showError('scores-table',e); document.getElementById('scores-meta').textContent='Error'; });
+}
+
+function reloadScores(){
+  S.raw=null; S.filtered=null; _loaded.scores=false;
+  document.getElementById('scores-table').innerHTML='<div class="section-loading"><span class="spinner"></span> Reloading…</div>';
+  document.getElementById('scores-meta').textContent='Loading…';
+  loadScores();
+}
+
+function onScoresLoaded(data){
+  if(!data||!data.length){ document.getElementById('scores-table').innerHTML='<div class="empty-state">No data found.</div>'; return; }
+  S.raw=data;
+  populateFilters(data);
+  applyFilters();
+}
+
+function populateFilters(data){
+  fillSelect('f-region',   unique(data.map(function(r){ return r.office_region; })));
+  fillSelect('f-office',   unique(data.map(function(r){ return r.office; })));
+  fillSelect('f-pod',      unique(data.map(function(r){ return r.growth_pod; })));
+  fillSelect('f-vertical', unique(data.map(function(r){ return r.vertical; })));
+  fillSelect('f-os',       unique(data.map(function(r){ return r.os; })));
+  buildMultiSelect('platform',   unique(data.map(function(r){ return r.platform_id; })));
+  buildMultiSelect('advertiser', unique(data.map(function(r){ return r.advertiser_title; })));
+  buildMultiSelect('app',        unique(data.map(function(r){ return r.app_name; })));
+  buildMultiSelect('campaign',   unique(data.map(function(r){ return (r.campaign_title||'')+'  ('+r.campaign_id+')'; })));
+}
+
+function fillSelect(id, vals){
+  var sel=document.getElementById(id), cur=sel.value;
+  var truncate = ['f-advertiser','f-app'].indexOf(id) > -1;
+  while(sel.options.length > 1) sel.remove(1);
+  vals.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v;
+    o.textContent = truncate && v.length > 24 ? v.slice(0,22)+'…' : v;
+    o.title = v;
+    sel.appendChild(o);
+  });
+  if(cur) sel.value=cur;
+}
+
+// ── MULTI-SELECT ──────────────────────────────────────
+var _msVals = {};  // all values per key
+var _msSel  = {};  // Set of selected values, or null = all selected
+var _msLabels = {platform:'Platforms', advertiser:'Advertisers', app:'Apps', campaign:'Campaigns'};
+
+function buildMultiSelect(key, vals){
+  _msVals[key] = vals;
+  _msSel[key]  = null;
+  _renderMsList(key, '');
+  _updateMsBtn(key);
+}
+
+function _renderMsList(key, search){
+  var list = document.getElementById('ms-list-'+key);
+  var vals = _msVals[key]||[];
+  var q = search.toLowerCase();
+  list.innerHTML = '';
+  vals.forEach(function(v){
+    if(q && v.toLowerCase().indexOf(q) === -1) return;
+    var checked = _msSel[key] === null || _msSel[key].has(v);
+    var safeVal = v.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var row = document.createElement('label');
+    row.className = 'ms-item';
+    row.innerHTML =
+      '<input type="checkbox"'+(checked?' checked':'')+' onchange="toggleMsItem(\''+key+'\',\''+safeVal+'\')">' +
+      '<span class="ms-item-label" title="'+h(v)+'">'+h(v)+'</span>' +
+      '<button class="ms-only-btn" onclick="onlyMs(event,\''+key+'\',\''+safeVal+'\')">Only</button>';
+    list.appendChild(row);
+  });
+}
+
+function _updateMsBtn(key){
+  var btn = document.getElementById('ms-btn-'+key);
+  var sel = _msSel[key];
+  var label = _msLabels[key]||key;
+  if(sel === null){
+    btn.textContent = 'All '+label+' \u25be';
+    btn.classList.remove('active');
+  } else {
+    var n = sel.size;
+    btn.textContent = n+' selected \u25be';
+    btn.classList.toggle('active', n > 0);
+  }
+}
+
+function toggleMs(e, key){
+  e.stopPropagation();
+  var panel = document.getElementById('ms-panel-'+key);
+  var isOpen = panel.style.display !== 'none';
+  Object.keys(_msLabels).forEach(function(k){
+    document.getElementById('ms-panel-'+k).style.display = 'none';
+  });
+  if(!isOpen) panel.style.display = 'block';
+}
+
+function toggleMsItem(key, val){
+  if(_msSel[key] === null){
+    _msSel[key] = new Set(_msVals[key]);
+    _msSel[key].delete(val);
+  } else {
+    if(_msSel[key].has(val)) _msSel[key].delete(val);
+    else _msSel[key].add(val);
+    if(_msSel[key].size === (_msVals[key]||[]).length) _msSel[key] = null;
+  }
+  _updateMsBtn(key);
+  applyFilters();
+}
+
+function onlyMs(e, key, val){
+  e.preventDefault(); e.stopPropagation();
+  _msSel[key] = new Set([val]);
+  var searchEl = document.querySelector('#ms-panel-'+key+' .ms-search');
+  _renderMsList(key, searchEl ? searchEl.value : '');
+  _updateMsBtn(key);
+  applyFilters();
+}
+
+function filterMsItems(key, q){
+  _renderMsList(key, q);
+}
+
+document.addEventListener('click', function(e){
+  Object.keys(_msLabels).forEach(function(k){
+    var wrap = document.getElementById('ms-wrap-'+k);
+    if(wrap && !wrap.contains(e.target)){
+      document.getElementById('ms-panel-'+k).style.display = 'none';
+    }
+  });
+});
+
+// ══════════════════════════════════════════════════════
+// SCORES — FILTER & DRILL
+// ══════════════════════════════════════════════════════
+function applyFilters(){
+  if(!S.raw) return;
+  var region   = document.getElementById('f-region').value;
+  var office   = document.getElementById('f-office').value;
+  var pod      = document.getElementById('f-pod').value;
+  var vertical = document.getElementById('f-vertical').value;
+  var os       = document.getElementById('f-os').value;
+  var campSel  = _msSel['campaign'];
+  var platSel  = _msSel['platform'];
+  var advSel   = _msSel['advertiser'];
+  var appSel   = _msSel['app'];
+
+  var filtered = S.raw.filter(function(r){
+    if(region   && r.office_region !== region)   return false;
+    if(office   && r.office        !== office)   return false;
+    if(pod      && r.growth_pod    !== pod)      return false;
+    if(vertical && r.vertical      !== vertical) return false;
+    if(os       && r.os            !== os)       return false;
+    if(platSel !== null && !platSel.has(r.platform_id||''))     return false;
+    if(advSel  !== null && !advSel.has(r.advertiser_title||'')) return false;
+    if(appSel  !== null && !appSel.has(r.app_name||''))         return false;
+    if(campSel !== null && !campSel.has((r.campaign_title||'')+'  ('+r.campaign_id+')')) return false;
+    return true;
+  });
+
+  // Apply drill-path constraints
+  S.drillPath.forEach(function(step){
+    filtered = filtered.filter(function(r){ return (r[step.dim]||'(Unknown)') === step.value; });
+  });
+
+  S.filtered = filtered;
+  renderScoresStats();
+  renderScoresTable();
+}
+
+function clearFilters(){
+  ['f-region','f-office','f-pod','f-vertical','f-os'].forEach(function(id){ document.getElementById(id).value=''; });
+  Object.keys(_msLabels).forEach(function(key){
+    _msSel[key] = null;
+    var searchEl = document.querySelector('#ms-panel-'+key+' .ms-search');
+    if(searchEl) searchEl.value='';
+    _renderMsList(key, '');
+    _updateMsBtn(key);
+  });
+  applyFilters();
+}
+
+function setLevel(idx){
+  S.levelIdx = idx;
+  // Trim drill path to not exceed new level
+  S.drillPath = S.drillPath.filter(function(s){ return s.levelIdx < idx; });
+  document.querySelectorAll('.level-btns .btn-sm').forEach(function(b){ b.classList.toggle('active', parseInt(b.dataset.lvl)===idx); });
+  updateBreadcrumb();
+  applyFilters();
+}
+
+function drillInto(dim, value, label, fromLevelIdx){
+  // Add this step to drill path
+  S.drillPath = S.drillPath.filter(function(s){ return s.levelIdx < fromLevelIdx; });
+  S.drillPath.push({ levelIdx: fromLevelIdx, dim: dim, value: value, label: label });
+  // Advance level
+  var nextLevel = fromLevelIdx + 1;
+  if(nextLevel > LEVELS.length - 1) nextLevel = LEVELS.length - 1;
+  S.levelIdx = nextLevel;
+  document.querySelectorAll('.level-btns .btn-sm').forEach(function(b){ b.classList.toggle('active', parseInt(b.dataset.lvl)===S.levelIdx); });
+  updateBreadcrumb();
+  applyFilters();
+}
+
+function drillBackTo(pathIdx){
+  // pathIdx = -1 means go back to root
+  if(pathIdx < 0){
+    S.drillPath = [];
+    S.levelIdx  = 0;
+    document.querySelectorAll('.level-btns .btn-sm').forEach(function(b){ b.classList.toggle('active', b.dataset.lvl==='0'); });
+  } else {
+    S.drillPath = S.drillPath.slice(0, pathIdx + 1);
+    S.levelIdx  = pathIdx + 1;
+    document.querySelectorAll('.level-btns .btn-sm').forEach(function(b){ b.classList.toggle('active', parseInt(b.dataset.lvl)===S.levelIdx); });
+  }
+  updateBreadcrumb();
+  applyFilters();
+}
+
+function updateBreadcrumb(){
+  var el  = document.getElementById('breadcrumb');
+  var btn = document.getElementById('scores-back-btn');
+  var parts = ['<span class="breadcrumb-item" onclick="drillBackTo(-1)">All</span>'];
+  S.drillPath.forEach(function(step, i){
+    parts.push('<span class="breadcrumb-sep">›</span>');
+    if(i < S.drillPath.length - 1){
+      parts.push('<span class="breadcrumb-item" onclick="drillBackTo('+i+')">'+h(step.label)+'</span>');
+    } else {
+      parts.push('<span class="breadcrumb-item current">'+h(step.label)+'</span>');
+    }
+  });
+  if(!S.drillPath.length){
+    el.innerHTML='<span class="breadcrumb-item current">All</span>';
+    if(btn) btn.style.display='none';
+  } else {
+    el.innerHTML = parts.join('');
+    if(btn){
+      btn.style.display='inline-flex';
+      var prev = S.drillPath.length >= 2 ? S.drillPath[S.drillPath.length-2].label : 'All';
+      btn.textContent = '← ' + prev;
+    }
+  }
+}
+
+function setPillar(p){
+  S.pillar = p;
+  document.querySelectorAll('.pillar-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.pillar===p); });
+  renderScoresTable();
+}
+
+// ══════════════════════════════════════════════════════
+// SCORES — RENDER STATS
+// ══════════════════════════════════════════════════════
+function renderScoresStats(){
+  var d = S.filtered;
+  if(!d) return;
+  var totalSpend = d.reduce(function(s,r){ return s+(parseFloat(r.spend_l7)||0); },0);
+  var advs = {}, apps = {};
+  d.forEach(function(r){ advs[r.advertiser_id]=1; apps[r.product_id||r.app_name]=1; });
+  var avgOverall = wAvg(d,'overall_score');
+  document.getElementById('scores-meta').textContent = d.length+' campaigns · '+Object.keys(advs).length+' advertisers · '+fmt$(totalSpend)+' spend L7';
+  var row=document.getElementById('scores-stats');
+  row.style.display='';
+  row.innerHTML = [
+    statCard('Campaigns',   d.length, '', 'var(--indigo)'),
+    statCard('Advertisers', Object.keys(advs).length, '', 'var(--blue)'),
+    statCard('Spend L7',    fmt$(totalSpend), '', 'var(--green)'),
+    statCard('Avg Score',   avgOverall!==null?Math.round(avgOverall)+'/100':'—', 'spend-weighted', 'var(--amber)')
+  ].join('');
+}
+
+// ══════════════════════════════════════════════════════
+// SCORES — RENDER TABLE
+// ══════════════════════════════════════════════════════
+function renderScoresTable(){
+  var el = document.getElementById('scores-table');
+  var d  = S.filtered;
+  if(!d){ el.innerHTML='<div class="section-loading"><span class="spinner"></span></div>'; return; }
+  if(!d.length){ el.innerHTML='<div class="empty-state">No campaigns match these filters.</div>'; return; }
+
+  var level    = LEVELS[S.levelIdx];
+  var pillarId = S.pillar;
+  var cols     = getActiveCols(pillarId);
+
+  if(S.levelIdx === LEVELS.length - 1){
+    el.innerHTML = buildCampaignTable(d, cols, pillarId);
+  } else {
+    el.innerHTML = buildRollupTable(d, level, cols, pillarId);
+  }
+}
+
+function getActiveCols(pillarId){
+  if(pillarId === 'all') return PILLARS.map(function(p, i){ return { key: p.key, label: p.label, pillar: p, sep: true }; });
+  var p = PILLAR_MAP[pillarId];
+  if(!p) return [];
+  return p.subs.map(function(s, i){ return { key: s.key, label: s.label, sub: s, sep: i === 0 }; });
+}
+
+function buildRollupTable(campaigns, level, cols, pillarId){
+  // Group
+  var map = {};
+  campaigns.forEach(function(c){
+    var k = (c[level.dim]||'').trim() || '(Unknown)';
+    if(!map[k]) map[k]={ key:k, label:k, campaigns:[] };
+    map[k].campaigns.push(c);
+  });
+  var groups = Object.values(map).sort(function(a,b){
+    return (b.campaigns.reduce(function(s,c){ return s+(parseFloat(c.spend_l7)||0); },0)) -
+           (a.campaigns.reduce(function(s,c){ return s+(parseFloat(c.spend_l7)||0); },0));
+  });
+
+  var fromLevel = S.levelIdx;
+  var dim       = level.dim;
+  var html = '<div class="table-wrap"><table class="ht"><thead>';
+  // Group header row (only for pillar-subs with grouped cols)
+  if(pillarId !== 'all'){
+    html += '<tr><th colspan="4"></th>';
+    var p = PILLAR_MAP[pillarId];
+    html += '<th colspan="'+cols.length+'" class="grp grp-hd" style="color:'+p.color+'">'+ h(p.label) +'</th></tr>';
+  }
+  html += '<tr><th>'+h(level.label)+'</th><th>Camps</th><th class="r">Spend L7</th><th class="c">Overall</th>';
+  cols.forEach(function(col){ html += '<th class="c grp-hd'+(col.sep?' pillar-sep':'')+'">'+h(col.label)+'</th>'; });
+  html += '</tr></thead><tbody>';
+
+  groups.forEach(function(g){
+    var spend = g.campaigns.reduce(function(s,c){ return s+(parseFloat(c.spend_l7)||0); },0);
+    var overall = wAvg(g.campaigns,'overall_score');
+    html += '<tr class="drillable" onclick="drillInto(\''+h(dim)+'\',\''+h(g.key)+'\',\''+h(g.label)+'\','+fromLevel+')">';
+    var rollupLabel = (dim === 'campaign_id' && g.campaigns[0])
+      ? (g.campaigns[0].campaign_title||g.key)+' ('+g.key+')'
+      : (g.label||'(Unknown)');
+    html += '<td><span class="name-cell" title="'+h(rollupLabel)+'">'+h(rollupLabel)+'</span></td>';
+    html += '<td class="c">'+g.campaigns.length+'</td>';
+    html += '<td class="r">'+fmt$(spend)+'</td>';
+    html += '<td class="c">'+scChip(overall)+'</td>';
+    cols.forEach(function(col){
+      html += '<td class="c'+(col.sep?' pillar-sep':'')+'">'+scChip(wAvg(g.campaigns, col.key))+'</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function buildCampaignTable(campaigns, cols, pillarId){
+  var html = '<div class="table-wrap"><table class="ht"><thead>';
+  if(pillarId !== 'all'){
+    var p = PILLAR_MAP[pillarId];
+    html += '<tr><th colspan="5"></th><th colspan="'+cols.length+'" class="grp grp-hd" style="color:'+p.color+'">'+ h(p.label) +'</th></tr>';
+  }
+  html += '<tr><th style="min-width:180px">Campaign</th><th style="min-width:140px">Advertiser</th><th>Office</th><th class="r">Spend L7</th><th class="c">Overall</th>';
+  cols.forEach(function(col){ html += '<th class="c grp-hd'+(col.sep?' pillar-sep':'')+'">'+h(col.label)+'</th>'; });
+  html += '</tr></thead><tbody>';
+
+  campaigns.forEach(function(c){
+    var isOpen = S.openCampaign === c.campaign_id;
+    html += '<tr class="camp-row'+(isOpen?' detail-open':'')+'" onclick="toggleDetail(\''+h(c.campaign_id)+'\')">';
+    var campLabel = (c.campaign_title||c.campaign_id)+' ('+c.campaign_id+')';
+    html += '<td><span class="sub-cell" title="'+h(campLabel)+'">'+h(campLabel)+'</span></td>';
+    html += '<td><span class="name-cell" title="'+h(c.advertiser_title)+'">'+h(c.advertiser_title)+'</span></td>';
+    html += '<td><span class="mono">'+h(c.office||'—')+'</span></td>';
+    html += '<td class="r">'+fmt$(c.spend_l7)+'</td>';
+    html += '<td class="c">'+scChip(c.overall_score)+'</td>';
+    cols.forEach(function(col){ html += '<td class="c'+(col.sep?' pillar-sep':'')+'">'+scChip(c[col.key])+'</td>'; });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+// ══════════════════════════════════════════════════════
+// CAMPAIGN DETAIL DRAWER
+// ══════════════════════════════════════════════════════
+function toggleDetail(campaignId){
+  if(S.openCampaign === campaignId){
+    closeDrawer();
+  } else {
+    S.openCampaign = campaignId;
+    var c = S.filtered && S.filtered.filter(function(r){ return r.campaign_id===campaignId; })[0];
+    if(c) openDrawer(c);
+  }
+  renderScoresTable(); // refresh highlight state
+}
+
+function openDrawer(c){
+  var mcpUrl = 'https://portal.moloco.cloud/v2/p/'+h(c.platform_id)+'/cm/a/'+h(c.advertiser_id)+'/overview/a/'+h(c.product_id)+'/c/'+h(c.campaign_id);
+  document.getElementById('drawer-title').textContent = (c.campaign_title||c.campaign_id)+' ('+c.campaign_id+')';
+  document.getElementById('drawer-meta').innerHTML =
+    h(c.advertiser_title)+' · '+h(c.office||'—')+' · '+h(c.growth_pod||'—')+' · '+h(c.vertical||'—')+
+    ' · <a href="'+mcpUrl+'" target="_blank">Open in MCP &#8599;</a>';
+
+  document.getElementById('drawer-body').innerHTML = '<div class="section-loading"><span class="spinner"></span> Loading detail…</div>';
+  document.getElementById('detail-drawer').classList.add('open');
+
+  fetch('/api/campaign/'+encodeURIComponent(c.campaign_id)+'/detail')
+    .then(function(r){ return r.ok ? r.json() : Promise.reject('HTTP '+r.status); })
+    .then(function(detail){ _renderDrawerBody(c, detail); })
+    .catch(function(){ _renderDrawerBody(c, {}); });
+}
+
+function _renderDrawerBody(c, detail){
+  // Merge detail fields into campaign object for sub-index rendering
+  var merged = Object.assign({}, c, detail);
+  var body = '';
+
+  // Pillar cards
+  body += '<div class="pillar-cards">';
+  PILLARS.forEach(function(p, pIdx){
+    var pillarScore = parseFloat(merged[p.key]);
+    var scoreColor  = isNaN(pillarScore)?'var(--slate-400)': pillarScore>=80?'#166534':pillarScore>=60?'#854d0e':pillarScore>=40?'#9a3412':'#991b1b';
+    body += '<div class="pillar-card" style="--pc-color:'+p.color+'">';
+    body += '<div class="pc-title">'+h(p.label)+'</div>';
+    body += '<div class="pc-score" style="color:'+scoreColor+'">'+(isNaN(pillarScore)?'—':Math.round(pillarScore)+'/100')+'</div>';
+
+    // Sub-index rows
+    body += '<div class="sub-index-list">';
+    p.subs.forEach(function(s){
+      var det = s.detailKey && merged[s.detailKey];
+      var rec = s.recKey    && merged[s.recKey];
+      var hasInfo = !!(det || rec);
+      var safeLabel = s.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var safeDetail = (det||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+      var safeRec    = (rec||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+      body += '<div class="sub-index-row">';
+      body += '<span class="sub-index-label" title="'+h(s.label)+'">'+h(s.label)+'</span>';
+      var side = pIdx < 3 ? 'left' : 'right';
+      body += '<button class="sub-info-btn" onclick="event.stopPropagation();showSubInfo(this,\''+safeLabel+'\',\''+safeDetail+'\',\''+safeRec+'\',\''+side+'\')">?</button>';
+      body += scChip(merged[s.key]);
+      body += '</div>';
+    });
+    body += '</div>';
+    body += '</div>';
+  });
+  body += '</div>';
+
+  document.getElementById('drawer-body').innerHTML = body;
+}
+
+function closeDrawer(){
+  S.openCampaign = null;
+  document.getElementById('detail-drawer').classList.remove('open');
+}
+
+function _trunc(s, n){ s = String(s||''); return s.length > n ? s.slice(0, n) + '…' : s; }
+
+function showSubInfo(trigger, label, detail, rec, side){
+  document.getElementById('sub-info-title').textContent = label;
+  var bodyHtml = '';
+  if(detail){
+    bodyHtml += '<div><div class="sub-info-section-label">Detail</div><div class="sub-info-section-text">'+h(_trunc(detail, 300))+'</div></div>';
+  }
+  if(rec){
+    bodyHtml += '<div><div class="sub-info-section-label">Recommendation</div><div class="sub-info-section-text rec">'+h(_trunc(rec, 300))+'</div></div>';
+  }
+  if(!bodyHtml) bodyHtml = '<div style="font-size:12px;color:var(--slate-400)">No detail available.</div>';
+  document.getElementById('sub-info-body').innerHTML = bodyHtml;
+
+  var popup = document.getElementById('sub-info-popup');
+  popup.style.display = 'block';
+
+  var r   = trigger.getBoundingClientRect();
+  var pw  = popup.offsetWidth;
+  var ph  = popup.offsetHeight;
+  var vw  = window.innerWidth;
+  var vh  = window.innerHeight;
+  var gap = 8;
+
+  // Left pillars (0-2): anchor popup bottom-left to the (?), so it opens right+upward
+  // Right pillars (3-4): anchor popup bottom-right to the (?), so it opens left+upward
+  var left, top;
+  if(side === 'right'){
+    left = r.right - pw;   // popup's right edge at button's right
+  } else {
+    left = r.left;         // popup's left edge at button's left
+  }
+  top = r.top - ph - gap;  // popup sits above the button
+
+  // Clamp to viewport
+  if(left + pw > vw - gap) left = vw - pw - gap;
+  if(left < gap)            left = gap;
+  if(top < gap)             top  = r.bottom + gap;  // flip below if no room above
+  if(top + ph > vh - gap)   top  = vh - ph - gap;
+
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+}
+
+function closeSubInfo(){
+  document.getElementById('sub-info-popup').style.display = 'none';
+}
+
+// ── AI SUMMARY (rule-based) ────────────────────────
+var PILLAR_ADVICE = {
+  data:     'Improve MMP attribution coverage — ensure unattributed postbacks and probabilistic attribution are enabled so Moloco has the signal quality needed to optimise.',
+  optim:    'Switch to weekly flexible budget and increase KPI event volume to ≥10 events/day at bundle level to give the model sufficient optimisation signal.',
+  supply:   'Review publisher/exchange block lists and ensure IFA+LAT traffic is enabled — unnecessary blocks are limiting the accessible inventory pool.',
+  creative: 'Expand creative format coverage (video, native, HTML), diversify video lengths and orientations, and refresh fatigued creatives to maximise supply and performance.',
+  dup:      'Reduce campaign overlap — this campaign is bidding on significantly shared supply with other campaigns from the same advertiser. Consolidate or differentiate targeting.'
+};
+
+function genAiSummary(c){
+  var overall = parseFloat(c.overall_score);
+  var scoreStr = isNaN(overall) ? 'an unknown' : Math.round(overall)+'/100';
+  var weak = PILLARS
+    .map(function(p){ return { id:p.id, label:p.label, score:parseFloat(c[p.key]) }; })
+    .filter(function(p){ return !isNaN(p.score); })
+    .sort(function(a,b){ return a.score-b.score; });
+
+  var lines = ['Overall Blueprint score: '+scoreStr+'.'];
+  if(!weak.length){ lines.push('No pillar scores available for this campaign.'); return lines.join(' '); }
+
+  var critical = weak.filter(function(p){ return p.score < 70; });
+  var concern  = weak.filter(function(p){ return p.score >= 70 && p.score < 90; });
+  var strong   = weak.filter(function(p){ return p.score >= 90; });
+
+  if(critical.length){
+    lines.push('Critical gaps in: '+critical.map(function(p){ return p.label+' ('+Math.round(p.score)+')'; }).join(', ')+'.');
+    critical.slice(0,2).forEach(function(p){ lines.push(PILLAR_ADVICE[p.id]); });
+  } else if(concern.length){
+    lines.push('Areas to improve: '+concern.map(function(p){ return p.label+' ('+Math.round(p.score)+')'; }).join(', ')+'.');
+    concern.slice(0,1).forEach(function(p){ lines.push(PILLAR_ADVICE[p.id]); });
+  } else {
+    lines.push('All pillars are performing well. Focus on maintaining creative freshness and monitoring for supply changes.');
+  }
+  if(strong.length && critical.length){ lines.push('Strong pillars: '+strong.map(function(p){ return p.label; }).join(', ')+'.'); }
+  return lines.join(' ');
+}
+
+// ══════════════════════════════════════════════════════
+// ACTIVATION — LOAD
+// ══════════════════════════════════════════════════════
+function loadActivation(){
+  Promise.all([
+    fetch('/api/activation').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP '+r.status)); }),
+    fetch('/api/notes').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
+  ]).then(function(results){
+    var d=results[0], notes=results[1];
+    S.act.summary   = d.summary;
+    S.act.campaigns = d.campaigns;
+    S.act.notes     = notes || {};
+    renderActivation();
+  }).catch(function(e){ showError('activation-table',e); });
+}
+
+function reloadActivation(){
+  S.act.summary=null; S.act.campaigns=null; S.act.expanded={}; _loaded.activation=false;
+  document.getElementById('activation-table').innerHTML='<div class="section-loading"><span class="spinner"></span> Reloading…</div>';
+  loadActivation();
+}
+
+function setRegion(r){
+  S.act.region=r;
+  document.querySelectorAll('.region-btn').forEach(function(b){
+    b.classList.toggle('active', b.textContent.trim()===r||(r==='ALL'&&b.textContent.trim()==='All'));
+  });
+  renderActivation();
+}
+
+// ══════════════════════════════════════════════════════
+// ACTIVATION — RENDER
+// ══════════════════════════════════════════════════════
+function renderActivation(){
+  var el  = document.getElementById('activation-table');
+  if(!S.act.summary){ el.innerHTML='<div class="section-loading"><span class="spinner"></span> Loading…</div>'; return; }
+  var r   = S.act.region;
+  var sum = S.act.summary.filter(function(x){ return r==='ALL'||x.region===r; });
+  var camps = (S.act.campaigns||[]).filter(function(x){ return r==='ALL'||x.region===r; });
+  if(!sum.length){ el.innerHTML='<div class="empty-state">No data for this region.</div>'; return; }
+
+  var totalSubCamps = sum.reduce(function(s,x){ return s+(parseInt(x.latest_suboptimal_campaigns)||0); },0);
+  var totalSubSpend = sum.reduce(function(s,x){ return s+(parseFloat(x.latest_suboptimal_spend)||0); },0);
+  var totalSpend    = sum.reduce(function(s,x){ return s+(parseFloat(x.latest_total_spend)||0); },0);
+  var pctSub        = totalSpend ? (totalSubSpend/totalSpend*100) : 0;
+  var latestDate    = sum[0]&&sum[0].latest_date ? String(sum[0].latest_date).slice(0,10) : '—';
+
+  document.getElementById('act-meta').textContent = sum.length+' advertisers · '+camps.length+' campaigns · as of '+latestDate;
+
+  var statsRow = document.getElementById('act-stats');
+  statsRow.style.display='';
+  statsRow.innerHTML=[
+    statCard('Activated Advertisers', sum.length.toString(), r==='ALL'?'across all regions':r, 'var(--indigo)'),
+    statCard('Suboptimal Campaigns', totalSubCamps.toString(), 'currently suboptimal', 'var(--red)'),
+    statCard('Suboptimal Spend', fmt$(totalSubSpend), fmtPct(pctSub)+' of total spend', 'var(--amber)'),
+    statCard('Total Spend', fmt$(totalSpend), 'across activated advertisers', 'var(--green)')
+  ].join('');
+
+  var campByAdv={};
+  camps.forEach(function(c){ if(!campByAdv[c.advertiser_id]) campByAdv[c.advertiser_id]=[]; campByAdv[c.advertiser_id].push(c); });
+
+  var html='<div class="table-wrap"><table class="at"><thead><tr>'+
+    '<th style="width:16%;min-width:140px">Advertiser</th>'+
+    '<th style="width:6%;min-width:60px">Region</th>'+
+    '<th class="r" style="width:8%">Suboptimal Camps.</th>'+
+    '<th class="r" style="width:9%">Sub. Spend</th>'+
+    '<th class="r" style="width:7%">% Spend</th>'+
+    '<th style="width:54%;min-width:260px">Notes &amp; Status</th>'+
+    '</tr></thead><tbody>';
+
+  sum.forEach(function(x){
+    var open     = !!S.act.expanded[x.advertiser_id];
+    var note     = S.act.notes[x.advertiser_id];
+    var campList = campByAdv[x.advertiser_id]||[];
+    var pct      = parseFloat(x.latest_pct_suboptimal)||0;
+    var hasSales = note&&note.sales_note;
+    var hasGds   = note&&note.gds_note;
+    var status   = note&&note.status;
+    var psoVal   = note&&(note.pso_validated==='true'||note.pso_validated===true||note.pso_validated==='1'||note.pso_validated===1);
+    var onclick  = 'openNoteModal(\''+h(x.advertiser_id)+'\',\''+h(x.advertiser_title).replace(/'/g,'&#39;')+'\')';
+
+    html+='<tr class="adv-row'+(open?' open':'')+'" onclick="toggleAdv(\''+h(x.advertiser_id)+'\')">';
+    html+='<td><div class="adv-cell"><span class="exp-icon">&#9658;</span><div><div>'+h(x.advertiser_title)+'</div><div style="font-size:10px;font-weight:400;color:var(--slate-400);margin-top:1px">'+h(x.platform_id||'—')+'</div></div></div></td>';
+    html+='<td><span class="pill pill-slate" style="font-size:10px">'+h(x.region)+'</span></td>';
+    html+='<td class="r">'+(parseInt(x.latest_suboptimal_campaigns)||0)+'</td>';
+    html+='<td class="r">'+fmt$(x.latest_suboptimal_spend)+'</td>';
+    html+='<td class="r">'+fmtPct(pct)+'</td>';
+
+    // Note cell — sticky-note card, whole cell clickable
+    var ncBar = psoVal ? 'nc-bar-pso-validated' : (status ? 'nc-bar-'+statusClass(status) : 'nc-bar-none');
+    var hasNotes = hasSales||hasGds;
+    html+='<td onclick="event.stopPropagation();'+onclick+'" style="padding:5px 10px;vertical-align:middle">';
+    if(hasNotes){
+      var jira = note&&note.jira_tickets ? note.jira_tickets : '';
+      html+='<div class="note-card '+ncBar+'">';
+      // Top row: status pill + updated timestamp
+      html+='<div class="nc-top">';
+      if(psoVal){
+        html+='<span class="pill note-status-pso-validated">✓ PSO Validated</span>';
+      } else if(status){
+        html+='<span class="pill note-status-'+statusClass(status)+'">'+h(status)+'</span>';
+      }
+      if(note&&note.updated_at){
+        var updStr = note.updated_at ? relTime_(note.updated_at) : '';
+        if(updStr) html+='<span style="font-size:10px;color:var(--slate-400)">· '+h(updStr)+'</span>';
+      }
+      html+='</div>';
+      // Sales note preview
+      if(hasSales){
+        html+='<div class="nc-preview"><span class="nc-preview-label">Sales</span>'+h(truncate_(note.sales_note, 90))+'</div>';
+      }
+      // GDS note preview
+      if(hasGds){
+        html+='<div class="nc-preview nc-preview-gds"><span class="nc-preview-label" style="color:#7c3aed">GDS</span>'+h(truncate_(note.gds_note, 90))+'</div>';
+      }
+      // Jira tag
+      if(jira){
+        html+='<div style="margin-top:4px"><span style="font-size:10px;background:#ede9fe;color:#5b21b6;border-radius:4px;padding:1px 6px;font-weight:600">🎫 '+h(jira)+'</span></div>';
+      }
+      html+='<span class="nc-edit">✎ Edit</span>';
+      html+='</div>';
+    } else {
+      html+='<div class="note-card nc-empty '+ncBar+'">';
+      html+='<div style="font-size:11px;color:var(--slate-400)">+ Add notes</div>';
+      html+='</div>';
+    }
+    html+='</td>';
+    html+='</tr>';
+
+    if(open){
+      var aiText = genActSummary(x, campList);
+      var gm = '';
+      for(var gi=0;gi<campList.length;gi++){ if(campList[gi].gm){ gm=campList[gi].gm; break; } }
+      var psoVal = note&&(note.pso_validated==='true'||note.pso_validated===true||note.pso_validated==='1'||note.pso_validated===1);
+
+      html+='<tr><td colspan="6" style="padding:0;border:none">';
+      html+='<div style="background:var(--slate-50);border-left:3px solid var(--indigo);padding:12px 18px;font-size:12px;color:var(--slate-700);line-height:1.6;display:flex;gap:20px;align-items:flex-start">';
+      html+='<div style="flex:1"><strong style="display:block;margin-bottom:4px;color:var(--slate-800)">Summary</strong>'+h(aiText)+'</div>';
+      if(gm) html+='<div style="flex-shrink:0;background:#fff;border:1px solid var(--slate-200);border-radius:8px;padding:8px 12px;font-size:11px;text-align:center"><div style="color:var(--slate-400);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:3px">GM</div><div style="color:var(--slate-800);font-weight:600">'+h(gm)+'</div></div>';
+      if(psoVal) html+='<div style="flex-shrink:0;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;font-size:11px;color:#166534;font-weight:600;text-align:center">✓ PSO Validated<br><span style="font-weight:400;font-size:10px">Product Need</span></div>';
+      html+='</div></td></tr>';
+
+      // Partition campaigns into groups — drop zero-spend campaigns entirely
+      var activeCamps=[], resolvedCamps=[], noIssueCamps=[];
+      campList.filter(function(c){
+        return parseFloat(c.latest_spend_L7)||0 > 0;
+      }).forEach(function(c){
+        var st = c.campaign_status==='Paused'?'Paused':(c.change_status||'');
+        var suboptimal = c.latest_is_suboptimal==='true'||c.latest_is_suboptimal===true||c.latest_is_suboptimal==='1'||c.latest_is_suboptimal===1;
+        if(st==='No issue') noIssueCamps.push(c);
+        else if(st==='New campaign' && !suboptimal) noIssueCamps.push(c);
+        else if(st==='Resolved') resolvedCamps.push(c);
+        else activeCamps.push(c);
+      });
+      var showNI = !!S.act.showNoIssue[x.advertiser_id];
+
+      html+='<tr><td colspan="6" style="padding:0;border:none"><table class="at" style="border:none;border-radius:0">'+
+        '<thead><tr style="background:var(--slate-700)">'+
+        '<th style="padding-left:30px;min-width:200px">Campaign</th>'+
+        '<th style="min-width:90px">Status</th>'+
+        '<th class="r" style="min-width:80px">Spend L7</th>'+
+        '<th style="width:30%;min-width:180px">Issue</th>'+
+        '<th style="width:25%;min-width:150px">Action</th>'+
+        '<th style="min-width:60px">MCP</th>'+
+        '</tr></thead><tbody>';
+
+      function campRow(c, extraClass){
+        var st = c.campaign_status==='Paused'?'Paused':(c.change_status||'—');
+        var suboptimal = c.latest_is_suboptimal==='true'||c.latest_is_suboptimal===true||c.latest_is_suboptimal==='1'||c.latest_is_suboptimal===1;
+        var cls = 'camp-sub'+(suboptimal?' sub-flag':'')+(extraClass?' '+extraClass:'');
+        var issueStyle = 'font-size:11px;color:var(--slate-600);white-space:normal;line-height:1.4;word-break:break-word;overflow-wrap:break-word';
+        var recStyle   = 'font-size:11px;color:var(--slate-500);white-space:normal;line-height:1.4;word-break:break-word;overflow-wrap:break-word';
+        return '<tr class="'+cls+'">'
+          +'<td style="padding-left:30px">'+h(c.campaign_title||c.campaign_id)+'</td>'
+          +'<td>'+csStatusPill(st)+'</td>'
+          +'<td class="r">'+fmt$(c.latest_spend_L7)+'</td>'
+          +'<td style="'+issueStyle+'">'+h(c.issue_detail||'—')+'</td>'
+          +'<td style="'+recStyle+'">'+h(c.recommendations||'—')+'</td>'
+          +'<td>'+(c.mcp_link?'<a href="'+h(c.mcp_link)+'" target="_blank" style="font-size:11px">Open &#8599;</a>':'—')+'</td>'
+          +'</tr>';
+      }
+
+      if(activeCamps.length){
+        activeCamps.forEach(function(c){ html+=campRow(c,''); });
+      }
+      if(resolvedCamps.length){
+        html+='<tr><td colspan="6" class="act-section-label">Resolved ('+resolvedCamps.length+')</td></tr>';
+        resolvedCamps.forEach(function(c){ html+=campRow(c,'camp-resolved'); });
+      }
+      if(noIssueCamps.length){
+        html+='<tr><td colspan="6" class="act-section-label" style="cursor:pointer" onclick="toggleNoIssue(\''+h(x.advertiser_id)+'\')">'
+          +(showNI?'▾':'▸')+' No Issues / New (no flag) ('+noIssueCamps.length+') — click to '+(showNI?'hide':'show')+'</td></tr>';
+        if(showNI) noIssueCamps.forEach(function(c){ html+=campRow(c,'camp-resolved'); });
+      }
+      if(!activeCamps.length&&!resolvedCamps.length&&!noIssueCamps.length){
+        html+='<tr class="camp-sub"><td colspan="6" style="color:var(--slate-400);font-style:italic">No campaigns found.</td></tr>';
+      }
+      html+='</tbody></table></td></tr>';
+    }
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+function genActSummary(x, campList){
+  var parts=[];
+  var subCamps   = parseInt(x.latest_suboptimal_campaigns)||0;
+  var totalCamps = parseInt(x.latest_campaigns)||0;
+  var pct        = parseFloat(x.latest_pct_suboptimal)||0;
+  var totalSpend = parseFloat(x.latest_total_spend)||0;
+  if(subCamps===0){
+    parts.push('All '+(totalCamps||campList.length)+' campaigns are performing within acceptable thresholds. No suboptimal spend detected.');
+  } else {
+    parts.push(subCamps+' of '+totalCamps+' campaign'+(totalCamps!==1?'s':'')+' ('+fmtPct(pct)+' of '+fmt$(totalSpend)+') are currently suboptimal.');
+  }
+  var supplyBlocks = campList.filter(function(c){
+    return c.latest_flag_supply_block==='true'||c.latest_flag_supply_block===true||c.latest_flag_supply_block==='1'||c.latest_flag_supply_block===1;
+  });
+  var dupIssues = campList.filter(function(c){
+    return c.latest_duplication_type&&c.latest_duplication_type!==''&&c.latest_duplication_type!=='None'&&c.latest_duplication_type!=='none';
+  });
+  if(supplyBlocks.length) parts.push(supplyBlocks.length+' campaign'+(supplyBlocks.length!==1?'s have':' has')+' supply blocks detected.');
+  if(dupIssues.length){
+    var types=[];
+    dupIssues.forEach(function(c){ if(types.indexOf(c.latest_duplication_type)<0) types.push(c.latest_duplication_type); });
+    parts.push(dupIssues.length+' campaign'+(dupIssues.length!==1?'s have':' has')+' duplication issues ('+types.join(', ')+').');
+  }
+  var paused = campList.filter(function(c){ return c.campaign_status==='Paused'; });
+  if(paused.length) parts.push(paused.length+' campaign'+(paused.length!==1?'s are':' is')+' currently paused.');
+  return parts.join(' ');
+}
+
+function toggleAdv(advId){ S.act.expanded[advId]=!S.act.expanded[advId]; renderActivation(); }
+function toggleNoIssue(advId){ S.act.showNoIssue[advId]=!S.act.showNoIssue[advId]; renderActivation(); }
+
+function toggleActExplainer(){
+  var body = document.getElementById('act-explainer-body');
+  var chev = document.getElementById('act-explainer-chevron');
+  if(!body) return;
+  var open = body.style.display!=='none';
+  body.style.display = open ? 'none' : 'block';
+  if(chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function csStatusPill(cs){
+  var map={'Resolved':'cs-resolved','Still suboptimal':'cs-still','New issue':'cs-new-issue','New campaign':'cs-new-camp','Paused':'cs-paused','No issue':'cs-no-issue'};
+  return '<span class="pill '+(map[cs]||'pill-gray')+'">'+h(cs)+'</span>';
+}
+
+function noteBadge(advId, advTitle, note){
+  var hasSales = note&&note.sales_note;
+  var hasGds   = note&&note.gds_note;
+  var hasNote  = hasSales||hasGds;
+  var status   = note&&note.status ? note.status : null;
+  var psoVal   = note&&(note.pso_validated==='true'||note.pso_validated===true||note.pso_validated==='1'||note.pso_validated===1);
+  var onclick  = 'openNoteModal(\''+h(advId)+'\',\''+h(advTitle).replace(/'/g,'&#39;')+'\')';
+  if(hasNote){
+    var inner = '';
+    if(psoVal) inner += '<span class="pill note-status-pso-validated" style="margin-right:4px">✓ PSO Validated</span>';
+    else if(status) inner += '<span class="pill note-status-'+statusClass(status)+'" style="margin-right:4px">'+h(status)+'</span>';
+    inner += '✎ Edit';
+    return '<span class="note-badge has-note" onclick="'+onclick+'">'+inner+'</span>';
+  }
+  return '<span class="note-badge" onclick="'+onclick+'">+ Add Note</span>';
+}
+
+function truncate_(s, n){ s=String(s||''); return s.length>n ? s.slice(0,n)+'…' : s; }
+
+function relTime_(iso){
+  try{
+    var d = new Date(iso); if(isNaN(d)) return '';
+    var diff = Math.round((Date.now()-d)/86400000);
+    if(diff===0) return 'today';
+    if(diff===1) return '1 day ago';
+    if(diff<30)  return diff+' days ago';
+    if(diff<60)  return '1 month ago';
+    return Math.round(diff/30)+' months ago';
+  }catch(e){ return ''; }
+}
+
+function statusClass(s){
+  var map={
+    'Not Started':'not-started',
+    'In Discussion':'discussion',
+    'Partly Resolved':'partly',
+    'Fully Resolved':'fully',
+    'Blocked':'blocked',
+    'Temporarily Blocked - Product Need':'temp-blocked'
+  };
+  return map[s]||'not-started';
+}
+
+// ══════════════════════════════════════════════════════
+// NOTES MODAL
+// ══════════════════════════════════════════════════════
+function openNoteModal(advId, advTitle){
+  S.noteModal.advertiserId=advId; S.noteModal.advertiserTitle=advTitle;
+  document.getElementById('modal-title').textContent='Note — '+advTitle;
+  document.getElementById('modal-sub').textContent=advId;
+  var ex=S.act.notes[advId];
+  document.getElementById('modal-sales-note').value   = ex?(ex.sales_note||''):'';
+  document.getElementById('modal-gds-note').value     = ex?(ex.gds_note||''):'';
+  document.getElementById('modal-status').value       = ex?(ex.status||'Not Started'):'Not Started';
+  document.getElementById('modal-jira').value         = ex?(ex.jira_tickets||''):'';
+  document.getElementById('modal-pso-validated').checked = ex?(ex.pso_validated==='true'||ex.pso_validated===true||ex.pso_validated==='1'||ex.pso_validated===1):false;
+  document.getElementById('note-modal').classList.add('open');
+}
+function closeNoteModal(){ document.getElementById('note-modal').classList.remove('open'); }
+function submitNote(){
+  var salesNote    = document.getElementById('modal-sales-note').value.trim();
+  var gdsNote      = document.getElementById('modal-gds-note').value.trim();
+  var status       = document.getElementById('modal-status').value;
+  var jiraTickets  = document.getElementById('modal-jira').value.trim();
+  var psoValidated = document.getElementById('modal-pso-validated').checked;
+  var advId=S.noteModal.advertiserId, advTitle=S.noteModal.advertiserTitle;
+  if(!advId) return;
+  S.act.notes[advId]={ advertiser_id:advId, advertiser_title:advTitle, sales_note:salesNote, gds_note:gdsNote, status:status, jira_tickets:jiraTickets, pso_validated:psoValidated, updated_by:'', updated_at:new Date().toISOString() };
+  closeNoteModal(); renderActivation();
+  fetch('/api/notes', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ advertiser_id:advId, advertiser_title:advTitle, sales_note:salesNote, gds_note:gdsNote, status:status, jira_tickets:jiraTickets, pso_validated:psoValidated })
+  }).catch(function(e){ alert('Failed to save note: '+(e.message||e)); });
+}
+document.getElementById('note-modal').addEventListener('click',function(e){ if(e.target===this) closeNoteModal(); });
+
+// ══════════════════════════════════════════════════════
+// DOWNLOAD POPUP
+// ══════════════════════════════════════════════════════
+function toggleDownloadPopup(e){
+  e.stopPropagation();
+  var p = document.getElementById('download-popup');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e){
+  var wrap = document.querySelector('.dl-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    var p = document.getElementById('download-popup');
+    if(p) p.style.display = 'none';
+  }
+});
+
+// Build SQL WHERE conditions from the current filter state.
+// Returns an array of SQL condition strings (AND-able).
+function buildFilterConditions(){
+  var conds = [];
+  var sq = function(v){ return v.replace(/'/g, "''"); };
+
+  var region   = document.getElementById('f-region').value;
+  var office   = document.getElementById('f-office').value;
+  var pod      = document.getElementById('f-pod').value;
+  var vertical = document.getElementById('f-vertical').value;
+  var os       = document.getElementById('f-os').value;
+
+  if(region)   conds.push("office_region = '" + sq(region) + "'");
+  if(office)   conds.push("office = '"        + sq(office) + "'");
+  if(pod)      conds.push("growth_pod = '"    + sq(pod)    + "'");
+  if(vertical) conds.push("vertical = '"      + sq(vertical) + "'");
+  if(os)       conds.push("os = '"            + sq(os)       + "'");
+
+  var platSel = _msSel['platform'];
+  var advSel  = _msSel['advertiser'];
+  var appSel  = _msSel['app'];
+  var campSel = _msSel['campaign'];
+
+  if(platSel !== null && platSel.size > 0){
+    var vals = Array.from(platSel).map(function(v){ return "'" + sq(v) + "'"; }).join(', ');
+    conds.push("platform_id IN (" + vals + ")");
+  }
+  if(advSel !== null && advSel.size > 0){
+    var vals = Array.from(advSel).map(function(v){ return "'" + sq(v) + "'"; }).join(', ');
+    conds.push("advertiser_title IN (" + vals + ")");
+  }
+  if(appSel !== null && appSel.size > 0){
+    var vals = Array.from(appSel).map(function(v){ return "'" + sq(v) + "'"; }).join(', ');
+    conds.push("app_name IN (" + vals + ")");
+  }
+  if(campSel !== null && campSel.size > 0){
+    // Campaign values are stored as "title  (campaign_id)" — extract the ID from inside the last parens
+    var ids = Array.from(campSel).map(function(v){
+      var m = v.match(/\(([^)]+)\)\s*$/);
+      return m ? "'" + sq(m[1]) + "'" : null;
+    }).filter(Boolean).join(', ');
+    if(ids) conds.push("campaign_id IN (" + ids + ")");
+  }
+  return conds;
+}
+
+var _COMBINED_SQL_TEMPLATE = [
+"SELECT",
+"  campaign_id,",
+"  ANY_VALUE(campaign_title)         AS campaign_title,",
+"  ANY_VALUE(campaign_goal)          AS campaign_goal,",
+"  ANY_VALUE(advertiser_id)          AS advertiser_id,",
+"  ANY_VALUE(advertiser_title)       AS advertiser_title,",
+"  ANY_VALUE(platform_id)            AS platform_id,",
+"  ANY_VALUE(office_region)          AS office_region,",
+"  ANY_VALUE(office)                 AS office,",
+"  ANY_VALUE(growth_pod)             AS growth_pod,",
+"  ANY_VALUE(gm)                     AS gm,",
+"  ANY_VALUE(vertical)               AS vertical,",
+"  ANY_VALUE(sub_genre)              AS sub_vertical,",
+"  ANY_VALUE(genre)                  AS genre,",
+"  ANY_VALUE(app_name)               AS app_name,",
+"  ANY_VALUE(product_id)             AS product_id,",
+"  ANY_VALUE(os)                     AS os,",
+"  ANY_VALUE(mmp_name)               AS mmp_name,",
+"  MAX(spend_L7)                     AS spend_l7,",
+"  ANY_VALUE(overall_blueprint_score) AS overall_score,",
+"  AVG(IF(pillar = 'data_and_signals',      score, NULL)) AS pillar_data_signals,",
+"  AVG(IF(pillar = 'optimization_strategy', score, NULL)) AS pillar_opt_strategy,",
+"  AVG(IF(pillar = 'supply',                score, NULL)) AS pillar_supply,",
+"  AVG(IF(pillar = 'creative',              score, NULL)) AS pillar_creative,",
+"  AVG(IF(pillar = 'duplication',           score, NULL)) AS pillar_duplication,",
+"  MAX(IF(blueprint_index = '1_signal_quality',                         score, NULL)) AS score_signal_quality,",
+"  MAX(IF(blueprint_index = '2_unattributed_installs',                  score, NULL)) AS score_unattrib,",
+"  MAX(IF(blueprint_index = '3_probabilistic_attribution',              score, NULL)) AS score_prob_attr,",
+"  MAX(IF(blueprint_index = '1_budget_mode',                            score, NULL)) AS score_budget_mode,",
+"  MAX(IF(blueprint_index = '2_kpi_event_volume',                       score, NULL)) AS score_kpi_events,",
+"  MAX(IF(blueprint_index = '1_target_accessible_supply_bidreq_score',  score, NULL)) AS score_target_supply,",
+"  MAX(IF(blueprint_index = '2_traffic_accessible_supply_bidreq_score', score, NULL)) AS score_traffic_supply,",
+"  MAX(IF(blueprint_index = '3_os_coverage_supply_score',               score, NULL)) AS score_os_coverage,",
+"  MAX(IF(blueprint_index = '1_creative_format_adoption',               score, NULL)) AS score_creative_format,",
+"  MAX(IF(blueprint_index = '2_1_video_length_mix',                     score, NULL)) AS score_video_length,",
+"  MAX(IF(blueprint_index = '2_2_video_orientation_mix',                score, NULL)) AS score_video_orient,",
+"  MAX(IF(blueprint_index = '2_3_video_end_cards_mix',                  score, NULL)) AS score_video_endcards,",
+"  MAX(IF(blueprint_index = '3_1_image_dimension_mix',                  score, NULL)) AS score_image_dims,",
+"  MAX(IF(blueprint_index = '4_1_creative_fatigue',                     score, NULL)) AS score_creative_fatigue,",
+"  MAX(IF(blueprint_index = '5_1_campaign_duplication',                 score, NULL)) AS score_duplication,",
+"  MAX(IF(blueprint_index = '1_signal_quality',                         detail, NULL)) AS detail_signal,",
+"  MAX(IF(blueprint_index = '2_unattributed_installs',                  detail, NULL)) AS detail_unattrib,",
+"  MAX(IF(blueprint_index = '3_probabilistic_attribution',              detail, NULL)) AS detail_prob_attr,",
+"  MAX(IF(blueprint_index = '1_budget_mode',                            detail, NULL)) AS detail_budget_mode,",
+"  MAX(IF(blueprint_index = '2_kpi_event_volume',                       detail, NULL)) AS detail_kpi_events,",
+"  MAX(IF(blueprint_index = '1_target_accessible_supply_bidreq_score',  detail, NULL)) AS detail_target_supply,",
+"  MAX(IF(blueprint_index = '1_creative_format_adoption',               detail, NULL)) AS detail_creative_format,",
+"  MAX(IF(blueprint_index = '4_1_creative_fatigue',                     detail, NULL)) AS detail_creative_fatigue,",
+"  MAX(IF(blueprint_index = '5_1_campaign_duplication',                 detail, NULL)) AS detail_duplication,",
+"  MAX(IF(blueprint_index = '1_signal_quality',                         recommendations, NULL)) AS rec_signal,",
+"  MAX(IF(blueprint_index = '2_unattributed_installs',                  recommendations, NULL)) AS rec_unattrib,",
+"  MAX(IF(blueprint_index = '3_probabilistic_attribution',              recommendations, NULL)) AS rec_prob_attr,",
+"  MAX(IF(blueprint_index = '1_budget_mode',                            recommendations, NULL)) AS rec_budget_mode,",
+"  MAX(IF(blueprint_index = '2_kpi_event_volume',                       recommendations, NULL)) AS rec_kpi_events,",
+"  MAX(IF(blueprint_index = '1_target_accessible_supply_bidreq_score',  recommendations, NULL)) AS rec_target_supply,",
+"  MAX(IF(blueprint_index = '1_creative_format_adoption',               recommendations, NULL)) AS rec_creative_format,",
+"  MAX(IF(blueprint_index = '4_1_creative_fatigue',                     recommendations, NULL)) AS rec_creative_fatigue,",
+"  MAX(IF(blueprint_index = '5_1_campaign_duplication',                 recommendations, NULL)) AS rec_duplication",
+"FROM `moloco-ods.alaricjames.project_blueprint_combined_data`",
+"WHERE spend_L7 > 0",
+"{extra_where}",
+"GROUP BY campaign_id",
+"ORDER BY spend_l7 DESC"
+].join('\n');
+
+function buildDownloadSQL(){
+  var conds = buildFilterConditions();
+  var extra = conds.length ? '  AND ' + conds.join('\n  AND ') : '';
+  return _COMBINED_SQL_TEMPLATE.replace('{extra_where}', extra);
+}
+
+function downloadQuery(){
+  document.getElementById('download-popup').style.display = 'none';
+  var sql = buildDownloadSQL();
+  var blob = new Blob([sql], {type: 'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'blueprint_query.sql';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function downloadCSV(){
+  document.getElementById('download-popup').style.display = 'none';
+  var conds = buildFilterConditions();
+  fetch('/api/scores/download', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({conditions: conds})
+  })
+  .then(function(r){
+    if(!r.ok) return r.text().then(function(t){ throw new Error('HTTP '+r.status+': '+t); });
+    return r.blob();
+  })
+  .then(function(blob){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'blueprint_scores.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  })
+  .catch(function(e){ alert('Download failed: '+(e.message||e)); });
+}
+</script>
+</body>
+</html>
+

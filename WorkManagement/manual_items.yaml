@@ -1,0 +1,15 @@
+# Manual work items — hand-edit this file
+# These survive across refreshes and are always human_confirmed = true
+# Run /api/refresh after editing to pick up changes
+
+items:
+  # Example:
+  # - id: manual:example-1
+  #   title: "Prepare KOR GDS weekly report"
+  #   bucket: 1          # 1=Todo 2=Ongoing 3=Pending 4=Delegated 5=Deprioritized
+  #   status_flag: soon  # see plan.md for valid flags per bucket
+  #   due_date: "2026-04-11"
+  #   source_url: ""
+  #   context: "Weekly cadence, send to leadership by Friday"
+  #   tags: [reporting, weekly]
+  #   notes: ""

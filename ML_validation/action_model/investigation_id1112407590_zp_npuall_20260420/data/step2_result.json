@@ -1,0 +1,11 @@
+{
+  "step": 2,
+  "verdict": "OK",
+  "metadata_file": "gs://tfexample-action/metadata_versions/meta_data_042005.pbtxt",
+  "bundle_registered": true,
+  "events": [
+    {"event": "zp_npuall", "action_event_type": "ACTION_EVENT_KPI", "is_live_campaign_goal": true, "backfill_start_millis": 0},
+    {"event": "login_success", "action_event_type": "ACTION_EVENT_KPI", "is_live_campaign_goal": true, "backfill_start_millis": 0},
+    {"event": "cashloan_register", "action_event_type": "ACTION_EVENT_KPI", "is_live_campaign_goal": true, "backfill_start_millis": 0}
+  ]
+}

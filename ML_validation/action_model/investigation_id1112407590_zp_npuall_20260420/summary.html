@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Action Model Investigation — id1112407590 × ios × zp_npuall (2026-04-20)</title>
+<style>
+  :root {
+    --bg: #f5f6fa; --card: #ffffff; --header: #1a1d2e; --accent: #4f6ef7;
+    --border: #e2e6f0; --text: #23263a; --muted: #6b7280;
+    --mono: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+  #sidebar { width: 230px; min-width: 230px; background: var(--header); color: #c9d0e6; padding: 24px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  #sidebar .logo { padding: 0 20px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #7c85b3; border-bottom: 1px solid #2c3054; }
+  #sidebar nav { padding-top: 12px; }
+  #sidebar nav a { display: flex; align-items: center; gap: 8px; padding: 8px 20px; text-decoration: none; color: #9aa3c8; font-size: 13px; transition: background 0.15s; }
+  #sidebar nav a:hover { background: #252a48; color: #e0e4f7; }
+  #sidebar nav a.active { background: #2f3560; color: #ffffff; border-left: 3px solid var(--accent); }
+  .badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 9px; }
+  .b-ok { background: #16a34a; color: #fff; } .b-warn { background: #d97706; color: #fff; }
+  .b-fail { background: #dc2626; color: #fff; } .b-info { background: #4f6ef7; color: #fff; }
+  #main { flex: 1; padding: 32px 40px; max-width: 1120px; }
+  .page-header { background: var(--header); color: #fff; border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; }
+  .page-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .resolved-banner { background: #16a34a; color: #fff; border-radius: 8px; padding: 10px 16px; margin-top: 12px; font-size: 13px; font-weight: 600; display: inline-block; }
+  .meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .meta-item { background: rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 12px; font-size: 13px; }
+  .meta-item span { color: #9aa3c8; font-size: 11px; display: block; }
+  .alert { border-radius: 10px; padding: 18px 22px; margin-bottom: 20px; border-left: 5px solid; }
+  .alert-success { background: #f0fdf4; border-color: #16a34a; }
+  .alert-info { background: #eff6ff; border-color: #4f6ef7; }
+  .alert-warn { background: #fffbeb; border-color: #d97706; }
+  .alert h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .alert p { font-size: 13.5px; line-height: 1.7; color: #374151; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .step-badge { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 5px; font-family: var(--mono); }
+  .card-header h2 { font-size: 16px; font-weight: 700; flex: 1; }
+  .verdict { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9px; }
+  .v-ok { background: #dcfce7; color: #15803d; } .v-warn { background: #fef3c7; color: #92400e; }
+  .v-fail { background: #fee2e2; color: #991b1b; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8f9fc; text-align: left; padding: 9px 12px; font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbff; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9px; }
+  .pill-active { background: #dcfce7; color: #15803d; } .pill-paused { background: #fee2e2; color: #991b1b; }
+  .pill-null { background: #f1f5f9; color: #475569; } .pill-ok { background: #dcfce7; color: #15803d; }
+  .pill-fail { background: #fee2e2; color: #991b1b; } .pill-warn { background: #fef3c7; color: #92400e; }
+  .pill-real { background: #dbeafe; color: #1e40af; } .pill-fallback { background: #ffedd5; color: #9a3412; }
+  .pill-lat { background: #fae8ff; color: #7c3aed; } .pill-action { background: #e0f2fe; color: #0369a1; }
+  .change-row { background: #f0fdf4 !important; }
+  pre { background: #1e2235; color: #c9d7f0; padding: 16px 18px; border-radius: 8px; font-family: var(--mono); font-size: 12px; overflow-x: auto; line-height: 1.5; margin-top: 12px; }
+  code { font-family: var(--mono); font-size: 12px; background: #f1f5f9; padding: 2px 5px; border-radius: 3px; }
+  .source { font-size: 11px; color: var(--muted); margin-top: 12px; font-family: var(--mono); }
+  .delta { font-size: 11px; font-weight: 700; color: #15803d; }
+  .timeline { list-style: none; }
+  .timeline li { display: flex; gap: 14px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .timeline li:last-child { border-bottom: none; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .dot-green { background: #16a34a; } .dot-red { background: #dc2626; }
+  .dot-yellow { background: #d97706; } .dot-blue { background: #4f6ef7; } .dot-gray { background: #9ca3af; }
+  .tl-date { font-size: 12px; font-family: var(--mono); color: var(--muted); width: 175px; flex-shrink: 0; }
+  .tl-text { font-size: 13px; line-height: 1.5; }
+  section { scroll-margin-top: 20px; }
+</style>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="logo">Action Model Investigation</div>
+  <nav>
+    <a href="#header"><span class="badge b-info">HDR</span> Overview</a>
+    <a href="#rootcause"><span class="badge b-ok">✓</span> Diagnosis</a>
+    <a href="#step0"><span class="badge b-ok">0</span> Campaign Audit <span class="badge b-ok">OK</span></a>
+    <a href="#step1"><span class="badge b-ok">1</span> Postbacks <span class="badge b-ok">OK</span></a>
+    <a href="#step2"><span class="badge b-ok">2</span> Training Scope <span class="badge b-ok">OK</span></a>
+    <a href="#step3"><span class="badge b-ok">3</span> Training Data <span class="badge b-ok">OK</span></a>
+    <a href="#step4"><span class="badge b-ok">4</span> Eval Files <span class="badge b-ok">OK</span></a>
+    <a href="#step5"><span class="badge b-ok">5</span> Serving pbtxt <span class="badge b-ok">OK</span></a>
+    <a href="#step6"><span class="badge b-ok">6</span> Pricing Model <span class="badge b-ok">OK</span></a>
+    <a href="#progression">Progression vs Apr 17</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#sources">Data Sources</a>
+  </nav>
+</nav>
+
+<div id="main">
+  <section id="header">
+    <div class="page-header">
+      <h1>Action Model Investigation</h1>
+      <div class="resolved-banner">✓ RESOLVED — Graduated to BIDLOG Normalizer (2026-04-20)</div>
+      <div class="meta">
+        <div class="meta-item"><span>Bundle</span>id1112407590</div>
+        <div class="meta-item"><span>OS</span>ios</div>
+        <div class="meta-item"><span>Event</span>zp_npuall</div>
+        <div class="meta-item"><span>Campaign</span>RGPQHVtHfPNlSXcU</div>
+        <div class="meta-item"><span>Date</span>2026-04-20</div>
+        <div class="meta-item"><span>App</span>ZaloPay (Finance / IAP)</div>
+        <div class="meta-item"><span>Prior Investigation</span>2026-04-17</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rootcause">
+    <div class="alert alert-success">
+      <h3>Diagnosis — Action Model Fully Operational</h3>
+      <p>Campaign <code>RGPQHVtHfPNlSXcU</code> has graduated from a <strong>fallback normalizer to a BIDLOG-backed normalizer</strong> since the 2026-04-17 investigation. All 5 prediction horizons (D1/D3/D7/D14/D28) now show <code>normalizer_data_source: BIDLOG</code> with 64,287 bid-log examples. The campaign is actively serving with millions of impressions per day, and the action model is applied correctly for LAT traffic (<code>TYPE_ACTION_LAT</code>) and IFA traffic (<code>TYPE_ACTION</code>).</p>
+    </div>
+    <div class="alert alert-info">
+      <h3>What changed between Apr 17 and Apr 20</h3>
+      <p>
+        <strong>Apr 17:</strong> Campaign had just become ACTIVE. Empty <code>pb_eval_info {}</code> and <code>bid_eval_info {}</code> — fallback normalizer 0.3138 for D7.<br><br>
+        <strong>Apr 18–19:</strong> Campaign served at scale — 800K–1M LAT impressions/day accumulated bid-log data. Training examples grew from 234K (1 day) to 1.47M (4 days).<br><br>
+        <strong>Apr 20 04:45 UTC:</strong> Latest model deployment (<code>action_consol_v2_lat_cpu_cont/1776660333</code>) includes bid-log eval data (64,287 examples) and campaign-specific BIDLOG normalizers for all horizons. Fallback normalizer replaced.
+      </p>
+    </div>
+    <div class="alert alert-warn">
+      <h3>Note: No pb_eval data for LAT model (expected behavior)</h3>
+      <p>The LAT model's postback eval (<code>evaluations_per_key.tsv</code>) remains NOT FOUND. This is expected: the LAT model uses <code>campaignlog</code> (Moloco-attributed impressions) as its pb_eval source, not organic MMP postbacks. The IFA model's <code>ifa_cont</code> variant shows bid-log eval data (293K examples) — this confirms the IFA path is also calibrated. Only <code>ifa_cpu_cont</code> is missing bid-log eval.</p>
+    </div>
+  </section>
+
+  <section id="step0">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 0</span><h2>Campaign Audit</h2><span class="verdict v-ok">OK</span></div>
+      <table>
+        <thead><tr><th>Campaign</th><th>KPI Actions</th><th>State (latest)</th><th>inactive_since</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr class="change-row">
+            <td><strong><code>RGPQHVtHfPNlSXcU</code></strong> ★</td>
+            <td><code>zp_npuall</code></td>
+            <td><span class="pill pill-active">ACTIVE</span> (×3 today)</td>
+            <td>—</td>
+            <td>State transitions at 00:35, 02:21, 02:41 UTC on Apr 20 — continuously active.</td>
+          </tr>
+          <tr>
+            <td><code>f6EhdMGNHwGpKD4l</code></td>
+            <td><code>zp_npuall</code></td>
+            <td><span class="pill pill-null">unknown (no 30d history)</span></td>
+            <td>—</td>
+            <td>Last entity_history: 2026-03-31. Likely pre-launch.</td>
+          </tr>
+          <tr>
+            <td><code>Nu3RqJ9SKxUQHmK4</code></td>
+            <td><code>zp_npuall</code></td>
+            <td><span class="pill pill-paused">PAUSED</span></td>
+            <td>2026-04-09 06:58 UTC (11d ago)</td>
+            <td>Within 60d scope window.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="source">Source: focal-elf-631.prod.campaign_digest_merged_latest + focal-elf-631.entity_history.prod_entity_history</p>
+    </div>
+  </section>
+
+  <section id="step1">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 1</span><h2>Postback Existence</h2><span class="verdict v-ok">OK</span></div>
+      <p style="font-size:13px; margin-bottom:14px;">14/14 days covered. Volume up to 4,917/day (still rising). Total 14d: ~59,203 postbacks.</p>
+      <table>
+        <thead><tr><th>Date</th><th>Count</th><th>Date</th><th>Count</th><th>Date</th><th>Count</th><th>Date</th><th>Count</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>2026-04-20</td><td>4,917</td>
+            <td>2026-04-16</td><td>4,430</td>
+            <td>2026-04-12</td><td>4,177</td>
+            <td>2026-04-08</td><td>3,649</td>
+          </tr>
+          <tr>
+            <td>2026-04-19</td><td>4,661</td>
+            <td>2026-04-15</td><td>4,079</td>
+            <td>2026-04-11</td><td>4,219</td>
+            <td>2026-04-07</td><td>3,553</td>
+          </tr>
+          <tr>
+            <td>2026-04-18</td><td>4,512</td>
+            <td>2026-04-14</td><td>3,978</td>
+            <td>2026-04-10</td><td>3,747</td>
+            <td></td><td></td>
+          </tr>
+          <tr>
+            <td>2026-04-17</td><td>4,600</td>
+            <td>2026-04-13</td><td>4,072</td>
+            <td>2026-04-09</td><td>3,608</td>
+            <td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="source">Source: focal-elf-631.df_accesslog.pb</p>
+    </div>
+  </section>
+
+  <section id="step2">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 2</span><h2>Bundle Registry (meta_data.pbtxt)</h2><span class="verdict v-ok">OK</span></div>
+      <table>
+        <thead><tr><th>Event</th><th>action_event_type</th><th>is_live_campaign_goal</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr class="change-row"><td><code>zp_npuall</code></td><td>ACTION_EVENT_KPI</td><td>true</td><td><span class="pill pill-ok">In scope + live</span></td></tr>
+          <tr><td><code>login_success</code></td><td>ACTION_EVENT_KPI</td><td>true</td><td><span class="pill pill-ok">In scope + live</span></td></tr>
+          <tr><td><code>cashloan_register</code></td><td>ACTION_EVENT_KPI</td><td>true</td><td><span class="pill pill-ok">In scope + live</span></td></tr>
+        </tbody>
+      </table>
+      <p class="source">Source: gs://tfexample-action/metadata_versions/meta_data_042005.pbtxt (2026-04-20 05:xx UTC)</p>
+    </div>
+  </section>
+
+  <section id="step3">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 3</span><h2>Training Data</h2><span class="verdict v-ok">OK</span></div>
+      <p style="font-size:13px; margin-bottom:14px; color:#374151;">Training data grew from 1 day (234K examples on Apr 14) to <strong>4 days (1.47M total examples)</strong>. Training examples continue to come from multi-label scope (non-zp_npuall campaigns on same bundle), but volume is now sufficient for model calibration. Campaign RGPQHVtHfPNlSXcU itself contributes via bid-log eval (see Step 4) even though it doesn't appear as a multi-label source here.</p>
+      <table>
+        <thead><tr><th>Date</th><th>Key</th><th>Campaign (b_campaign)</th><th>Source KPI</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr class="change-row"><td>2026-04-17</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>OTh3FqM3vteUsp7f</code></td><td><span class="pill pill-warn">login_success</span></td><td>441,995 <span class="delta">▲3.0×</span></td></tr>
+          <tr class="change-row"><td>2026-04-17</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>hkSJo4zlGNoIzLbC</code></td><td><span class="pill pill-warn">cashloan</span></td><td>74,927</td></tr>
+          <tr><td>2026-04-16</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>OTh3FqM3vteUsp7f</code></td><td><span class="pill pill-warn">login_success</span></td><td>380,035</td></tr>
+          <tr><td>2026-04-16</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>hkSJo4zlGNoIzLbC</code></td><td><span class="pill pill-warn">cashloan</span></td><td>84,076</td></tr>
+          <tr><td>2026-04-15</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>OTh3FqM3vteUsp7f</code></td><td><span class="pill pill-warn">login_success</span></td><td>155,773</td></tr>
+          <tr><td>2026-04-15</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>hkSJo4zlGNoIzLbC</code></td><td><span class="pill pill-warn">cashloan</span></td><td>98,477</td></tr>
+          <tr><td>2026-04-14</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>OTh3FqM3vteUsp7f</code></td><td><span class="pill pill-warn">login_success</span></td><td>145,124</td></tr>
+          <tr><td>2026-04-14</td><td><code>id1112407590:ios:zp_npuall</code></td><td><code>hkSJo4zlGNoIzLbC</code></td><td><span class="pill pill-warn">cashloan</span></td><td>89,361</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px; margin-top:10px; color:var(--muted);">Total 4 days: 1,469,768 examples. Note: RGPQHVtHfPNlSXcU does not appear as source campaign because it contributes bid-log impressions (data-plane) rather than campaignlog training examples (multi-label source).</p>
+      <p class="source">Source: moloco-dsp-ml-prod.training_dataset_prod.tfexample_action_campaignlog_imp_v2</p>
+    </div>
+  </section>
+
+  <section id="step4">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 4</span><h2>Eval Files</h2><span class="verdict v-ok">OK</span></div>
+      <p style="font-size:13px; margin-bottom:14px; color:#374151;"><strong>Major change from Apr 17: bid-log eval now found in 3 of 4 active models.</strong> Both LAT models have 64,287 bid-log examples. The IFA <code>ifa_cont</code> model has 293,332. Only <code>ifa_cpu_cont</code> still missing (likely a model variant difference). pb_eval remains NOT FOUND for LAT models as expected (LAT uses campaignlog, not postback).</p>
+      <table>
+        <thead><tr><th>Model</th><th>Deployed (UTC)</th><th>pb_eval</th><th>bid_log_eval</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr class="change-row"><td><code>v2_lat_cpu_cont</code></td><td>2026-04-20 04:45</td><td><span class="pill pill-null">NOT FOUND (expected)</span></td><td><span class="pill pill-ok">FOUND ✓</span></td><td>64,287</td></tr>
+          <tr class="change-row"><td><code>v2_lat_cont</code></td><td>2026-04-20 04:36</td><td><span class="pill pill-null">NOT FOUND (expected)</span></td><td><span class="pill pill-ok">FOUND ✓</span></td><td>64,287</td></tr>
+          <tr class="change-row"><td><code>v2_ifa_cont</code></td><td>2026-04-20 04:41</td><td><span class="pill pill-null">NOT FOUND</span></td><td><span class="pill pill-ok">FOUND ✓</span></td><td>293,332</td></tr>
+          <tr><td><code>v2_ifa_cpu_cont</code></td><td>2026-04-20 00:50</td><td><span class="pill pill-null">NOT FOUND</span></td><td><span class="pill pill-fail">NOT FOUND</span></td><td>0</td></tr>
+        </tbody>
+      </table>
+      <details style="margin-top:14px;">
+        <summary style="cursor:pointer; font-size:13px; color:var(--accent); font-weight:600;">View raw bid-log eval lines (LAT model)</summary>
+        <pre>id1112407590:ios:zp_npuall_UNIFIED_D7   0.13967374781957981  0  0.13011876467904862  64287  0  64287
+id1112407590:ios:zp_npuall_UNIFIED_D1   0.056238491976274264  0  0.054634801211629232  64287  0  64287
+id1112407590:ios:zp_npuall_UNIFIED_D3   0.10585891257773879   0  0.10030718288585534  64287  0  64287
+id1112407590:ios:zp_npuall_UNIFIED_D28  0.17418130493516046   0  0.15949405263113800  64287  0  64287
+id1112407590:ios:zp_npuall_UNIFIED_D14  0.15794076944170415   0  0.14580005530362269  64287  0  64287</pre>
+        <p style="font-size:12px; color:var(--muted); margin-top:6px;">Format: key · mean_pred · num_pos · normalizer · num_examples · (unused) · (unused)</p>
+      </details>
+      <p class="source">Source: gs://tfserving-us/{model}/{path}/assets.extra/evaluations_per_key_bid_logs.tsv</p>
+    </div>
+  </section>
+
+  <section id="step5">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 5</span><h2>Serving pbtxt (campaign_stats_set)</h2><span class="verdict v-ok">OK</span></div>
+      <p style="font-size:13px; margin-bottom:14px; color:#374151;"><strong>All 5 horizons now show <code>normalizer_data_source: BIDLOG</code></strong> with 64,287 bid-log examples. This replaces the fallback normalizer (0.3138 for D7) that was present on Apr 17. The D7 normalizer dropped from 0.3138 → 0.1301, reflecting the actual observed conversion rate rather than a conservative fallback estimate.</p>
+      <table>
+        <thead><tr><th>kpi_event</th><th>pred_type</th><th>pricing_type</th><th>normalizer</th><th>data_source</th><th>num_examples</th><th>bid_eval populated</th></tr></thead>
+        <tbody>
+          <tr class="change-row"><td><code>zp_npuall</code></td><td>D1</td><td><span class="pill pill-lat">TYPE_ACTION_LAT</span></td><td>0.05463</td><td><span class="pill pill-real">BIDLOG</span></td><td>64,287</td><td>✓ mean=0.05623</td></tr>
+          <tr class="change-row"><td><code>zp_npuall</code></td><td>D3</td><td><span class="pill pill-lat">TYPE_ACTION_LAT</span></td><td>0.10031</td><td><span class="pill pill-real">BIDLOG</span></td><td>64,287</td><td>✓ mean=0.10586</td></tr>
+          <tr class="change-row"><td><code>zp_npuall</code></td><td>D7</td><td><span class="pill pill-lat">TYPE_ACTION_LAT</span></td><td>0.13012 <span class="delta">▼ from 0.3138</span></td><td><span class="pill pill-real">BIDLOG</span></td><td>64,287</td><td>✓ mean=0.13967</td></tr>
+          <tr class="change-row"><td><code>zp_npuall</code></td><td>D14</td><td><span class="pill pill-lat">TYPE_ACTION_LAT</span></td><td>0.14580</td><td><span class="pill pill-real">BIDLOG</span></td><td>64,287</td><td>✓ mean=0.15794</td></tr>
+          <tr class="change-row"><td><code>zp_npuall</code></td><td>D28</td><td><span class="pill pill-lat">TYPE_ACTION_LAT</span></td><td>0.15949</td><td><span class="pill pill-real">BIDLOG</span></td><td>64,287</td><td>✓ mean=0.17418</td></tr>
+        </tbody>
+      </table>
+      <details style="margin-top:14px;">
+        <summary style="cursor:pointer; font-size:13px; color:var(--accent); font-weight:600;">View raw pbtxt block</summary>
+        <pre>campaign_stats {
+  campaign: "RGPQHVtHfPNlSXcU"
+  product_app_bundle: "id1112407590"
+  dev_os: IOS
+  platform: "ZALOPAY"
+  action_stats {
+    kpi_event: "zp_npuall"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    pricing_metadata_type: TYPE_ACTION_LAT
+    normalizer: 0.13011876467904862
+    num_examples_for_normalizer: 64287
+    normalizer_data_source: BIDLOG
+    pb_eval_info { }               ← expected empty for LAT model
+    bid_eval_info {
+      num_examples: 64287
+      mean_prediction: 0.13011876467904862
+    }
+    has_unattr: true
+  }
+  [... D1/D3/D14/D28 entries with same structure ...]
+  campaign_goal {
+    type: OPTIMIZE_CPA_FOR_APP_UA
+    optimize_cpa_for_app_ua { action: "zp_npuall" }
+    kpi_actions: "zp_npuall"
+  }
+}</pre>
+      </details>
+      <p class="source">Source: gs://tfserving-us/action_consol_v2_lat_cpu_cont/1776660333/assets.extra/campaign_stats_set.pbtxt</p>
+    </div>
+  </section>
+
+  <section id="step6">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">STEP 6</span><h2>Pricing Model (Control + Data Plane)</h2><span class="verdict v-ok">OK</span></div>
+      <p style="font-size:13px; margin-bottom:14px; color:#374151;">Action model applied across all traffic types. <strong>Impression volume is now very high: ~1–1.8M LAT impressions/day, ~800K–1M IFA impressions/day.</strong> Normalizer at data plane (wrapper.normalizer=0.2654 today) differs from pbtxt normalizer (0.1301) — the wrapper normalizer is a composite pricing factor, not the per-horizon action normalizer.</p>
+      <table>
+        <thead><tr><th colspan="2">6a. Control-Plane (mems_prod.api_log, last 3d)</th></tr>
+          <tr><th>Date / Type</th><th>Detail</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-04-19 TYPE_ACTION (5 reqs)</td><td>normalizer 0.3315 — IFA push</td></tr>
+          <tr><td>2026-04-19 TYPE_ACTION_LAT (3 reqs)</td><td>normalizer 0.2125 — updated LAT push (new value)</td></tr>
+          <tr><td>2026-04-19 TYPE_ACTION_LAT (1 req)</td><td>normalizer 0.3138 — old fallback (pre-update)</td></tr>
+          <tr><td>2026-04-19 TYPE_ACTION (1 req)</td><td>normalizer 0.3587</td></tr>
+        </tbody>
+      </table>
+      <table style="margin-top:16px;">
+        <thead><tr><th colspan="4">6b. Data-Plane Impression Execution (prod_stream_view.imp, last 3d) — key rows</th></tr>
+          <tr><th>Date</th><th>pricing_function</th><th>Model</th><th>Impressions</th></tr>
+        </thead>
+        <tbody>
+          <tr class="change-row"><td>2026-04-20</td><td>UA_INSTALL_AND_ACTION_LAT</td><td>action_consol_v2_lat_cpu_cont (normalizer=0.2654)</td><td>163,193</td></tr>
+          <tr class="change-row"><td>2026-04-20</td><td>UA_INSTALL_AND_ACTION_LAT</td><td>action_consol_v2_lat_cont (normalizer=0.2654)</td><td>40,167</td></tr>
+          <tr class="change-row"><td>2026-04-20</td><td>UA_INSTALL_AND_ACTION</td><td>action_consol_v2_ifa_cpu_cont (normalizer=0.2654)</td><td>227,324</td></tr>
+          <tr class="change-row"><td>2026-04-20</td><td>UA_INSTALL_AND_ACTION</td><td>action_consol_v2_ifa_cont (normalizer=0.2654)</td><td>56,457</td></tr>
+          <tr><td>2026-04-19</td><td>UA_INSTALL_AND_ACTION_LAT</td><td>action_consol_v2_lat_cpu_cont (normalizer=0.3355)</td><td>481,435</td></tr>
+          <tr><td>2026-04-19</td><td>UA_INSTALL_AND_ACTION_LAT</td><td>action_consol_v2_lat_cpu_cont (normalizer=0.2654)</td><td>112,569</td></tr>
+          <tr><td>2026-04-18</td><td>UA_INSTALL_AND_ACTION_LAT</td><td>action_consol_v2_lat_cpu_cont (normalizer=0.3355)</td><td>800,846</td></tr>
+          <tr><td>2026-04-17</td><td>UA_INSTALL_AND_ACTION_LAT</td><td>action_consol_v2_lat_cpu_cont (normalizer=0.3355)</td><td>672,635</td></tr>
+        </tbody>
+      </table>
+      <p class="source">Sources: focal-elf-631.mems_prod.api_log (6a) + focal-elf-631.prod_stream_view.imp (6b)</p>
+    </div>
+  </section>
+
+  <section id="progression">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">ΔPROG</span><h2>Progression: Apr 17 → Apr 20</h2></div>
+      <table>
+        <thead><tr><th>Step</th><th>2026-04-17 State</th><th>2026-04-20 State</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Step 0 — Campaign</td><td>ACTIVE (just activated 02:29 UTC)</td><td>ACTIVE (continuously, ×3 today)</td><td><span class="pill pill-ok">No change (good)</span></td></tr>
+          <tr><td>Step 1 — Postbacks</td><td>3,553–4,600/day (14d)</td><td>3,553–4,917/day (rising)</td><td><span class="pill pill-ok">Continued growth</span></td></tr>
+          <tr><td>Step 2 — Scope</td><td>is_live_campaign_goal: true</td><td>is_live_campaign_goal: true</td><td><span class="pill pill-ok">No change (good)</span></td></tr>
+          <tr class="change-row"><td>Step 3 — Training Data</td><td>1 day / 234K examples</td><td>4 days / 1.47M examples</td><td><span class="delta">▲6.3× more examples</span></td></tr>
+          <tr class="change-row"><td>Step 4 — Eval Files</td><td>NOT FOUND (0/8 models)</td><td>FOUND (3/4 active models)</td><td><span class="delta">▲ Graduated</span></td></tr>
+          <tr class="change-row"><td>Step 5 — Normalizer</td><td>FALLBACK (0.3138 for D7)</td><td>BIDLOG (0.1301 for D7, 64K examples)</td><td><span class="delta">▼ Calibrated (more accurate)</span></td></tr>
+          <tr><td>Step 6 — Pricing</td><td>TYPE_ACTION_LAT ✓ (17 reqs/3d)</td><td>TYPE_ACTION_LAT ✓ (~1M+ imps/day)</td><td><span class="delta">▲ Massive scale-up</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">TL</span><h2>Event Timeline</h2></div>
+      <ul class="timeline">
+        <li><div class="dot dot-green"></div><div class="tl-date">2026-04-20 04:45 UTC</div><div class="tl-text"><code>action_consol_v2_lat_cpu_cont/1776660333</code> deployed. <strong>First deployment with BIDLOG normalizer for RGPQHVtHfPNlSXcU × zp_npuall.</strong> 64,287 bid-log examples → D1/D3/D7/D14/D28 all calibrated.</div></li>
+        <li><div class="dot dot-green"></div><div class="tl-date">2026-04-20 04:41 UTC</div><div class="tl-text"><code>action_consol_v2_ifa_cont/serving_gpu/1776660109</code> deployed with bid-log eval (293,332 examples) for IFA path.</div></li>
+        <li><div class="dot dot-green"></div><div class="tl-date">2026-04-20 04:36 UTC</div><div class="tl-text"><code>action_consol_v2_lat_cont/serving_gpu/1776659813</code> deployed — same 64,287 bid-log eval as lat_cpu_cont. LAT path now calibrated on both models.</div></li>
+        <li><div class="dot dot-blue"></div><div class="tl-date">2026-04-19 ~afternoon</div><div class="tl-text">MEMS control-plane push with new LAT normalizer 0.2125 (vs old fallback 0.3138). Transition visible in api_log: 3 reqs at 0.2125, 1 req still at 0.3138.</div></li>
+        <li><div class="dot dot-green"></div><div class="tl-date">2026-04-18 all day</div><div class="tl-text">Campaign serving at scale: 800K+ LAT impressions/day on <code>lat_cpu_cont</code>, 967K on <code>ifa_cpu_cont</code>. Bid-log data accumulating rapidly.</div></li>
+        <li><div class="dot dot-green"></div><div class="tl-date">2026-04-17 02:29 UTC</div><div class="tl-text">Campaign <code>RGPQHVtHfPNlSXcU</code> becomes ACTIVE. Initial investigation: fallback normalizer 0.3138, empty eval blocks.</div></li>
+        <li><div class="dot dot-yellow"></div><div class="tl-date">2026-04-14</div><div class="tl-text">First training data for <code>id1112407590:ios:zp_npuall</code> — 234K multi-label examples from OTh3FqM3vteUsp7f and hkSJo4zlGNoIzLbC.</div></li>
+        <li><div class="dot dot-red"></div><div class="tl-date">2026-04-09 06:58 UTC</div><div class="tl-text">Campaign <code>Nu3RqJ9SKxUQHmK4</code> paused — still within 60d training scope.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="sources">
+    <div class="card">
+      <div class="card-header"><span class="step-badge">SRC</span><h2>Data Sources</h2></div>
+      <table>
+        <thead><tr><th>Step</th><th>Source</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>0a</td><td><code>focal-elf-631.prod.campaign_digest_merged_latest</code></td><td>Campaign KPI and bundle registry</td></tr>
+          <tr><td>0b</td><td><code>focal-elf-631.entity_history.prod_entity_history</code></td><td>Campaign state change log (last 30d)</td></tr>
+          <tr><td>1</td><td><code>focal-elf-631.df_accesslog.pb</code></td><td>MMP postback log</td></tr>
+          <tr><td>2</td><td><code>gs://tfexample-action/metadata_versions/meta_data_042005.pbtxt</code></td><td>Bundle registry (2026-04-20 05:xx UTC)</td></tr>
+          <tr><td>3</td><td><code>moloco-dsp-ml-prod.training_dataset_prod.tfexample_action_campaignlog_imp_v2</code></td><td>ML training examples (Moloco-attributed)</td></tr>
+          <tr><td>4</td><td><code>gs://tfserving-us/{model}/{path}/assets.extra/evaluations_per_key_bid_logs.tsv</code></td><td>Bid-log eval per model</td></tr>
+          <tr><td>5</td><td><code>gs://tfserving-us/action_consol_v2_lat_cpu_cont/1776660333/assets.extra/campaign_stats_set.pbtxt</code></td><td>Serving normalizer config</td></tr>
+          <tr><td>6a</td><td><code>focal-elf-631.mems_prod.api_log</code></td><td>Control-plane pricing pushes</td></tr>
+          <tr><td>6b</td><td><code>focal-elf-631.prod_stream_view.imp</code></td><td>Data-plane impression execution</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('#sidebar nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`#sidebar nav a[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

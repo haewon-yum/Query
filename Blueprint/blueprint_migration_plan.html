@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blueprint — Cloud Run Migration Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-300:#cbd5e1;
+  --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569; --slate-700:#334155;
+  --slate-800:#1e293b; --slate-900:#0f172a;
+  --indigo:#6366f1; --blue:#3b82f6; --green:#10b981; --amber:#f59e0b;
+  --red:#ef4444; --purple:#8b5cf6;
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--slate-100);font-family:var(--font);color:var(--slate-900);font-size:14px;line-height:1.6}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:12px;background:var(--slate-100);padding:1px 5px;border-radius:4px;color:var(--slate-700)}
+pre{font-family:var(--mono);font-size:12px;background:var(--slate-800);color:#e2e8f0;padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.7}
+pre code{background:none;padding:0;color:inherit;font-size:12px}
+
+.page{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+
+/* header */
+.header{background:var(--slate-800);border-radius:14px;padding:28px 32px;margin-bottom:24px;color:#fff}
+.header-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--slate-400);margin-bottom:8px}
+.header h1{font-size:26px;font-weight:800;margin-bottom:6px}
+.header-meta{font-size:12px;color:var(--slate-400);display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
+.header-meta span{display:flex;align-items:center;gap:5px}
+
+/* sections */
+.section{background:#fff;border:1px solid var(--slate-200);border-radius:14px;padding:24px 28px;margin-bottom:16px}
+.section-title{font-size:16px;font-weight:800;color:var(--slate-900);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.section-sub{font-size:12px;color:var(--slate-400);margin-bottom:16px}
+h3{font-size:13px;font-weight:700;color:var(--slate-700);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.4px}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:4px}
+th{background:var(--slate-800);color:#fff;padding:7px 12px;text-align:left;font-size:11px;font-weight:600;white-space:nowrap}
+th:first-child{border-radius:6px 0 0 0} th:last-child{border-radius:0 6px 0 0}
+td{padding:8px 12px;border-bottom:1px solid var(--slate-100);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--slate-50)}
+td code{font-size:11px}
+
+/* callout */
+.callout{border-radius:10px;padding:12px 16px;margin:12px 0;font-size:12.5px;line-height:1.6}
+.callout-blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.callout-green{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.callout-amber{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.callout-purple{background:#faf5ff;border:1px solid #ddd6fe;color:#5b21b6}
+.callout strong{font-weight:700}
+
+/* arch diagram */
+.arch{background:var(--slate-50);border:1px solid var(--slate-200);border-radius:10px;padding:20px 24px;font-size:12px;line-height:1.9;font-family:var(--mono)}
+.arch .layer{margin-bottom:8px}
+.arch .layer-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--slate-400);margin-bottom:4px}
+
+/* step list */
+.steps{counter-reset:step;display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{counter-increment:step;width:26px;height:26px;border-radius:50%;background:var(--indigo);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-num::before{content:counter(step)}
+.step-body{flex:1}
+.step-title{font-size:13px;font-weight:700;color:var(--slate-800);margin-bottom:3px}
+.step-desc{font-size:12px;color:var(--slate-500);line-height:1.6}
+
+/* decision table */
+.decision-row td:first-child{font-weight:600;color:var(--slate-700);white-space:nowrap;width:180px}
+.decision-row td:nth-child(2){color:var(--slate-500);font-size:12px}
+.decision-row td:nth-child(3){font-weight:600;color:#166534}
+
+/* pill */
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.pill-green{background:#dcfce7;color:#166534}
+.pill-amber{background:#fef3c7;color:#92400e}
+.pill-blue{background:#dbeafe;color:#1e40af}
+.pill-slate{background:var(--slate-100);color:var(--slate-600)}
+.pill-purple{background:#f3e8ff;color:#7e22ce}
+
+/* diff blocks */
+.diff-block{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.diff-before,.diff-after{border-radius:8px;overflow:hidden}
+.diff-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:5px 10px}
+.diff-before .diff-label{background:#fee2e2;color:#991b1b}
+.diff-after .diff-label{background:#dcfce7;color:#166534}
+.diff-before pre,.diff-after pre{border-radius:0 0 8px 8px;margin:0}
+
+/* secrets table */
+.secrets td:first-child{font-family:var(--mono);font-size:11px;color:#5b21b6;font-weight:500}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-eyebrow">Migration Plan</div>
+  <h1>Blueprint Dashboard → Cloud Run</h1>
+  <p style="font-size:13px;color:var(--slate-300);margin-top:4px">App Script → Python FastAPI · Google OAuth · gds-apac project</p>
+  <div class="header-meta">
+    <span>📅 2026-04-22</span>
+    <span>👤 Haewon Yum</span>
+    <span>☁️ gds-apac · asia-northeast3</span>
+    <span>🔗 github.com/moloco/gds · projects/google_cloud_run/blueprint</span>
+  </div>
+</div>
+
+<!-- ── 1. OVERVIEW ── -->
+<div class="section">
+  <div class="section-title">1. Overview</div>
+  <div class="section-sub">Why migrate, and what stays the same</div>
+
+  <p style="color:var(--slate-600);margin-bottom:16px">Blueprint is currently a Google Apps Script web app — a single <code>Code.js</code> backend and one <code>index.html</code> frontend, deployed inside the Google Workspace environment. Migration to Cloud Run addresses three pain points: <strong>execution timeouts</strong> (GAS hard-caps at 6 min), <strong>caching unreliability</strong> (CacheService has a 100KB per-key limit requiring chunked workarounds), and <strong>no local dev loop</strong> (every change requires a <code>clasp push</code> cycle).</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="callout callout-amber">
+      <strong>Changing</strong><br/>
+      Backend runtime: GAS → Python FastAPI<br/>
+      BQ client: Advanced Service → <code>google-cloud-bigquery</code><br/>
+      Cache: <code>CacheService</code> → <code>cachetools.TTLCache</code><br/>
+      Sheets: <code>SpreadsheetApp</code> → Sheets API v4<br/>
+      Auth: GAS domain lock → Google OAuth 2.0<br/>
+      Frontend API calls: <code>google.script.run</code> → <code>fetch()</code><br/>
+      Secrets: Script Properties → Cloud Run env vars / Secret Manager
+    </div>
+    <div class="callout callout-green">
+      <strong>Staying the same</strong><br/>
+      All UI — 100% of HTML, CSS, and rendering JS<br/>
+      All BQ tables and queries (word-for-word)<br/>
+      Google Sheets as the notes store<br/>
+      Cache TTLs (scores 6h, activation 1h)<br/>
+      <code>@moloco.com</code> domain restriction<br/>
+      4 logical API operations (scores, activation, notes GET/POST)<br/>
+      GCP project <code>gds-apac</code>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. ARCHITECTURE ── -->
+<div class="section">
+  <div class="section-title">2. Target Architecture</div>
+  <div class="section-sub">How the pieces connect after migration</div>
+
+  <div class="arch">
+    <div class="layer">
+      <div class="layer-label">Browser</div>
+      ┌─────────────────────────────────────────────────────┐<br/>
+      │  index.html  (same UI, fetch() instead of           │<br/>
+      │              google.script.run)                      │<br/>
+      └──────────────────────┬──────────────────────────────┘<br/>
+    </div>
+    <div class="layer">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ HTTPS  @moloco.com Google OAuth
+    </div>
+    <div class="layer">
+      <div class="layer-label">Cloud Run · gds-apac · asia-northeast3</div>
+      ┌─────────────────────────────────────────────────────┐<br/>
+      │  Python 3.12 · FastAPI · uvicorn                     │<br/>
+      │                                                      │<br/>
+      │  app/auth.py      ← Google OAuth flow               │<br/>
+      │  app/main.py      ← route wiring + index.html serve │<br/>
+      │  app/bq.py        ← BigQuery client + run_query()   │<br/>
+      │  app/cache.py     ← TTLCache (scores 6h, act 1h)    │<br/>
+      │  app/notes.py     ← Sheets API v4 CRUD              │<br/>
+      └──────┬──────────────────┬────────────────┬──────────┘<br/>
+    </div>
+    <div class="layer" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px">
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br/>BigQuery<br/>(moloco-ods)</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br/>Google Sheets<br/>(Notes store)</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br/>Secret Manager<br/>(gds-apac)</div>
+    </div>
+  </div>
+
+  <div class="callout callout-blue" style="margin-top:12px">
+    <strong>Same auth pattern as Mosaic.</strong> Google OAuth 2.0 flow → verify <code>hd=moloco.com</code> → sign session with <code>itsdangerous</code> → store in <code>hd_session</code> cookie (7-day TTL). <code>APP_BASE_URL</code> env var fixes the Cloud Run HTTP→HTTPS proxy issue (same fix as Mosaic).
+  </div>
+</div>
+
+<!-- ── 3. API MAPPING ── -->
+<div class="section">
+  <div class="section-title">3. API Surface</div>
+  <div class="section-sub">Every google.script.run call replaced 1-for-1 with a REST endpoint</div>
+
+  <table>
+    <tr>
+      <th>Frontend call (today)</th>
+      <th>New REST endpoint</th>
+      <th>Backend impl.</th>
+      <th>Cache</th>
+    </tr>
+    <tr>
+      <td><code>google.script.run.fetchBlueprintCampaigns()</code></td>
+      <td><code>GET /api/scores</code></td>
+      <td>SELECT * from <code>blueprint_scores_pivoted</code></td>
+      <td><span class="pill pill-blue">6h TTL</span></td>
+    </tr>
+    <tr>
+      <td><code>google.script.run.fetchActivationData()</code></td>
+      <td><code>GET /api/activation</code></td>
+      <td>2× BQ view queries → <code>{summary, campaigns}</code></td>
+      <td><span class="pill pill-blue">1h TTL</span></td>
+    </tr>
+    <tr>
+      <td><code>google.script.run.getNotes()</code></td>
+      <td><code>GET /api/notes</code></td>
+      <td>Read Google Sheet, return dict keyed by <code>advertiser_id</code></td>
+      <td><span class="pill pill-slate">No cache</span></td>
+    </tr>
+    <tr>
+      <td><code>google.script.run.saveNote(payload)</code></td>
+      <td><code>POST /api/notes</code></td>
+      <td>Upsert row in Google Sheet (scan col A, update or append)</td>
+      <td><span class="pill pill-slate">No cache</span></td>
+    </tr>
+    <tr>
+      <td>—</td>
+      <td><code>GET /</code></td>
+      <td>Serve <code>index.html</code> (static file response)</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>—</td>
+      <td><code>GET /auth/login</code></td>
+      <td>Redirect to Google OAuth consent</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>—</td>
+      <td><code>GET /auth/callback</code></td>
+      <td>Exchange code → verify domain → set session cookie</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>—</td>
+      <td><code>GET /auth/logout</code></td>
+      <td>Clear session cookie</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top:20px">Frontend diff — 4 call sites changed</h3>
+  <p style="font-size:12px;color:var(--slate-500);margin-bottom:10px">Everything else in <code>index.html</code> is untouched. The only edit is swapping the 4 <code>google.script.run</code> call patterns for <code>fetch()</code>.</p>
+
+  <div class="diff-block">
+    <div class="diff-before">
+      <div class="diff-label">Before — App Script</div>
+      <pre><code>google.script.run
+  .withSuccessHandler(onScoresLoaded)
+  .withFailureHandler(function(e){ ... })
+  .fetchBlueprintCampaigns();</code></pre>
+    </div>
+    <div class="diff-after">
+      <div class="diff-label">After — Cloud Run</div>
+      <pre><code>fetch('/api/scores')
+  .then(r => r.ok ? r.json() : Promise.reject(r))
+  .then(onScoresLoaded)
+  .catch(function(e){ ... });</code></pre>
+    </div>
+  </div>
+
+  <div class="diff-block">
+    <div class="diff-before">
+      <div class="diff-label">Before — saveNote</div>
+      <pre><code>google.script.run
+  .withFailureHandler(function(e){ alert(...); })
+  .saveNote({ advertiser_id, ... });</code></pre>
+    </div>
+    <div class="diff-after">
+      <div class="diff-label">After — saveNote</div>
+      <pre><code>fetch('/api/notes', {
+  method: 'POST',
+  headers: {'Content-Type':'application/json'},
+  body: JSON.stringify({ advertiser_id, ... })
+}).catch(function(e){ alert(...); });</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ── 4. FILE STRUCTURE ── -->
+<div class="section">
+  <div class="section-title">4. File Structure</div>
+  <div class="section-sub">Local working directory + remote repo path</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <h3>Local (working directory)</h3>
+      <pre><code>~/Documents/Queries/Blueprint/blueprint-dash/
+├── app/
+│   ├── __init__.py
+│   ├── main.py        # FastAPI app + route wiring
+│   ├── auth.py        # OAuth flow (same as Mosaic)
+│   ├── bq.py          # BigQuery client + run_query()
+│   ├── cache.py       # TTLCache helpers
+│   ├── notes.py       # Sheets API v4 CRUD
+│   └── templates/
+│       └── index.html # Adapted frontend
+├── Dockerfile
+├── requirements.txt
+├── .env.example
+├── deploy.sh
+├── setup.sh           # One-time: secrets + SA grants
+└── README.md</code></pre>
+    </div>
+    <div>
+      <h3>Remote repo</h3>
+      <pre><code>github.com/moloco/gds
+└── projects/
+    └── google_cloud_run/
+        └── blueprint/       ← new folder
+            ├── app/
+            │   ├── __init__.py
+            │   ├── main.py
+            │   ├── auth.py
+            │   ├── bq.py
+            │   ├── cache.py
+            │   ├── notes.py
+            │   └── templates/
+            │       └── index.html
+            ├── Dockerfile
+            ├── requirements.txt
+            ├── .env.example
+            ├── deploy.sh
+            ├── setup.sh
+            └── README.md</code></pre>
+    </div>
+  </div>
+
+  <div class="callout callout-blue" style="margin-top:4px">
+    <strong>Git workflow:</strong> Create files locally in <code>blueprint-dash/</code> → clone <code>moloco/gds</code> to a temp dir → copy contents into <code>projects/google_cloud_run/blueprint/</code> → commit and push. Or: add <code>moloco/gds</code> as a remote in the <code>blueprint-dash</code> repo and push to the subdirectory using a sparse checkout. Simpler option: just work locally, then copy + push once ready.
+  </div>
+</div>
+
+<!-- ── 5. KEY FILES ── -->
+<div class="section">
+  <div class="section-title">5. Key File Summaries</div>
+  <div class="section-sub">What each file does — no surprises at build time</div>
+
+  <h3>app/auth.py — identical pattern to Mosaic</h3>
+  <p style="font-size:12px;color:var(--slate-500);margin-bottom:8px">Reuse Mosaic's auth.py verbatim (same OAuth flow, same cookie name <code>hd_session</code>, same <code>APP_BASE_URL</code> fix). <code>get_session()</code> and <code>require_session()</code> are imported by the API routes.</p>
+
+  <h3>app/bq.py</h3>
+  <pre><code>from google.cloud import bigquery
+
+PROJECT_ID = "moloco-ods"
+_client = None
+
+def client():
+    global _client
+    if _client is None:
+        _client = bigquery.Client(project=PROJECT_ID)
+    return _client
+
+def run_query(sql: str) -> list[dict]:
+    rows = client().query(sql).result()
+    return [dict(row) for row in rows]</code></pre>
+
+  <h3>app/cache.py</h3>
+  <pre><code>from cachetools import TTLCache
+from threading import Lock
+
+_SCORES_CACHE = TTLCache(maxsize=1, ttl=6 * 3600)
+_ACT_CACHE    = TTLCache(maxsize=1, ttl=1 * 3600)
+_LOCK         = Lock()
+
+def cached_scores(fn):
+    with _LOCK:
+        if "v" not in _SCORES_CACHE:
+            _SCORES_CACHE["v"] = fn()
+        return _SCORES_CACHE["v"]
+
+def cached_activation(fn):
+    with _LOCK:
+        if "v" not in _ACT_CACHE:
+            _ACT_CACHE["v"] = fn()
+        return _ACT_CACHE["v"]</code></pre>
+
+  <div class="callout callout-amber" style="margin-top:8px">
+    <strong>About the cache:</strong> This is a per-process in-memory cache. It works correctly as long as Cloud Run runs at least 1 instance (<code>--min-instances 1</code>). If it scales to 0 (cold start), the first request after idle will hit BigQuery directly — no data loss, just a ~5–10s wait. We'll set <code>min-instances 1</code> in <code>deploy.sh</code> to keep the cache warm and avoid cold starts. The tradeoff vs. using Redis/Memorystore: simpler, no extra infra, but each instance has its own cache (if we ever scale to 2+ instances, they'd each fetch BQ independently on first load). For this dashboard's traffic that's fine.
+  </div>
+
+  <h3>app/notes.py</h3>
+  <pre><code>import os
+from googleapiclient.discovery import build
+from google.auth import default
+
+HEADERS = ['advertiser_id','advertiser_title','sales_note','gds_note',
+           'status','jira_tickets','pso_validated','updated_by','updated_at']
+
+def _sheet():
+    creds, _ = default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
+    svc = build("sheets", "v4", credentials=creds)
+    return svc.spreadsheets(), os.environ["BLUEPRINT_NOTES_SHEET_ID"]
+
+def get_notes() -> dict:
+    svc, sheet_id = _sheet()
+    result = svc.values().get(spreadsheetId=sheet_id, range="Notes!A:I").execute()
+    rows = result.get("values", [])
+    if len(rows) <= 1: return {}
+    notes = {}
+    for row in rows[1:]:
+        row += [""] * (9 - len(row))   # pad short rows
+        notes[row[0]] = dict(zip(HEADERS, row))
+    return notes
+
+def save_note(payload: dict, updated_by: str) -> dict:
+    # ... upsert logic (same as Code.js saveNote)
+    ...</code></pre>
+
+  <h3>Dockerfile — single stage (no frontend build needed)</h3>
+  <p style="font-size:12px;color:var(--slate-500);margin-bottom:8px">Unlike Mosaic (React + Python multi-stage build), Blueprint is Python-only — <code>index.html</code> is a static template file copied straight in. Much simpler.</p>
+  <pre><code>FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app/ ./app/
+ENV ENV=production
+EXPOSE 8080
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]</code></pre>
+</div>
+
+<!-- ── 6. SECRETS ── -->
+<div class="section">
+  <div class="section-title">6. Secrets &amp; Environment Variables</div>
+  <div class="section-sub">All stored in Secret Manager (gds-apac), mounted as env vars at deploy time</div>
+
+  <table class="secrets">
+    <tr>
+      <th>Secret Manager key</th>
+      <th>What it is</th>
+      <th>Source</th>
+    </tr>
+    <tr>
+      <td>blueprint-google-client-id</td>
+      <td>OAuth 2.0 client ID</td>
+      <td>Google Cloud Console → APIs &amp; Services → Credentials. Can reuse Mosaic's OAuth client — just add the new redirect URI.</td>
+    </tr>
+    <tr>
+      <td>blueprint-google-client-secret</td>
+      <td>OAuth 2.0 client secret</td>
+      <td>Same OAuth client as above.</td>
+    </tr>
+    <tr>
+      <td>blueprint-session-secret</td>
+      <td>Random string for signing session cookies</td>
+      <td><code>python -c "import secrets; print(secrets.token_hex(32))"</code></td>
+    </tr>
+    <tr>
+      <td>blueprint-notes-sheet-id</td>
+      <td>Google Sheet ID for the Notes store</td>
+      <td>From current Script Property <code>BLUEPRINT_NOTES_SHEET_ID</code>.</td>
+    </tr>
+  </table>
+
+  <div class="callout callout-purple" style="margin-top:12px">
+    <strong>Reusing the Mosaic OAuth client:</strong> Go to GCP Console → APIs &amp; Services → Credentials → edit the existing OAuth client → add <code>https://&lt;blueprint-run-url&gt;/auth/callback</code> to Authorized Redirect URIs. This avoids creating a new OAuth consent screen.
+  </div>
+</div>
+
+<!-- ── 7. DECISIONS ── -->
+<div class="section">
+  <div class="section-title">7. Decisions Made</div>
+  <div class="section-sub">Locked in — not open for discussion during build</div>
+
+  <table>
+    <tr><th>Decision</th><th>Alternatives considered</th><th>Choice</th></tr>
+    <tr class="decision-row">
+      <td>Auth</td>
+      <td>IAP (no code), rolling custom OAuth</td>
+      <td class="pill pill-green">Google OAuth 2.0 (same as Mosaic)</td>
+    </tr>
+    <tr class="decision-row">
+      <td>Cache</td>
+      <td>Redis/Memorystore, no cache</td>
+      <td class="pill pill-green">In-memory TTLCache, min-instances=1</td>
+    </tr>
+    <tr class="decision-row">
+      <td>Notes backend</td>
+      <td>Firestore, Cloud SQL</td>
+      <td class="pill pill-green">Keep Google Sheets (zero migration cost)</td>
+    </tr>
+    <tr class="decision-row">
+      <td>Frontend</td>
+      <td>React rewrite, Vue</td>
+      <td class="pill pill-green">Same index.html — only 4 call sites change</td>
+    </tr>
+    <tr class="decision-row">
+      <td>Dockerfile</td>
+      <td>Multi-stage (not needed), Cloud Run buildpacks</td>
+      <td class="pill pill-green">Single-stage Python — no frontend build step</td>
+    </tr>
+    <tr class="decision-row">
+      <td>GCP project</td>
+      <td>moloco-ods, new project</td>
+      <td class="pill pill-green">gds-apac (shared SA, same as Mosaic)</td>
+    </tr>
+    <tr class="decision-row">
+      <td>Repo layout</td>
+      <td>Separate repo</td>
+      <td class="pill pill-green">moloco/gds under projects/google_cloud_run/blueprint/</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ── 8. BUILD STEPS ── -->
+<div class="section">
+  <div class="section-title">8. Build Steps</div>
+  <div class="section-sub">In order — what to do and in what sequence</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Create local directory</div>
+        <div class="step-desc"><code>mkdir -p ~/Documents/Queries/Blueprint/blueprint-dash</code> — this is the working directory for all files below.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Scaffold Python app</div>
+        <div class="step-desc">Write <code>app/auth.py</code> (copy from Mosaic), <code>app/bq.py</code>, <code>app/cache.py</code>, <code>app/notes.py</code>, <code>app/main.py</code>. Write <code>requirements.txt</code>, <code>Dockerfile</code>, <code>.env.example</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Adapt index.html</div>
+        <div class="step-desc">Copy <code>index.html</code> from the App Script project. Replace the 4 <code>google.script.run</code> call sites with <code>fetch()</code>. Add an auth gate: if <code>/api/me</code> returns 401, redirect to <code>/auth/login</code>. Save to <code>app/templates/index.html</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Test locally</div>
+        <div class="step-desc">Set env vars from <code>.env.example</code> (or a local <code>.env</code>). Run <code>uvicorn app.main:app --reload</code>. Verify all 4 API endpoints return data, notes save correctly, OAuth flow completes.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Write setup.sh (one-time GCP setup)</div>
+        <div class="step-desc">Enable APIs, create Secret Manager secrets, grant the shared SA <code>roles/bigquery.dataViewer</code> on <code>moloco-ods</code> (if not already set) and <code>roles/spreadsheets</code> (or the Sheets API scope). Add redirect URI to the OAuth client.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Write deploy.sh</div>
+        <div class="step-desc"><code>gcloud builds submit --tag gcr.io/gds-apac/blueprint:latest</code> + <code>gcloud run deploy blueprint</code> with <code>--set-secrets</code>, <code>--min-instances 1</code>, <code>--memory 512Mi</code>. Same pattern as Mosaic's <code>deploy.sh</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">First deploy &amp; smoke test</div>
+        <div class="step-desc">Run <code>deploy.sh</code>. Note the Cloud Run URL. Open it, complete OAuth, verify Scores tab loads data, Activation tab loads, Notes save. Check Cloud Run logs for any BQ or Sheets errors.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Push to moloco/gds</div>
+        <div class="step-desc">Clone <code>github.com/moloco/gds</code> locally. Copy <code>blueprint-dash/</code> contents into <code>projects/google_cloud_run/blueprint/</code>. Commit as <em>"feat: add Blueprint Cloud Run service"</em>. Push. <code>blueprint-dash/</code> local dir stays as the primary working copy going forward.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 9. RESOLVED DECISIONS ── -->
+<div class="section">
+  <div class="section-title">9. Pre-Build Decisions — All Resolved</div>
+  <div class="section-sub">Confirmed 2026-04-23 — unblocked, ready to build</div>
+
+  <table>
+    <tr><th>#</th><th>Question</th><th>Resolution</th></tr>
+    <tr>
+      <td>1</td>
+      <td>Does the SA have <code>bigquery.dataViewer</code> on <code>moloco-ods.alaricjames</code>?</td>
+      <td><span class="pill pill-green">✅ Already granted</span> — <code>326198683934-compute@developer.gserviceaccount.com</code> confirmed as DataViewer on the <code>alaricjames</code> dataset.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Is the Notes Sheet shared with the SA?</td>
+      <td><span class="pill pill-green">✅ Being added</span> — Sheet ID <code>1yzriLZh1vgQtTv5xTAlDBaiQ4GzHW8D9fKyOcEtTWUU</code> · SA to be added as Editor. Note: "shared with Moloco domain" is not sufficient — SA email must be added explicitly.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Reuse Mosaic's OAuth client or create a new one?</td>
+      <td><span class="pill pill-green">✅ Reuse Mosaic's client</span> — add the new Cloud Run redirect URI to the existing OAuth client. No new consent screen needed.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Service name?</td>
+      <td><span class="pill pill-green">✅ <code>blueprint</code></span> — Cloud Run service URL will be <code>https://blueprint-326198683934.asia-northeast3.run.app</code> (approximate).</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Cache-bust mechanism?</td>
+      <td><span class="pill pill-slate">Deferred</span> — add <code>POST /api/cache/bust</code> endpoint later if needed. Not required for initial deploy.</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top:20px">Key Values</h3>
+  <table>
+    <tr><th>Item</th><th>Value</th></tr>
+    <tr><td>GCP project</td><td><code>gds-apac</code></td></tr>
+    <tr><td>Region</td><td><code>asia-northeast3</code></td></tr>
+    <tr><td>Service account</td><td><code>326198683934-compute@developer.gserviceaccount.com</code></td></tr>
+    <tr><td>BQ dataset</td><td><code>moloco-ods.alaricjames</code> (3 tables: <code>blueprint_scores_pivoted</code>, <code>blueprint_activation_summary</code>, <code>blueprint_activation_campaigns</code>)</td></tr>
+    <tr><td>Notes Sheet ID</td><td><code>1yzriLZh1vgQtTv5xTAlDBaiQ4GzHW8D9fKyOcEtTWUU</code></td></tr>
+    <tr><td>Notes Sheet URL</td><td><a href="https://docs.google.com/spreadsheets/d/1yzriLZh1vgQtTv5xTAlDBaiQ4GzHW8D9fKyOcEtTWUU/edit">open sheet ↗</a></td></tr>
+    <tr><td>Notes sheet — user-generated?</td><td>Yes — written entirely via the dashboard note modal. No BQ pipeline. Safe to reuse as-is.</td></tr>
+    <tr><td>Local working dir</td><td><code>~/Documents/Queries/Blueprint/blueprint-dash/</code></td></tr>
+    <tr><td>Remote repo path</td><td><code>github.com/moloco/gds · projects/google_cloud_run/blueprint/</code></td></tr>
+  </table>
+</div>
+
+<!-- ── FOOTER ── -->
+<div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--slate-400)">
+  Blueprint Migration Plan · Haewon Yum · GDS · updated 2026-04-23
+</div>
+
+</div>
+</body>
+</html>

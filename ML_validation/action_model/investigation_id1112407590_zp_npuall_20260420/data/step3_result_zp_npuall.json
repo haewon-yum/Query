@@ -1,0 +1,10 @@
+{
+  "step": 3, "event": "zp_npuall",
+  "verdict": "OK",
+  "most_recent_date": "2026-04-17",
+  "total_examples_14d": 1470491,
+  "campaigns_seen": [
+    {"campaign_id": "OTh3FqM3vteUsp7f", "kpi_event": "login_success", "multi_label": true},
+    {"campaign_id": "hkSJo4zlGNoIzLbC", "kpi_event": "cashloan_register", "multi_label": true}
+  ]
+}

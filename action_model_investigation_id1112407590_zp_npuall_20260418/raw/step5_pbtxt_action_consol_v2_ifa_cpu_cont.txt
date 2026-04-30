@@ -1,0 +1,81 @@
+  campaign: "RGPQHVtHfPNlSXcU"
+  product_app_bundle: "id1112407590"
+  dev_os: IOS
+  platform: "ZALOPAY"
+  product_id: "fnZBcKedxhCFyxPx"
+  advertiser: "p7ipJYOQinKmNvk5"
+  action_stats {
+    kpi_event: "zp_npuall"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.35868492334253504
+    pb_eval_info {
+    }
+    bid_eval_info {
+    }
+  }
+  campaign_goal {
+    type: OPTIMIZE_CPA_FOR_APP_UA
+    optimize_cpa_for_app_ua {
+      action: "zp_npuall"
+      budget_centric {
+        rate: 1.0
+      }
+      post_conversion_pred_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7
+    }
+    kpi_actions: "zp_npuall"
+  }
+}
+campaign_stats {
+  campaign: "RGQ0S9Z1dnENPx9T"
+  product_app_bundle: "id6760998967"
+  dev_os: IOS
+  platform: "BOOSTAPP"
+  product_id: "BCaczf9TZv0l9CGg"
+  advertiser: "aGDEF0y0ijYiXlLi"
+  action_stats {
+    kpi_event: "af_complete_registration"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D3
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.18114784572187773
+    num_examples_for_normalizer: 32531
+    normalizer_data_source: BIDLOG
+    pb_eval_info {
+    }
+    bid_eval_info {
+      num_examples: 32531
+      mean_prediction: 0.18114784572187773
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_complete_registration"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D28
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.18877666479290134
+    num_examples_for_normalizer: 32531
+    normalizer_data_source: BIDLOG
+    pb_eval_info {
+    }
+    bid_eval_info {
+      num_examples: 32531
+      mean_prediction: 0.18877666479290134
+    }
+    has_unattr: true
+  }
+  action_stats {
+    kpi_event: "af_complete_registration"
+    prediction_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D1
+    pricing_metadata_type: TYPE_ACTION
+    normalizer: 0.17594511808831534
+    num_examples_for_normalizer: 32531
+    normalizer_data_source: BIDLOG
+    pb_eval_info {
+    }
+    bid_eval_info {
+      num_examples: 32531
+      mean_prediction: 0.17594511808831534
+    }
+    has_unattr: true
+  }
+  action_stats {

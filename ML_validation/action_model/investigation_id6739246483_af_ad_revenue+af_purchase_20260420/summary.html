@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action Model Investigation — id6739246483 × ios × af_ad_revenue + af_purchase</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f6fa; color: #1a1a2e; }
+  a { color: inherit; text-decoration: none; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 220px; min-width: 220px; background: #16213e; color: #e0e0f0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 24px 0; display: flex; flex-direction: column; gap: 2px;
+  }
+  .sidebar-title { padding: 0 20px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #7080a0; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 20px; font-size: 13px; cursor: pointer;
+    border-left: 3px solid transparent; transition: all 0.15s;
+    color: #a0b0cc;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-item.active { background: rgba(255,255,255,0.08); border-left-color: #4a9eff; color: #fff; }
+  .nav-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; margin-left: auto; }
+  .nav-badge.ok { background: #1a4a2e; color: #4caf50; }
+  .nav-badge.warn { background: #4a3a00; color: #ffc107; }
+  .nav-badge.fail { background: #4a1a1a; color: #f44336; }
+  .nav-badge.info { background: #1a2a4a; color: #4a9eff; }
+  .nav-sep { margin: 8px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+  .content { flex: 1; padding: 32px; max-width: 1100px; }
+
+  /* Header */
+  .header { background: #16213e; color: white; border-radius: 12px; padding: 28px 32px; margin-bottom: 28px; }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .header .meta { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; color: #a0b8d0; margin-top: 12px; }
+  .header .meta span strong { color: #e0ecff; }
+
+  /* Callout boxes */
+  .callout { border-radius: 10px; padding: 18px 22px; margin-bottom: 22px; }
+  .callout-root { background: #fff8f8; border-left: 5px solid #e53935; }
+  .callout-rec { background: #f3fff5; border-left: 5px solid #43a047; }
+  .callout-warn { background: #fffde7; border-left: 5px solid #ffa000; }
+  .callout h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .callout-root h3 { color: #c62828; }
+  .callout-rec h3 { color: #2e7d32; }
+  .callout-warn h3 { color: #e65100; }
+  .callout p, .callout li { font-size: 13.5px; line-height: 1.6; color: #333; }
+  .callout ul { padding-left: 18px; }
+  .callout li { margin-bottom: 4px; }
+
+  /* Sections */
+  .section { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 24px; overflow: hidden; }
+  .section-header { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid #f0f0f0; }
+  .section-header h2 { font-size: 15px; font-weight: 700; flex: 1; }
+  .step-badge { font-size: 11px; background: #e8eeff; color: #3355cc; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+  .section-body { padding: 20px 22px; }
+  .source-note { font-size: 11px; color: #888; margin-top: 12px; font-family: monospace; }
+
+  /* Verdict pills */
+  .verdict { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+  .verdict.ok { background: #e8f5e9; color: #2e7d32; }
+  .verdict.warn { background: #fff8e1; color: #e65100; }
+  .verdict.fail { background: #ffebee; color: #c62828; }
+  .verdict::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* State pills */
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 10px; }
+  .pill.active { background: #e8f5e9; color: #2e7d32; }
+  .pill.paused { background: #ffebee; color: #c62828; }
+  .pill.ok-pill { background: #e3f2fd; color: #1565c0; }
+  .pill.warn-pill { background: #fff8e1; color: #e65100; }
+  .pill.fail-pill { background: #ffebee; color: #c62828; }
+  .pill.postback { background: #fff3e0; color: #e65100; }
+  .pill.bidlog { background: #e8f5e9; color: #2e7d32; }
+  .pill.fallback { background: #ffebee; color: #c62828; }
+  .pill.action { background: #e3f2fd; color: #1565c0; }
+  .pill.sec-kpi { background: #f3e5f5; color: #7b1fa2; }
+  .pill.lat { background: #e8eaf6; color: #3949ab; }
+  .pill.found { background: #e8f5e9; color: #2e7d32; }
+  .pill.notfound { background: #fafafa; color: #999; }
+  .pill.sparse { background: #fff3cd; color: #856404; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8f9fc; text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 2px solid #eee; }
+  td { padding: 9px 12px; border-bottom: 1px solid #f4f4f4; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbff; }
+  .mono { font-family: monospace; font-size: 12px; }
+  .dim { color: #999; }
+  .highlight-row td { background: #fffde7 !important; }
+  .warn-row td { background: #fff8f0 !important; }
+
+  /* Code block */
+  pre { background: #1e1e2e; color: #cdd6f4; border-radius: 8px; padding: 16px; font-size: 12px; overflow-x: auto; line-height: 1.6; margin-top: 12px; }
+  .kw { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .key { color: #89dceb; }
+  .comment { color: #6c7086; }
+
+  /* Sub-tables for eval */
+  .eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .eval-box { border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+  .eval-box-header { background: #f8f9fc; padding: 10px 14px; font-size: 12px; font-weight: 700; color: #555; border-bottom: 1px solid #eee; }
+  .eval-box table th { background: #fafafa; }
+
+  /* Horizon bar */
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar { height: 6px; border-radius: 3px; background: #4a9eff; min-width: 2px; }
+  .bar.orange { background: #ff9800; }
+  .bar.red { background: #f44336; }
+
+  /* Timeline */
+  .timeline { list-style: none; padding-left: 12px; border-left: 2px solid #e0e7ff; }
+  .timeline li { position: relative; padding: 6px 0 6px 18px; font-size: 13px; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: #4a9eff; border: 2px solid white; }
+  .timeline li.warn::before { background: #ffa000; }
+  .timeline li.fail::before { background: #f44336; }
+  .timeline li.ok::before { background: #43a047; }
+  .timeline-date { font-size: 11px; color: #888; margin-bottom: 2px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .eval-grid { grid-template-columns: 1fr; }
+  }
+
+  .alert-box { background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: 12.5px; color: #bf360c; }
+  .alert-box strong { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-title">Navigation</div>
+  <a class="nav-item" href="#header">Overview</a>
+  <a class="nav-item" href="#root-cause">Root Cause</a>
+  <div class="nav-sep"></div>
+  <a class="nav-item" href="#step0">
+    <span>Step 0 — Campaigns</span>
+    <span class="nav-badge warn">WARN</span>
+  </a>
+  <a class="nav-item" href="#step1">
+    <span>Step 1 — Postbacks</span>
+    <span class="nav-badge ok">OK</span>
+  </a>
+  <a class="nav-item" href="#step2">
+    <span>Step 2 — Registry</span>
+    <span class="nav-badge warn">WARN</span>
+  </a>
+  <a class="nav-item" href="#step3">
+    <span>Step 3 — Training</span>
+    <span class="nav-badge fail">FAIL</span>
+  </a>
+  <a class="nav-item" href="#step4">
+    <span>Step 4 — Eval Files</span>
+    <span class="nav-badge warn">WARN</span>
+  </a>
+  <a class="nav-item" href="#step5">
+    <span>Step 5 — Normalizer</span>
+    <span class="nav-badge warn">WARN</span>
+  </a>
+  <a class="nav-item" href="#step6">
+    <span>Step 6 — Pricing</span>
+    <span class="nav-badge warn">WARN</span>
+  </a>
+  <div class="nav-sep"></div>
+  <a class="nav-item" href="#timeline">Timeline</a>
+  <a class="nav-item" href="#sources">Sources</a>
+</nav>
+
+<!-- Main Content -->
+<div class="content">
+
+<!-- Header -->
+<div class="header" id="header">
+  <h1>Action Model Investigation</h1>
+  <div class="meta">
+    <span><strong>Bundle</strong> id6739246483</span>
+    <span><strong>OS</strong> ios</span>
+    <span><strong>Events</strong> af_ad_revenue &amp; af_purchase</span>
+    <span><strong>Campaign ID</strong> IV7TA5O07K4JNsjn</span>
+    <span><strong>Date</strong> 2026-04-20</span>
+    <span><strong>Advertiser</strong> hGlSfm9ulyvAXwYB &nbsp;|&nbsp; <strong>Product</strong> sDMiZJXvhFbrcdOy</span>
+  </div>
+</div>
+
+<!-- Root Cause + Recommendation -->
+<div id="root-cause">
+<div class="callout callout-root">
+  <h3>Root Cause — Two Overlapping Issues</h3>
+  <ul>
+    <li><strong>Provided campaign IV7TA5O07K4JNsjn is long-term paused</strong> (inactive since 2025-12-18, 4+ months). It has no impressions in the last 3 days and generates no bid-log eval data. Action model IS configured (TYPE_ACTION/TYPE_SEC_KPI) but the campaign is not serving.</li>
+    <li><strong>Active campaign SqHUbqoeXYnCj6Ow was just reactivated today</strong> (2026-04-20 04:31 UTC) after a ~6-day pause. No Moloco bid traffic has accumulated since reactivation, so no bid-log eval exists. Both IFA and LAT models are serving with sub-optimal normalizers: IFA uses organic MMP postback data (POSTBACK normalizer), LAT has no eval at all (FALLBACK normalizer = 0.804).</li>
+    <li><strong>af_purchase pb eval quality is critically sparse</strong>: only 21/12/4/0/0 positives at D1/D3/D7/D14/D28 out of 3,551 examples. The reported AUC (0.98-0.99) is trivially inflated with &lt;1% positive rate — the normalizer is unreliable for all horizons beyond D1.</li>
+  </ul>
+</div>
+
+<div class="callout callout-rec">
+  <h3>Recommendation</h3>
+  <ul>
+    <li><strong>IV7TA5O07K4JNsjn</strong>: Confirm with client whether this campaign should be reactivated or archived. If archiving, this cleanly removes it from the ML pipeline's consideration.</li>
+    <li><strong>SqHUbqoeXYnCj6Ow</strong>: Allow ~1–2 weeks of active serving. Once bid-log eval accumulates, IFA will graduate POSTBACK → BIDLOG; LAT will get real eval data. Re-run this investigation at that time to confirm graduation.</li>
+    <li><strong>af_purchase as secondary KPI</strong>: Flag to AE. With only 4 D7 positives out of 3,551 IFA examples, the model has almost no signal for this event. If af_ad_revenue is the true optimization target (it is — OPTIMIZE_ROAS campaign), af_purchase secondary KPI adds noise without actionable calibration. Consider removing it or discussing with the client whether purchase matters for bidding.</li>
+  </ul>
+</div>
+
+<div class="callout callout-warn">
+  <h3>Note: Action Model Is Wired Up Correctly</h3>
+  <p>The model type is correctly applied — TYPE_ACTION for af_ad_revenue (primary), TYPE_SEC_KPI for af_purchase (secondary), TYPE_ACTION_LAT for LAT impressions. The structural wiring is correct. The issue is <strong>normalizer quality</strong>, not model selection.</p>
+</div>
+</div>
+
+<!-- Step 0: Campaign Audit -->
+<div class="section" id="step0">
+  <div class="section-header">
+    <span class="step-badge">Step 0</span>
+    <h2>Campaign Audit</h2>
+    <span class="verdict warn">WARN</span>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead>
+        <tr>
+          <th>Campaign ID</th>
+          <th>KPI Events</th>
+          <th>State</th>
+          <th>Inactive Since</th>
+          <th>Entity History (Last 30d)</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td class="mono">SqHUbqoeXYnCj6Ow</td>
+          <td>af_ad_revenue, af_purchase</td>
+          <td><span class="pill active">ACTIVE</span></td>
+          <td class="dim">—</td>
+          <td>ACTIVE @ 2026-04-20 04:31 UTC<br><span class="dim" style="font-size:11px">PAUSED @ 2026-04-14 09:46 UTC (6d gap)</span></td>
+          <td>Just reactivated. No impressions yet today.</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="mono">IV7TA5O07K4JNsjn ⚠ (provided)</td>
+          <td>af_ad_revenue, af_purchase</td>
+          <td><span class="pill paused">PAUSED</span></td>
+          <td>2025-12-18</td>
+          <td>PAUSED × 3 recent events<br><span class="dim" style="font-size:11px">Last seen: 2026-04-15 17:06 UTC</span></td>
+          <td>Inactive 4+ months. 0 impressions in last 3d.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="source-note">Sources: focal-elf-631.prod.campaign_digest_merged_latest · focal-elf-631.entity_history.prod_entity_history</div>
+  </div>
+</div>
+
+<!-- Step 1: Postbacks -->
+<div class="section" id="step1">
+  <div class="section-header">
+    <span class="step-badge">Step 1</span>
+    <h2>Postback Existence</h2>
+    <span class="verdict ok">OK</span>
+  </div>
+  <div class="section-body">
+    <div class="eval-grid">
+      <div class="eval-box">
+        <div class="eval-box-header">af_ad_revenue — 14 days, ~9.25M total</div>
+        <table>
+          <thead><tr><th>Date</th><th>Count</th></tr></thead>
+          <tbody>
+            <tr><td>2026-04-20</td><td>418,273</td></tr>
+            <tr><td>2026-04-19</td><td>845,290</td></tr>
+            <tr><td>2026-04-18</td><td>744,007</td></tr>
+            <tr><td>2026-04-17</td><td>701,426</td></tr>
+            <tr><td>2026-04-16</td><td>694,191</td></tr>
+            <tr><td>2026-04-15</td><td>685,135</td></tr>
+            <tr><td>2026-04-14</td><td>673,111</td></tr>
+            <tr><td class="dim">2026-04-07 → 2026-04-13</td><td class="dim">604k – 692k/day</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eval-box">
+        <div class="eval-box-header">af_purchase — 14 days, ~16k total</div>
+        <table>
+          <thead><tr><th>Date</th><th>Count</th></tr></thead>
+          <tbody>
+            <tr><td>2026-04-20</td><td>526</td></tr>
+            <tr><td>2026-04-19</td><td>1,305</td></tr>
+            <tr><td>2026-04-18</td><td>1,048</td></tr>
+            <tr><td>2026-04-17</td><td>1,090</td></tr>
+            <tr><td>2026-04-16</td><td>1,014</td></tr>
+            <tr><td>2026-04-15</td><td>993</td></tr>
+            <tr><td>2026-04-14</td><td>1,037</td></tr>
+            <tr><td class="dim">2026-04-07 → 2026-04-13</td><td class="dim">1,058 – 1,388/day</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p style="font-size:13px; margin-top:12px; color:#444">Both events fire consistently from all channels. High postback volume confirms MMP is configured correctly. The disparity (af_ad_revenue: ~700k/day vs af_purchase: ~1,100/day) reflects the nature of these events — ad revenue fires on every ad impression, purchase fires on actual IAP.</p>
+    <div class="source-note">Source: focal-elf-631.df_accesslog.pb | app.bundle, event.name, timestamp</div>
+  </div>
+</div>
+
+<!-- Step 2: Bundle Registry -->
+<div class="section" id="step2">
+  <div class="section-header">
+    <span class="step-badge">Step 2</span>
+    <h2>Bundle Registry (meta_data.pbtxt)</h2>
+    <span class="verdict warn">WARN</span>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px; margin-bottom:12px; color:#444">Metadata file: <span class="mono">gs://tfexample-action/metadata_versions/meta_data_042014.pbtxt</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>action_event_type</th>
+          <th>revenue_event_type</th>
+          <th>is_live_campaign_goal</th>
+          <th>Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>af_ad_revenue</strong></td>
+          <td><span class="pill ok-pill">ACTION_EVENT_KPI</span></td>
+          <td>REV_EVENT_KPI</td>
+          <td><span class="pill active">true</span></td>
+          <td>Primary KPI. SqHUbqoeXYnCj6Ow active today → flag set.</td>
+        </tr>
+        <tr class="warn-row">
+          <td><strong>af_purchase</strong></td>
+          <td><span class="pill ok-pill">ACTION_EVENT_KPI</span></td>
+          <td>REV_EVENT_KPI</td>
+          <td><span class="pill paused">absent</span></td>
+          <td>No is_live_campaign_goal. Confirmed secondary KPI only (TYPE_SEC_KPI in Step 5). Metadata sets this flag for primary KPI only.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pre>bundle {
+  <span class="key">key</span>: <span class="str">"id6739246483:ios"</span>
+  value {
+    b_product_app_bundle: <span class="str">"id6739246483"</span>
+    b_dev_os: <span class="str">"ios"</span>
+    b_tracking_company: <span class="str">"appsflyer"</span>
+    b_advertiser: <span class="str">"hGlSfm9ulyvAXwYB"</span>
+    b_is_gaming: <span class="str">"true"</span>   b_genre: <span class="str">"hypercasual"</span>   b_sub_genre: <span class="str">"puzzle"</span>
+    last_roas_activity: <span class="str">"2025-12-18"</span>   <span class="comment">← matches IV7TA5O07K4JNsjn inactive date</span>
+    events {
+      <span class="key">key</span>: <span class="str">"af_ad_revenue"</span>
+      value {
+        is_kpi: <span class="kw">true</span>
+        <span class="num">is_live_campaign_goal: true</span>   <span class="comment">← SqHUbqoeXYnCj6Ow active today</span>
+        action_event_type: ACTION_EVENT_KPI
+      }
+    }
+    events {
+      <span class="key">key</span>: <span class="str">"af_purchase"</span>
+      value {
+        is_kpi: <span class="kw">true</span>
+        <span class="comment">← no is_live_campaign_goal (secondary KPI)</span>
+        action_event_type: ACTION_EVENT_KPI
+      }
+    }
+  }
+}</pre>
+    <div class="source-note">Source: gs://tfexample-action/metadata_versions/meta_data_042014.pbtxt</div>
+  </div>
+</div>
+
+<!-- Step 3: Training Data -->
+<div class="section" id="step3">
+  <div class="section-header">
+    <span class="step-badge">Step 3</span>
+    <h2>Training Data (campaignlog impressions)</h2>
+    <span class="verdict fail">FAIL</span>
+  </div>
+  <div class="section-body">
+    <div class="eval-grid">
+      <div class="eval-box">
+        <div class="eval-box-header">af_ad_revenue — 0 rows (last 14 days)</div>
+        <div style="padding:14px;font-size:13px;color:#999;text-align:center">No Moloco-attributed impressions found</div>
+      </div>
+      <div class="eval-box">
+        <div class="eval-box-header">af_purchase — 0 rows (last 14 days)</div>
+        <div style="padding:14px;font-size:13px;color:#999;text-align:center">No Moloco-attributed impressions found</div>
+      </div>
+    </div>
+    <div class="alert-box" style="margin-top:14px">
+      <strong>Expected:</strong> SqHUbqoeXYnCj6Ow was paused from 2026-04-14 until 2026-04-20 04:31 UTC (the entire 14-day lookback window). IV7TA5O07K4JNsjn has been paused since 2025-12-18. Zero training rows is correct — no impressions = no campaignlog entries. As SqHUbqoeXYnCj6Ow accumulates bid-log impressions from today onward, this table will begin populating.
+    </div>
+    <div class="source-note">Source: moloco-dsp-ml-prod.training_dataset_prod.tfexample_action_campaignlog_imp_v2 | b_product_app_bundle_dev_os_kpi_action LIKE '%6739246483%af_ad_revenue%'</div>
+  </div>
+</div>
+
+<!-- Step 4: Eval Files -->
+<div class="section" id="step4">
+  <div class="section-header">
+    <span class="step-badge">Step 4</span>
+    <h2>Eval Files (per active model)</h2>
+    <span class="verdict warn">WARN</span>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px; color:#444; margin-bottom:14px">4 active UA models found. IFA models have pb eval (from organic MMP postbacks). LAT models have no eval at all. No bid-log eval in any model.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Deployed UTC</th>
+          <th>Event</th>
+          <th>pb eval</th>
+          <th>bid-log eval</th>
+          <th>pb Positives (D1/D7/D28)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">action_consol_v2_ifa_cont</td>
+          <td>2026-04-20 09:44</td>
+          <td>af_ad_revenue</td>
+          <td><span class="pill found">FOUND</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td>2382 / 79 / <span style="color:#c62828">0</span></td>
+        </tr>
+        <tr class="warn-row">
+          <td class="mono">action_consol_v2_ifa_cont</td>
+          <td>2026-04-20 09:44</td>
+          <td>af_purchase</td>
+          <td><span class="pill sparse">FOUND (sparse!)</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td><span style="color:#c62828">21 / 4 / 0</span></td>
+        </tr>
+        <tr>
+          <td class="mono">action_consol_v2_ifa_cpu_cont</td>
+          <td>2026-04-20 09:42</td>
+          <td>af_ad_revenue</td>
+          <td><span class="pill found">FOUND</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td>2382 / 79 / 0</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="mono">action_consol_v2_ifa_cpu_cont</td>
+          <td>2026-04-20 09:42</td>
+          <td>af_purchase</td>
+          <td><span class="pill sparse">FOUND (sparse!)</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td><span style="color:#c62828">21 / 4 / 0</span></td>
+        </tr>
+        <tr style="background:#fff8f8">
+          <td class="mono">action_consol_v2_lat_cont</td>
+          <td>2026-04-20 09:38</td>
+          <td>af_ad_revenue</td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td class="dim">—</td>
+        </tr>
+        <tr style="background:#fff8f8">
+          <td class="mono">action_consol_v2_lat_cont</td>
+          <td>2026-04-20 09:38</td>
+          <td>af_purchase</td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td class="dim">—</td>
+        </tr>
+        <tr style="background:#fff8f8">
+          <td class="mono">action_consol_v2_lat_cpu_cont</td>
+          <td>2026-04-20 09:36</td>
+          <td>af_ad_revenue</td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td class="dim">—</td>
+        </tr>
+        <tr style="background:#fff8f8">
+          <td class="mono">action_consol_v2_lat_cpu_cont</td>
+          <td>2026-04-20 09:36</td>
+          <td>af_purchase</td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td><span class="pill notfound">NOT FOUND</span></td>
+          <td class="dim">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="alert-box" style="margin-top:14px">
+      <strong>af_purchase eval quality flag:</strong> With only 21 positives (D1), 12 (D3), 4 (D7), 0 (D14), 0 (D28) out of 3,551 examples, the reported AUC of 0.98–0.99 is meaningless — any model trivially achieves high AUC when &gt;99% of examples are negative. AUC is unreliable. The derived normalizer values should not be trusted beyond D1.
+    </div>
+    <p style="font-size:12px; color:#888; margin-top:10px">
+      <strong>IFA pb eval source:</strong> organic MMP postbacks (tfexample_action_postback) — does NOT require Moloco bid traffic.<br>
+      <strong>LAT pb eval source:</strong> campaignlog (Moloco-attributed impressions) — requires bid traffic. Zero rows → NOT FOUND expected.
+    </p>
+    <div class="source-note">Source: gs://tfserving-us/{model}/{version}/evaluations_per_key.tsv &amp; evaluations_per_key_bid_logs.tsv</div>
+  </div>
+</div>
+
+<!-- Step 5: Serving Normalizer -->
+<div class="section" id="step5">
+  <div class="section-header">
+    <span class="step-badge">Step 5</span>
+    <h2>Serving Normalizer (campaign_stats_set.pbtxt)</h2>
+    <span class="verdict warn">WARN</span>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px; color:#444; margin-bottom:14px">
+      <strong>IFA model:</strong> Both campaigns present. All entries use POSTBACK normalizer (no bid-log data). <span class="pill postback">POSTBACK</span> = organic MMP IFA installs, bundle-level, not campaign-calibrated.<br>
+      <strong>LAT model:</strong> Only SqHUbqoeXYnCj6Ow present. Single D7 entry with FALLBACK normalizer. IV7TA5O07K4JNsjn absent.
+    </p>
+
+    <h4 style="font-size:13px; margin-bottom:8px; color:#333">IFA Model (action_consol_v2_ifa_cont &amp; ifa_cpu_cont) — Campaign SqHUbqoeXYnCj6Ow</h4>
+    <table>
+      <thead>
+        <tr><th>KPI Event</th><th>Prediction Type</th><th>pricing_metadata_type</th><th>normalizer</th><th>Data Source</th><th>pb Examples</th><th>pb Positives</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>af_ad_revenue</td><td>UNIFIED_D1</td>
+          <td><span class="pill action">TYPE_ACTION</span></td>
+          <td class="mono">0.5816</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td><strong>2,382</strong> ✓</td>
+        </tr>
+        <tr>
+          <td>af_ad_revenue</td><td>UNIFIED_D3</td>
+          <td><span class="pill action">TYPE_ACTION</span></td>
+          <td class="mono">0.6320</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td>145</td>
+        </tr>
+        <tr>
+          <td>af_ad_revenue</td><td>UNIFIED_D7</td>
+          <td><span class="pill action">TYPE_ACTION</span></td>
+          <td class="mono">0.6623</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td>79</td>
+        </tr>
+        <tr class="warn-row">
+          <td>af_ad_revenue</td><td>UNIFIED_D14</td>
+          <td><span class="pill action">TYPE_ACTION</span></td>
+          <td class="mono">0.6790</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td><span style="color:#c62828"><strong>7</strong> ⚠</span></td>
+        </tr>
+        <tr class="warn-row">
+          <td>af_ad_revenue</td><td>UNIFIED_D28</td>
+          <td><span class="pill action">TYPE_ACTION</span></td>
+          <td class="mono">0.6935</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td><span style="color:#c62828"><strong>0</strong> ⚠</span></td>
+        </tr>
+        <tr class="warn-row">
+          <td>af_purchase</td><td>UNIFIED_D1</td>
+          <td><span class="pill sec-kpi">TYPE_SEC_KPI</span></td>
+          <td class="mono">0.0016</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td><span style="color:#c62828"><strong>21</strong> ⚠</span></td>
+        </tr>
+        <tr class="warn-row">
+          <td>af_purchase</td><td>UNIFIED_D3</td>
+          <td><span class="pill sec-kpi">TYPE_SEC_KPI</span></td>
+          <td class="mono">0.0028</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td><span style="color:#c62828"><strong>12</strong> ⚠</span></td>
+        </tr>
+        <tr class="warn-row">
+          <td>af_purchase</td><td>UNIFIED_D7</td>
+          <td><span class="pill sec-kpi">TYPE_SEC_KPI</span></td>
+          <td class="mono">0.0039</td>
+          <td><span class="pill postback">POSTBACK</span></td>
+          <td>3,551</td><td><span style="color:#c62828"><strong>4</strong> ⚠</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4 style="font-size:13px; margin:16px 0 8px; color:#333">LAT Model (action_consol_v2_lat_cont &amp; lat_cpu_cont) — Campaign SqHUbqoeXYnCj6Ow</h4>
+    <table>
+      <thead>
+        <tr><th>KPI Event</th><th>Prediction Type</th><th>pricing_metadata_type</th><th>normalizer</th><th>Data Source</th><th>pb eval</th><th>bid eval</th></tr>
+      </thead>
+      <tbody>
+        <tr style="background:#fff8f8">
+          <td>af_ad_revenue</td><td>UNIFIED_D7</td>
+          <td><span class="pill lat">TYPE_ACTION_LAT</span></td>
+          <td class="mono" style="color:#c62828">0.8042</td>
+          <td><span class="pill fallback">FALLBACK</span></td>
+          <td><span class="pill notfound">empty</span></td>
+          <td><span class="pill notfound">empty</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:#888; margin-top:8px">LAT model has a single D7 entry matching the campaign_goal's <code>post_conversion_pred_type: TFSERVING_PREDICTION_TYPE_UNIFIED_D7</code>. No normalizer_data_source field = fallback. IV7TA5O07K4JNsjn is absent from the LAT pbtxt entirely.</p>
+    <div class="source-note">Source: gs://tfserving-us/{model}/{timestamp}/campaign_stats_set.pbtxt</div>
+  </div>
+</div>
+
+<!-- Step 6: Pricing Configuration -->
+<div class="section" id="step6">
+  <div class="section-header">
+    <span class="step-badge">Step 6</span>
+    <h2>Pricing Model Configuration — Campaign IV7TA5O07K4JNsjn</h2>
+    <span class="verdict warn">WARN</span>
+  </div>
+  <div class="section-body">
+    <div class="eval-grid">
+      <div class="eval-box">
+        <div class="eval-box-header">6a — Control Plane (mems_prod.api_log)</div>
+        <table>
+          <thead><tr><th>Date</th><th>Type</th><th>Pred Type</th><th>Normalizer</th><th>Requests</th></tr></thead>
+          <tbody>
+            <tr><td>2026-04-20</td><td><span class="pill action">TYPE_ACTION</span></td><td>UNIFIED_D7</td><td class="mono">0.6623</td><td>8</td></tr>
+            <tr><td>2026-04-20</td><td><span class="pill sec-kpi">TYPE_SEC_KPI</span></td><td>UNIFIED_D7</td><td class="mono">0.0037–0.0041</td><td>8</td></tr>
+            <tr><td>2026-04-19</td><td><span class="pill action">TYPE_ACTION</span></td><td>UNIFIED_D7</td><td class="mono">0.625–0.632</td><td>5</td></tr>
+            <tr><td>2026-04-19</td><td><span class="pill sec-kpi">TYPE_SEC_KPI</span></td><td>UNIFIED_D7</td><td class="mono">0.0038–0.0041</td><td>5</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px;color:#888;padding:10px 14px">MEMS updater pushes configs for paused campaigns (expected behavior — pipeline runs for all non-terminal campaigns in pbtxt).</p>
+      </div>
+      <div class="eval-box">
+        <div class="eval-box-header">6b — Data Plane (prod_stream_view.imp)</div>
+        <div style="padding:20px;text-align:center;color:#c62828;font-size:13px">
+          <strong>0 impressions</strong> in last 3 days<br>
+          <span style="font-size:12px;color:#999;margin-top:6px;display:block">Campaign PAUSED since 2025-12-18 — not serving</span>
+        </div>
+      </div>
+    </div>
+    <div class="source-note">6a: focal-elf-631.mems_prod.api_log (method LIKE '%PricingMetadata%', status='OK') · 6b: focal-elf-631.prod_stream_view.imp</div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="section" id="timeline">
+  <div class="section-header">
+    <span class="step-badge">Timeline</span>
+    <h2>Campaign State History</h2>
+    <span class="verdict info">INFO</span>
+  </div>
+  <div class="section-body">
+    <ul class="timeline">
+      <li class="ok">
+        <div class="timeline-date">Before 2025-12-18</div>
+        <strong>IV7TA5O07K4JNsjn active</strong> — campaign running, generating bid-log impressions (not visible in 14d training window)
+      </li>
+      <li class="fail">
+        <div class="timeline-date">2025-12-18</div>
+        <strong>IV7TA5O07K4JNsjn paused</strong> — inactive_since = 2025-12-18T02:44:28Z. last_roas_activity in metadata also = 2025-12-18. 4+ months inactive.
+      </li>
+      <li class="warn">
+        <div class="timeline-date">2026-04-14 09:46 UTC</div>
+        <strong>SqHUbqoeXYnCj6Ow paused</strong> — was previously active serving af_ad_revenue+af_purchase
+      </li>
+      <li class="ok">
+        <div class="timeline-date">2026-04-20 04:31 UTC (today)</div>
+        <strong>SqHUbqoeXYnCj6Ow reactivated</strong> — ACTIVE state. IFA POSTBACK normalizer serving. LAT FALLBACK normalizer serving. Training data accumulation begins.
+      </li>
+      <li class="warn">
+        <div class="timeline-date">2026-04-20 09:36–09:44 UTC (today)</div>
+        <strong>New model deployment</strong> — all 4 UA action models deployed. ifa_cont ts=1776678283, ifa_cpu ts=1776678155, lat_cont ts=1776677889, lat_cpu ts=1776677794.
+      </li>
+      <li class="warn">
+        <div class="timeline-date">~1–2 weeks from now</div>
+        <strong>Expected graduation</strong> — if SqHUbqoeXYnCj6Ow stays active, bid-log eval will accumulate → IFA: POSTBACK → BIDLOG; LAT: FALLBACK → real eval data
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Data Sources -->
+<div class="section" id="sources">
+  <div class="section-header">
+    <span class="step-badge">Sources</span>
+    <h2>Data Sources Queried</h2>
+    <span class="verdict info">INFO</span>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>Step</th><th>Source</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>0a</td><td class="mono">focal-elf-631.prod.campaign_digest_merged_latest</td><td>Campaigns with this bundle × event as KPI</td></tr>
+        <tr><td>0b</td><td class="mono">focal-elf-631.entity_history.prod_entity_history</td><td>Recent campaign state transitions</td></tr>
+        <tr><td>1</td><td class="mono">focal-elf-631.df_accesslog.pb</td><td>MMP postback volume (app.bundle, event.name)</td></tr>
+        <tr><td>2</td><td class="mono">gs://tfexample-action/metadata_versions/meta_data_042014.pbtxt</td><td>Bundle registry — KPI registration, is_live_campaign_goal</td></tr>
+        <tr><td>3</td><td class="mono">moloco-dsp-ml-prod.training_dataset_prod.tfexample_action_campaignlog_imp_v2</td><td>Moloco-attributed training examples (LAT campaignlog)</td></tr>
+        <tr><td>4</td><td class="mono">gs://tfserving-us/{model}/{version}/evaluations_per_key.tsv</td><td>pb eval — IFA: organic postbacks, LAT: campaignlog</td></tr>
+        <tr><td>4</td><td class="mono">gs://tfserving-us/{model}/{version}/evaluations_per_key_bid_logs.tsv</td><td>bid-log eval — actual bid logs (requires Moloco traffic)</td></tr>
+        <tr><td>5</td><td class="mono">gs://tfserving-us/{model}/{version}/campaign_stats_set.pbtxt</td><td>Serving normalizer snapshot per campaign × event × horizon</td></tr>
+        <tr><td>6a</td><td class="mono">focal-elf-631.mems_prod.api_log</td><td>Control-plane pricing config pushes from ML pipeline</td></tr>
+        <tr><td>6b</td><td class="mono">focal-elf-631.prod_stream_view.imp</td><td>Data-plane impression execution (bid.model.prediction_logs)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+// Sticky nav IntersectionObserver
+const sections = document.querySelectorAll('[id]');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

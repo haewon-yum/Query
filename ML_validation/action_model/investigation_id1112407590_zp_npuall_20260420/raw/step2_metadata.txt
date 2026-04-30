@@ -1,0 +1,63 @@
+}
+bundle {
+  key: "id1112407590:ios"
+  value {
+    b_product_app_bundle: "id1112407590"
+    b_dev_os: "ios"
+    b_tracking_company: "appsflyer"
+    b_advertiser: "p7ipJYOQinKmNvk5"
+    b_product_category: "IAB13"
+    rtb_bundles: "1112407590"
+    rtb_bundles: "id1112407590"
+    events {
+      key: "cashloan_register"
+      value {
+        is_kpi: true
+        blocked_periods {
+          blocked_period {
+            key: "end_millis"
+            value: 1775088000000
+          }
+        }
+        is_live_campaign_goal: true
+        total_blocked_periods {
+          blocked_period {
+            key: "end_millis"
+            value: 1775088000000
+          }
+        }
+        action_event_type: ACTION_EVENT_KPI
+        b_mcp_event_type: "other"
+      }
+    }
+    events {
+      key: "login_success"
+      value {
+        is_kpi: true
+        is_live_campaign_goal: true
+        action_event_type: ACTION_EVENT_KPI
+        b_mcp_event_type: "sign_up"
+      }
+    }
+    events {
+      key: "zp_npuall"
+      value {
+        is_kpi: true
+        is_live_campaign_goal: true
+        action_event_type: ACTION_EVENT_KPI
+        b_mcp_event_type: "in_app_purchase"
+      }
+    }
+    b_is_hypercasual: "false"
+    b_is_gaming: "false"
+    b_genre: "finance"
+    b_sub_genre: "digital wallets & payment"
+    b_has_iap: "true"
+  }
+}
+bundle {
+  key: "id1113223808:ios"
+  value {
+    b_product_app_bundle: "id1113223808"
+    b_dev_os: "ios"
+    rtb_bundles: "id1113223808"
